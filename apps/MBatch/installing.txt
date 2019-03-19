@@ -1,0 +1,98 @@
+*********************************************
+**** Help
+*********************************************
+
+From the R command line
+
+help(package="MBatch")
+
+Will list the description and the exposed functions and classes for this package.
+
+With the package loaded, ?methodname will get the help for a method and class?classname will get the help for a class.
+
+*********************************************
+**** Cairo Prerequisites (OS level)
+*********************************************
+
+This should already be setup on DQS and HPC servers.
+
+The R Package Cairo (http://www.rforge.net/Cairo/) is dependent on the Cairo Graphics Library.
+
+Please check http://www.cairographics.org/ for Windows and Linux prerequisites.
+
+When installing the Cairo R package, if the complaint is about Cairo.h, you need to Cairo Development OS package installed.
+
+*********************************************
+**** R Versions
+*********************************************
+
+We compile for R/3.3.0.
+
+On DQS servers, use "module load R/3.3.0".
+
+*******************************************
+**** rJava (R Package) and Java Setup for R
+*******************************************
+
+MBatch requires Java 8 or higher.
+
+On DQS servers, use "module load JDK/1.8.0_25".
+
+The javareconf step below is not needed on DQS servers.
+
+On Linux only, to configure rJAva for Java 1.8:
+
+Install Java 8
+Setup environment path same as it will be when R and Java 8 are used.
+"R CMD javareconf" command as root (or whoever installed/owns the R install).
+Install the rJava package as the R install owner. (See below.)
+
+rJava can be tested with:
+
+library(rJava)
+.jinit()
+J("java.lang.System")$getProperty("java.version")
+
+
+*********************************************
+**** Installing Other Required Packages (R Command Line)
+*********************************************
+
+### run the first install.packages by itself, so you can answer the question about which repository to use
+install.packages("Cairo")
+
+install.packages("epiR")
+install.packages("gtools")
+install.packages("mclust")
+install.packages("squash")
+install.packages("rJava", dependencies=TRUE)
+
+install.packages(c("oompaBase", "ClassDiscovery", "PreProcess"), repos=c(getOption("repos"), "http://silicovore.com/OOMPA/"))
+
+source("http://bioconductor.org/biocLite.R")
+biocLite("limma")
+biocLite("RBGL")
+biocLite("graph")
+
+install.packages("devtools")
+library(devtools)
+install_github("js229/Vennerable")
+
+************************************
+**** Installing MBatch Linux
+************************************
+
+batchcorr is optional and may not be present.
+
+<change to directory with package files>
+
+-- remove the old packages (optional)
+R CMD REMOVE RBN4RPPA
+R CMD REMOVE MBatch
+R CMD REMOVE batchcorr
+
+-- add current packages
+R CMD INSTALL batchcorr_*.tar.gz
+R CMD INSTALL MBatch_*.tar.gz
+R CMD INSTALL RBN4RPPA_*.tar.gz
+

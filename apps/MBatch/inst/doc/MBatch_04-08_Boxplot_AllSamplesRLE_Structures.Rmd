@@ -1,0 +1,213 @@
+---
+title: "Using MBatch Assessments: Boxplot_AllSamplesRLE_Structures"
+author: "Tod Casasent"
+date: "`r Sys.Date()`"
+#output: rmarkdown::html_vignette
+# install with vignettes using devtools::install(build_vignettes = TRUE)
+# build vignettes using devtools::build_vignettes() (inst/doc)
+output: 
+  pdf_document:
+    number_sections: TRUE
+vignette: >
+  %\VignetteIndexEntry{Using MBatch Assessments: Boxplot_AllSamplesRLE_Structures}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+These instructions are aimed at people familiar with R and familiar with TCGA/GDC platforms and data types. They are intended to introduce the reader to producing the given assessment. These instructions will only rarely, if ever, touch on the appropriateness of the assessment algorithm or interpretation of output. See MBatch_01_InstallLinux for instructions on downloading test data.
+
+# Algorithm
+
+Boxplot_AllSamplesRLE_Structures is a function used to perform batch effects assessments using the boxplots on all samples using RLE (run length encoding).
+
+# Output
+
+The primary output method for MBatch is to view results in the Batch Effects Website, described elsewhere. The PNG files are rough versions of the website output.
+
+Graphical output is a set of boxplots where each boxplot (also called a box and whisper plot) represent a single sample. For datasets with many samples, the static PNG may be so dense as to be unusable.
+
+Here is an example of a smallish dynamic boxplot. (See Batch Effects Viewer documentation for more details.)
+
+![Dynamic Boxplot Example](boxplot_dynamic.PNG)
+
+Here is an example of the static plot for a medium-sized dataset.
+
+![Static Boxplot Example](BoxPlot_AllSample-RLE_Diagram-BatchId.png)
+
+# Usage
+
+Boxplot_AllSamplesRLE_Structures(theData, theTitle, theOutputPath,
+theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
+theMaxGeneCount=20000, theJavaParameters = "-Xms8000m")
+
+# Arguments
+
+##theData
+An instance of BEA_DATA.
+
+BEA_DATA objects can be created by calls of the form new("BEA_DATA", theData, theBatches, theCovariates). If you have no covariate data, use an empty data.frame created with data.frame()
+
+mData:
+Object of class "matrix" A matrix where the colnames are sample ids and the rownames are gene equivalents. All names should be strings, not factors.
+
+mBatches:
+Object of class "data.frame" A data.frame where the column "names" are batch types. The first batch "type" is "Sample". All names and values should be strings, not factors or numeric.
+
+mCovariates:
+Object of class "data.frame" A data.frame where the column "names" are covariate types. The first covariate "type" is "Sample". All names and values should be strings, not factors or numeric.
+
+##theTitle
+A string title to use in PNG files.
+
+##theOutputPath
+String giving directory in which to place output PNG files.
+
+##theBatchTypeAndValuePairsToRemove
+A list of vectors containing the batch type (or * for all types)
+and the value to remove. list() indicates none while NULL will cause an error.
+
+##theBatchTypeAndValuePairsToKeep
+A list of vectors containing the batch type (or * for all types)
+and a vector of the the value(s) to keep. list() indicates none while NULL
+will cause an error.
+
+##theMaxGeneCount	
+Integer giving maximum number of features (genes) to keep. Default is 20000. 0 means keep all.
+
+##theJavaParameters	
+Object of class "character" String for initializing JVM. Defaults to -Xms8000m.
+
+# Example Call
+
+The following code is adapted from the tests/Boxplot_AllSamplesRLE_Structures file. Data used is from the testing data as per the MBatch_01_InstallLinux document. In the future, we plan to make the output from MBatch more user friendly, but currently, this produces the following output at the command line.
+
+This output can generally be skipped as very long and generally obscure.
+After the output is an explanation of files and directories created.
+
+```{r, echo=TRUE}
+{
+  library(MBatch)
+  
+  # set the paths
+  theGeneFile="/bea_testing/MATRIX_DATA/matrix_data-Tumor.tsv"
+  theBatchFile="/bea_testing/MATRIX_DATA/batches-Tumor.tsv"
+  theOutputDir="/bea_testing/output/Boxplot_AllSamplesRLE_Structures"
+  theRandomSeed=314
+  
+  # make sure the output dir exists and is empty
+  unlink(theOutputDir, recursive=TRUE)
+  dir.create(theOutputDir, showWarnings=FALSE, recursive=TRUE)
+
+  # load the data and reduce the amount of data to reduce run time
+  myData <- mbatchLoadFiles(theGeneFile, theBatchFile)
+  myData@mData <- mbatchTrimData(myData@mData, 100000)
+
+  # here, we take most defaults
+  Boxplot_AllSamplesRLE_Structures(myData, "Disease/Data Type/Platform/Data Level", theOutputDir, list(), list())
+}
+```
+
+# Example File Output
+
+The above code creates the following subdirectories and files. The subdirectories correspond to the run type were requested.
+
+```bash
+/bea_testing/output/Boxplot_AllSamplesRLE_Structures$ ls -l
+total 44
+drwxr-xr-x 2 linux linux 40960 Jun 19 11:41 AllSample-RLE
+```
+
+Looking at the "AllSample-RLE" subdirectory, it contains the diagram and legend files, and data usable with dynamic displays.
+
+```bash
+/bea_testing/output/Boxplot_AllSamplesRLE_Structures/AllSample-RLE$ ls -l
+total 2472
+-rw-r--r-- 1 linux linux  3873 Jun 19 11:40 BoxPlot_AllSample-RLE_Annotations-BatchId.tsv
+-rw-r--r-- 1 linux linux  3873 Jun 19 11:41 BoxPlot_AllSample-RLE_Annotations-PlateId.tsv
+-rw-r--r-- 1 linux linux  3873 Jun 19 11:41 BoxPlot_AllSample-RLE_Annotations-ShipDate.tsv
+-rw-r--r-- 1 linux linux  3873 Jun 19 11:41 BoxPlot_AllSample-RLE_Annotations-TSS.tsv
+-rw-r--r-- 1 linux linux 15387 Jun 19 11:40 BoxPlot_AllSample-RLE_BoxData-BatchId.tsv
+-rw-r--r-- 1 linux linux 15387 Jun 19 11:41 BoxPlot_AllSample-RLE_BoxData-PlateId.tsv
+-rw-r--r-- 1 linux linux 15387 Jun 19 11:41 BoxPlot_AllSample-RLE_BoxData-ShipDate.tsv
+-rw-r--r-- 1 linux linux 15387 Jun 19 11:41 BoxPlot_AllSample-RLE_BoxData-TSS.tsv
+-rw-r--r-- 1 linux linux     9 Jun 19 11:40 BoxPlot_AllSample-RLE_CatData-BatchId-TCGA-OR-A5J1-01A-11D-A29J-05.tsv
+-rw-r--r-- 1 linux linux  7647 Jun 19 11:40 BoxPlot_AllSample-RLE_CatData-BatchId-TCGA-OR-A5J2-01A-11D-A29J-05.tsv
+#snipped out "CatData" files for each sample for each batch type
+-rw-r--r-- 1 linux linux  6688 Jun 19 11:41 BoxPlot_AllSample-RLE_CatData-TSS-TCGA-PK-A5HA-01A-11D-A29J-05.tsv
+-rw-r--r-- 1 linux linux  5583 Jun 19 11:41 BoxPlot_AllSample-RLE_CatData-TSS-TCGA-PK-A5HB-01A-11D-A29J-05.tsv
+-rw-r--r-- 1 linux linux  60434 Jun 19 14:27 BoxPlot_AllSample-RLE_Diagram-BatchId.png
+-rw-r--r-- 1 linux linux  59978 Jun 19 14:27 BoxPlot_AllSample-RLE_Diagram-PlateId.png
+-rw-r--r-- 1 linux linux  60366 Jun 19 14:27 BoxPlot_AllSample-RLE_Diagram-ShipDate.png
+-rw-r--r-- 1 linux linux  58667 Jun 19 14:27 BoxPlot_AllSample-RLE_Diagram-TSS.png
+-rw-r--r-- 1 linux linux 819911 Jun 19 14:27 BoxPlot_AllSample-RLE_Histogram-BatchId.png
+-rw-r--r-- 1 linux linux  45619 Jun 19 14:27 BoxPlot_AllSample-RLE_Histogram-BatchId.tsv
+-rw-r--r-- 1 linux linux 819911 Jun 19 14:27 BoxPlot_AllSample-RLE_Histogram-PlateId.png
+-rw-r--r-- 1 linux linux  45619 Jun 19 14:27 BoxPlot_AllSample-RLE_Histogram-PlateId.tsv
+-rw-r--r-- 1 linux linux 819911 Jun 19 14:27 BoxPlot_AllSample-RLE_Histogram-ShipDate.png
+-rw-r--r-- 1 linux linux  45619 Jun 19 14:27 BoxPlot_AllSample-RLE_Histogram-ShipDate.tsv
+-rw-r--r-- 1 linux linux 819911 Jun 19 14:27 BoxPlot_AllSample-RLE_Histogram-TSS.png
+-rw-r--r-- 1 linux linux  45619 Jun 19 14:27 BoxPlot_AllSample-RLE_Histogram-TSS.tsv
+-rw-r--r-- 1 linux linux   4358 Jun 19 14:27 BoxPlot_AllSample-RLE_Legend-BatchId.png
+-rw-r--r-- 1 linux linux   4378 Jun 19 14:27 BoxPlot_AllSample-RLE_Legend-PlateId.png
+-rw-r--r-- 1 linux linux   4593 Jun 19 14:27 BoxPlot_AllSample-RLE_Legend-ShipDate.png
+-rw-r--r-- 1 linux linux  13061 Jun 19 14:27 BoxPlot_AllSample-RLE_Legend-TSS.png
+```
+
+##Files
+
+Example data may not match output from above.
+
+##Annotations Files
+Looking at BoxPlot_AllSample-RLE_Annotations-TSS.tsv, we see it is a tab-delimited file, with two columns with the headers "key" nad "value". The first entry after that is the "Total-Data-Points", and then for each sample, we have the number of points available for that sample that are not NA. These two numbers will not always be equal, since some samples may have NAs for genes or probes where the other samples have values.
+
+```bash
+key	value
+Total-Data-Points	1250
+Non-NA-Points-TCGA-OR-A5J1-01A-11D-A29J-05	1250
+Non-NA-Points-TCGA-OR-A5J2-01A-11D-A29J-05	1250
+Non-NA-Points-TCGA-OR-A5J3-01A-11D-A29J-05	1250
+Non-NA-Points-TCGA-OR-A5J4-01A-11D-A29J-05	1250
+Non-NA-Points-TCGA-OR-A5J5-01A-11D-A29J-05	1250
+```
+
+##BoxData Files
+Looking at BoxPlot_AllSample-RLE_BoxData-TSS.tsv, we see it is a tab delimited file with headers indicating the Id (sample) and the different parts of the boxplot. Subsequent rows give the box settings for each sample. NAs are possible in this data.
+
+```bash
+Id	LowerOutMax	LowerOutMin	LowerNotch	LowerWhisker	LowerHinge	Median	UpperHinge	UpperWhisker	UpperNotch	UpperOutMin	UpperOutMax
+TCGA-OR-A5J1-01A-11D-A29J-05	NA	NA	-0.020527642802858643	-0.8467955227772493	-0.40564289859809605	-5.551115123125783E-17	0.05369999468280695	0.12176777974899489	0.020527642802858532	NA	NA
+TCGA-OR-A5J2-01A-11D-A29J-05	NA	NA	-0.002911079872554134	-0.039930119705853896	-0.021222413369487297	3.469446951953614E-18	0.043918229619712104	0.140397197625461	0.002911079872554141	0.142985792278003	0.91099330858616
+TCGA-OR-A5J3-01A-11D-A29J-05	NA	NA	-0.035001758602725926	-0.3988124487830225	-0.34987576645608115	-2.7755575615628914E-17	0.433351475994617	0.5669671511199139	0.03500175860272587	NA	NA
+TCGA-OR-A5J4-01A-11D-A29J-05	NA	NA	-0.017185120892053492	-0.8247218460963763	-0.3183107584949181	-5.551115123125783E-17	0.06623720094437291	0.142973842241374	0.01718512089205338	NA	NA
+TCGA-OR-A5J5-01A-11D-A29J-05	NA	NA	-0.03364073791133153	-0.8079754846584357	-0.644252206301912	0.0	0.108519752597515	0.16103221080586205	0.03364073791133153	NA	NA
+TCGA-OR-A5J6-01A-31D-A29J-05	NA	NA	-0.0034328681890936023	-0.04187597080189986	-0.022337461512431954	-3.469446951953614E-18	0.05447913264667144	0.16775555186231145	0.0034328681890935953	0.17291247448701147	0.9216473418200974
+TCGA-OR-A5J7-01A-11D-A29J-05	-0.865878813052012	-0.18821669173503153	-0.003889412141825995	-0.17734418845304856	-0.04824861721132856	0.0	0.03878396824166053	0.1042626709096035	0.003889412141825995	NA	NA
+```
+
+##CatData Files
+If we look at BoxPlot_AllSample-RLE_CatData-TSS-TCGA-PK-A5HB-01A-11D-A29J-05.tsv, we see it is a tab-delimited file with "id" and "value" as headers. The id is a feature (in this case a gene, probe, location) combination and then the value from the data for that id. This is used to populate the violin plot with a subset of outliers, if any.
+
+```bash
+id	value
+ADCY4-cg14287235-14-24804339	-0.7667974166463363
+ASCL2-cg12499235-11-2293173	-0.7077020078715286
+BAI1-cg09968723-8-143545789	-0.8074333452970504
+BNC1-cg06523224-15-83953883	-0.7850694441252194
+```
+
+##Histogram Data Files
+Looking at BoxPlot_AllSample-RLE_Histogram-TSS.tsv, we see it is a tab-delimited file. The first row is headers, with "entry" and "size" being the first two, followed by pairs of headers of the form "xN" and "yN", where they are pairs of X,Y coordinates for plotting the histogram. The entry column is the sample id and the size entry is the number of X,Y pairs.
+
+```bash
+entry	size	x0	y0	x1	y1	x2	y2	x3	y3	x4	y4	x5	y5	x6	y6	x7	y7	x8	y8	x9	y9	x10	y10	x11	y11	x12	y12	x13	y13	x14	y14	x15	y15	x16	y16	x17	y17	x18	y18	x19	y19	x20	y20	x21	y21	x22	y22	x23	y23	x24	y24	x25	y25	x26	y26	x27	y27	x28	y28	x29	y29	x30	y30	x31	y31	x32	y32	x33	y33	x34	y34	x35	y35	x36	y36	x37	y37	x38	y38	x39	y39	x40	y40	x41	y41	x42	y42	x43	y43	x44	y44	x45	y45	x46	y46	x47	y47	x48	y48	x49	y49	x50	y50	x51	y51	x52	y52	x53	y53	x54	y54	x55	y55	x56	y56	x57	y57	x58	y58	x59	y59	x60	y60	x61	y61	x62	y62	x63	y63	x64	y64	x65	y65	x66	y66	x67	y67	x68	y68	x69	y69	x70	y70	x71	y71	x72	y72	x73	y73	x74	y74	x75	y75	x76	y76	x77	y77	x78	y78	x79	y79	x80	y80	x81	y81	x82	y82	x83	y83	x84	y84	x85	y85	x86	y86
+TCGA-OR-A5J1-01A-11D-A29J-05	12	-0.8064387185053226	193.0	-0.7257251099614688	44.0	-0.6450115014176152	26.0	-0.5642978928737614	21.0	-0.48358428432990774	20.0	-0.40287067578605407	33.0	-0.32215706724220033	38.0	-0.24144345869834666	36.0	-0.16072985015449298	29.0	-0.0800162416106393	78.0	6.973669332143717E-4	334.0	0.08141097547706805	398.0
+TCGA-OR-A5J2-01A-11D-A29J-05	79	-0.033911616995144944	168.0	-0.02187461157372705	253.0	-0.009837606152309154	171.0	0.0021993992691087434	130.0	0.01423640469052664	96.0	0.026273410111944537	70.0	0.03831041553336244	51.0	0.050347420954780335	34.0	0.06238442637619823	36.0	0.07442143179761612	14.0	0.08645843721903403	21.0	0.09849544264045193	14.0	0.11053244806186982	6.0	0.12256945348328772	7.0	0.13460645890470563	10.0	0.14664346432612352	9.0	0.1586804697475414	10.0	0.1707174751689593	0.0	0.1827544805903772	8.0	0.1947914860117951	9.0	0.20682849143321302	3.0	0.21886549685463091	5.0	0.2309025022760488	6.0	0.2429395076974667	2.0	0.2549765131188846	7.0	0.2670135185403024	2.0	0.27905052396172036	3.0	0.29108752938313825	0.0	0.30312453480455614	2.0	0.3151615402259741	2.0	0.3271985456473919	5.0	0.33923555106880987	1.0	0.3512725564902277	0.0	0.36330956191164565	3.0	0.3753465673330635	3.0	0.38738357275448143	0.0	0.3994205781758993	3.0	0.4114575835973172	3.0	0.42349458901873516	3.0	0.435531594440153	4.0	0.44756859986157094	0.0	0.4596056052829888	4.0	0.4716426107044067	1.0	0.4836796161258246	2.0	0.4957166215472425	3.0	0.5077536269686604	1.0	0.5197906323900783	0.0	0.5318276378114961	6.0	0.5438646432329142	2.0	0.555901648654332	1.0	0.5679386540757498	1.0	0.5799756594971678	2.0	0.5920126649185857	2.0	0.6040496703400036	1.0	0.6160866757614214	5.0	0.6281236811828395	2.0	0.6401606866042573	2.0	0.6521976920256751	0.0	0.6642346974470931	0.0	0.676271702868511	0.0	0.6883087082899289	2.0	0.7003457137113467	2.0	0.7123827191327646	1.0	0.7244197245541826	0.0	0.7364567299756004	3.0	0.7484937353970184	2.0	0.7605307408184363	1.0	0.7725677462398541	1.0	0.784604751661272	2.0	0.7966417570826899	2.0	0.8086787625041079	4.0	0.8207157679255257	2.0	0.8327527733469435	0.0	0.8447897787683616	3.0	0.8568267841897794	2.0	0.8688637896111973	5.0	0.8809007950326152	3.0	0.8929378004540331	2.0	0.904974805875451	4.0
+TCGA-OR-A5J3-01A-11D-A29J-05	7	-0.32982819164709853	520.0	-0.19185967737525045	68.0	-0.05389116310340239	47.0	0.08407735116844567	69.0	0.22204586544029375	46.0	0.3600143797121418	176.0	0.49798289398398987	324.0
+```
+
+##Diagram
+Here is a diagram generated from this code.
+
+![Boxplot All Samples RLE Output](/bea_testing/output/Boxplot_AllSamplesRLE_Structures/AllSample-RLE/BoxPlot_AllSample-RLE_Diagram-TSS.png)

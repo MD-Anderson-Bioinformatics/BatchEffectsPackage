@@ -1,0 +1,6 @@
+source	GDC
+date	2017_04_28_1148
+program	TCGA
+project	TCGA-ACC
+workflow	GeneExpressionQuantification
+datatype	HTSeq-Counts

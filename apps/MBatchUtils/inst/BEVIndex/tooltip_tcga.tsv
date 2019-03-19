@@ -1,0 +1,7 @@
+mLabel	mName	mTooltip
+Disease	*	TCGA disease types with extended names are listed <a target="_blank" href="https://tcga-data.nci.nih.gov/docs/publications/tcga/">here</a>.
+Data Type	*	TCGA data types and data levels are described <a target="_blank" href="https://cancergenome.nih.gov/abouttcga/aboutdata/datalevelstypes">here</a>.
+Platform	*	TCGA platform types with extended names are listed <a target="_blank" href="https://cancergenome.nih.gov/abouttcga/aboutdata/platformdesign">here</a>.
+Data Level	*	TCGA data types and data levels are described <a target="_blank" href="https://cancergenome.nih.gov/abouttcga/aboutdata/datalevelstypes">here</a>.
+Data Set	*	The Data Set is a selection (sometimes a subset) of data with a corresponding (optional) correction.
+Algorithm	*	The Algorithm is a particular MBatch assessment for the given Data Set.

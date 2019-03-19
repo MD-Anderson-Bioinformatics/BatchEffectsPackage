@@ -1,0 +1,83 @@
+
+	**************************************************
+	*						 *
+	*	       0.1 SERIES NEWS			 *
+	*						 *
+	**************************************************
+
+
+		CHANGES IN R VERSION 0.1.10
+
+NEW FEATURES
+
+    o	Fix issue with extract for mutation batch.
+    o	Added memory option to extract for mutation batch.
+    o	Remove MBatch calls from mutation batch.
+    o	Fixed rare bug in color distances
+    o	Disable alternate plots for MutBatch
+
+		CHANGES IN R VERSION 0.1.9
+
+NEW FEATURES
+
+    o	Added methods to imports for possible issues with NGCHM
+    o	Take full path for index output for build archive functions
+    o	Find default diagram for build archive functions
+
+		CHANGES IN R VERSION 0.1.8
+
+NEW FEATURES
+
+    o	Updated Mutation Batch Extract API for new Standardized Data filenames.
+    o	Updated run from config to ignore warnings from NGCHM generation
+    o	Fixed issue writing CDP file from run from config
+
+		CHANGES IN R VERSION 0.1.7
+
+NEW FEATURES
+
+    o	Updated preprocessData log transform code so quantile results preclude getting a 0 as the "add to original" number.
+
+		CHANGES IN R VERSION 0.1.6
+
+NEW FEATURES
+
+    o	Added preprocess function to prepare data for processing (reduce size, add missing batches, and log transform, etc.)
+
+		CHANGES IN R VERSION 0.1.5
+
+NEW FEATURES
+
+    o	Added Boxplot Docs
+
+		CHANGES IN R VERSION 0.1.4
+
+NEW FEATURES
+
+    o	Updated for new MBatch configuration file
+
+		CHANGES IN R VERSION 0.1.3
+
+NEW FEATURES
+
+    o	Fixed EBN Plus correction run
+
+		CHANGES IN R VERSION 0.1.2
+
+NEW FEATURES
+
+    o	Updated for new config file parameters
+
+		CHANGES IN R VERSION 0.1.1
+
+NEW FEATURES
+
+    o	Added running NGCHM from configuration file
+    o	Added NGCHM default image for current website
+
+		CHANGES IN R VERSION 0.1.0
+
+NEW FEATURES
+
+    o	Added running from configuration file
+    o	Added Batch Effects Assessments for Mutation Data

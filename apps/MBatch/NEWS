@@ -1,0 +1,635 @@
+
+	**************************************************
+	*						 *
+	*	       1.4 SERIES NEWS			 *
+	*						 *
+	**************************************************
+
+		CHANGES IN R VERSION 1.4.19
+
+NEW FEATURES
+
+    o	updated mbatchTrimData to treat max size of 0 (zero) as "no trim"
+    o	added pdf(NULL) calls to CDP. (Other package is leaving open diagrams.)
+
+		CHANGES IN R VERSION 1.4.18
+
+NEW FEATURES
+
+    o	Update boxplot vertical axis documentation
+    o	Updated tests for smaller data files
+
+		CHANGES IN R VERSION 1.4.17
+
+NEW FEATURES
+
+    o	Restored generation of histograms for boxplot
+    o	Significant update of docs and vignettes
+
+		CHANGES IN R VERSION 1.4.16
+
+NEW FEATURES
+
+    o	Sort matrix and dataframes when read int
+
+		CHANGES IN R VERSION 1.4.15
+
+NEW FEATURES
+
+    o	Fixes to tests
+
+		CHANGES IN R VERSION 1.4.14
+
+NEW FEATURES
+
+    o	Update readAsGenericMatrix to use make.unique on row and column ids
+    o Add separator argument for EBNPlus_CombineBatches (to allow reuse with RBN)
+
+		CHANGES IN R VERSION 1.4.13
+
+NEW FEATURES
+
+    o	build for release
+
+		CHANGES IN R VERSION 1.4.12
+
+NEW FEATURES
+
+    o	remove combined histogram plot from boxplot (too much memory needed)
+
+		CHANGES IN R VERSION 1.4.11
+
+NEW FEATURES
+
+    o	Added in support for single batch in structure functions
+
+		CHANGES IN R VERSION 1.4.10
+
+NEW FEATURES
+
+    o	RBN uses dataframes internally--added the flags to prevent converting/changing the rownames
+    o	Expose readAsGenericDataframe
+
+		CHANGES IN R VERSION 1.4.09
+
+NEW FEATURES
+
+    o	update EBNPlus_TrainAndValidateFromVector_Structures to replace NULL for training pseudoreplicates with sample ids from matrices
+    o	 RBN uses the rows as "samples" and the columns as "features". Standard MBatch/Standardized Data is transposed from this. So, transpose data going in and coming out and make sure the docs describe this properly.
+
+		CHANGES IN R VERSION 1.4.08
+
+NEW FEATURES
+
+    o	fix EBNPlus_TrainAndValidateFromVector_Structures not using pseudoreplicates for data check
+
+		CHANGES IN R VERSION 1.4.07
+
+NEW FEATURES
+
+    o	do not filter out all data using mbatchFilterData
+    o	add stringsAsFactor as false for readDataframe
+    o	add check for NaN and INF for filterGeneDataMatrix
+    o Boxplot functions use theMaxGeneCount
+
+		CHANGES IN R VERSION 1.4.06
+
+NEW FEATURES
+
+    o	mbatchFilterData defaults to not removing Type batch type
+
+		CHANGES IN R VERSION 1.4.05
+
+NEW FEATURES
+
+    o	Only write DSC permutation files if there is any output
+    o	Add logging to all stopifnot calls
+    o	Added RBN API
+
+		CHANGES IN R VERSION 1.4.04
+
+NEW FEATURES
+
+    o	Sort incoming matrix and dataframes in mbatchLoadStructures and mbatchLoadFiles
+    o	Sort outgoing matrixes in EBNplus
+
+		CHANGES IN R VERSION 1.4.03
+
+NEW FEATURES
+
+    o	Update CDP histogram plotting
+    o	Add flag for CDP to accept width of bins for histogram
+
+		CHANGES IN R VERSION 1.4.02
+
+NEW FEATURES
+
+    o	Added histograms to CDP and limit plot range
+    o	For CDP, add flags for plotting lines and histograms.
+
+		CHANGES IN R VERSION 1.4.01
+
+NEW FEATURES
+
+    o	Updated Rd docs.
+    o	Removed unused argument theBatchType from MP_Overall function.
+    o	Removed auto-generated log files.
+
+		CHANGES IN R VERSION 1.4.00
+
+NEW FEATURES
+
+    o	Removed "batch processing" of assessments and corrections from package
+    o	Added individual calls for MP, EB, and MP Corrections
+    o	Added Test Set option for EBNPlus_TrainAndValidateFromVector_Structures
+
+	**************************************************
+	*						 *
+	*	       1.3 SERIES NEWS			 *
+	*						 *
+	**************************************************
+
+		CHANGES IN R VERSION 1.3.07
+
+NEW FEATURES
+
+    o	Corrected test for available replicates
+    o	CDP handles no or all replicates gracefully
+    o	Minor output tweaks (spacing and word choice)
+
+		CHANGES IN R VERSION 1.3.06
+
+NEW FEATURES
+
+    o	Added Test Set option to EBNPlus_TrainAndValidateReplicates_Structures
+    o	Added CDP_Files, CDP_Plot, and CDP_Structures
+
+		CHANGES IN R VERSION 1.3.05
+
+NEW FEATURES
+
+    o	EBNplus retains all NA rows
+    o	EBNplus has option to add NAs for missing rows in either dataset
+
+		CHANGES IN R VERSION 1.3.04
+
+BUG FIXES
+
+    o	Fix problem in mbatchLoadStructures
+
+	**************************************************
+	*						 *
+	*	       1.2 SERIES NEWS			 *
+	*						 *
+	**************************************************
+
+		CHANGES IN R VERSION 1.2.00
+
+NEW FEATURES
+
+    o	Java requires updated to Java 1.8.
+
+	**************************************************
+	*						 *
+	*	       1.1 SERIES NEWS			 *
+	*						 *
+	**************************************************
+
+		CHANGES IN R VERSION 1.1.60
+
+NEW FEATURES
+
+    o	Updated for new JAR names (Apache Commons versions).
+
+		CHANGES IN R VERSION 1.1.57
+
+NEW FEATURES
+
+    o	Fix Boxplot RLE not outputting due to no directory. Added R errors for this.
+
+		CHANGES IN R VERSION 1.1.57
+
+NEW FEATURES
+
+    o	Fix problem with Java Boxplot taking long time for Bisulfite data
+
+		CHANGES IN R VERSION 1.1.56
+
+NEW FEATURES
+
+    o	Fix problem with legend for Java Boxplot -- missing Java Legend JAR
+
+		CHANGES IN R VERSION 1.1.55
+
+NEW FEATURES
+
+    o	More fixes to R code to pass title to Java Boxplot
+
+		CHANGES IN R VERSION 1.1.54
+
+NEW FEATURES
+
+    o	Fixed R code to pass title to Java Boxplot
+
+		CHANGES IN R VERSION 1.1.53
+
+NEW FEATURES
+
+    o	update PNG files for boxplot
+
+		CHANGES IN R VERSION 1.1.52
+
+NEW FEATURES
+
+    o	changes to DSC output for NaN and infinity
+
+		CHANGES IN R VERSION 1.1.51
+
+NEW FEATURES
+
+    o	boxplot cutoff at 20,000 for overly large outliers
+    o	boxplot CATDATA as two columns
+
+		CHANGES IN R VERSION 1.1.50
+
+NEW FEATURES
+
+    o	MANOVA: visualization (Vennerable for testing of output)
+
+		CHANGES IN R VERSION 1.1.49
+
+NEW FEATURES
+
+    o	BoxPlot: add Java boxplot to Mbatch.
+
+		CHANGES IN R VERSION 1.1.48
+
+NEW FEATURES
+
+    o	MBatch: as.numeric on Incoming Data
+
+		CHANGES IN R VERSION 1.1.47
+
+NEW FEATURES
+
+    o	Boxplot: changing names
+
+		CHANGES IN R VERSION 1.1.46
+
+NEW FEATURES
+
+    o	BoxPlot: change outlier files to category files
+    o	Boxplot: add gene count to output
+    o	Boxplot: remove warnings from min/max
+    o	Boxplot: output min and max outliers
+
+		CHANGES IN R VERSION 1.1.45
+
+NEW FEATURES
+
+    o	Mbatch: fix if ("*" == theBatchTypesToCorrect) warning
+
+
+		CHANGES IN R VERSION 1.1.44
+
+NEW FEATURES
+
+    o	MBatch: ANOVA fails for dataset
+    o	ANOVA: Catch singular error
+    o	MANOVA: fit numbers to display bar
+
+		CHANGES IN R VERSION 1.1.43
+
+NEW FEATURES
+
+    o	Mbatch: version number in top level file
+    o	Mbatch: remove 5000gene file, add BoxPlot specific files
+
+		CHANGES IN R VERSION 1.1.42
+
+NEW FEATURES
+
+    o	Mbatch: add 5000gene TSV file
+
+		CHANGES IN R VERSION 1.1.41
+
+BUG FIXES
+
+    o	updated clearDSCOverviewFiles for deleting all rdata files
+    o	BEA-398 MANOVA: change to string output
+
+		CHANGES IN R VERSION 1.1.40
+
+BUG FIXES
+
+    o	SupervisedClust: rename output with same pattern as HC
+    o	BoxPlot: rename output with same pattern as HC
+
+		CHANGES IN R VERSION 1.1.39
+
+BUG FIXES
+
+    o	increase memory size in Java call for legends to 4GB
+
+		CHANGES IN R VERSION 1.1.37
+
+NEW FEATURES
+
+    o	added optional run type pre-pend to corrections output directory names
+
+		CHANGES IN R VERSION 1.1.36
+
+NEW FEATURES
+
+    o	Add mbatchIncludeExcludeData
+    o	MBatch EB: subscript out of bounds - handle without error
+    o	MBatch AN: lapack system is singular - handle without error
+
+		CHANGES IN R VERSION 1.1.35
+
+NEW FEATURES
+
+    o	MBatch: don't use Java for reading/writing dataframe
+
+		CHANGES IN R VERSION 1.1.34
+
+NEW FEATURES
+
+    o	Make Java optional for reading and writing matrices, since memory is to tight on some servers.
+    o	Reduce Default size to 2000.
+
+		CHANGES IN R VERSION 1.1.33
+
+NEW FEATURES
+
+    o	Change Default Java Memory Allocation to Xmx10000m
+
+		CHANGES IN R VERSION 1.1.32
+
+NEW FEATURES
+
+    o	Change Creating Dirs to Prevent Errors
+
+		CHANGES IN R VERSION 1.1.31
+
+NEW FEATURES
+
+    o	MBatch: Use Java for Faster Load Times
+    o	Mbatch: Java read and write for simpler matrix/data.frame code
+    o	MBatch: updating and testing for build
+    o	MBatch: add "keep" filter based on batch type and value
+    o	MBatch: add "drop" filter based on batch type and value
+    o	Pipeline: filter matrix file based on batch data in convert--this allows it to keep empty datasets out of run.
+    o	Pipeline: use sample type file
+    o	MBatch: add removal of an entire batch type
+    o	Pipeline: Use Single Matrix File for Data
+    o	Pipeline: use single batch data file
+    o	Pipeline: clean out more non-error "error" strings
+    o	MBatch: change default read/write Java site to 16000m
+
+		CHANGES IN R VERSION 1.1.30
+
+NEW FEATURES
+
+    o	added ReadRJava functionality for reading data using Java
+    o	added ReadRJava functionality for writing data using Java
+
+		CHANGES IN R VERSION 1.1.29
+
+NEW FEATURES
+
+    o	MBatch: rename asmatrixWithError
+    o	MBatch: rename handleErrorFunction
+    o	MBatch: rename errorpath in doAN
+    o	MBatch: handle "Error in svd" results (avoid logging word error unless a real error)
+    o	MBatch: remove "error" from 'Unable to do prior plots Error in density.default'
+
+		CHANGES IN R VERSION 1.1.28
+
+NEW FEATURES
+
+    o	MBatch: Use Single Matrix File for Data
+    o	MBatch: use single batch data file
+    o	MBatch: use single covariate data file
+    o	MBatch: clear out warnings
+    o	BeaAN: stop without error when system is singular
+    o	BeaAN: stop without error when ANdat is not a matrix
+    o	Convert: produce a single matrix file (col=sample id, row=gene equivalent)
+    o	Convert: produce a single batch data file (col=batch type, row=sample id)
+    o	Convert: add sample types to batch data
+    o	Convert: sort genes in data output
+    o	Convert: sort samples in data output
+    o	Convert: sort samples in batch output
+
+		CHANGES IN R VERSION 1.1.27
+
+NEW FEATURES
+
+    o	Legends: Fix Bug Where Odd Number of Combined Legends Failed
+    o	Pipeline: add na.rm=TRUE to mean boxplot example
+    o	BEA-411 Boxplot: wrap title in boxplot diagram
+    o	BEA-412 SupervisedClustering: add title to diagram
+    o	PCA: change SamplePCA log to not use word "error"
+    o	SupervisedClustering: wrap error title
+
+		CHANGES IN R VERSION 1.1.25
+
+NEW FEATURES
+
+    o	Legends: Use Java to Create Legends
+
+		CHANGES IN R VERSION 1.1.24
+
+NEW FEATURES
+
+    o	Legends: Use Java to Create Legends (Hierarchical Clustering only)
+
+		CHANGES IN R VERSION 1.1.23
+
+NEW FEATURES
+
+    o	Convert: +1 added to string
+    o	Corrections: PCA failing on Too Many NA Values
+    o	Corrections: Supervised Clustering failing on Too Many NA Values
+    o	Corrections: boxplot failing on big data
+    o	Running on bigmem nodes
+
+		CHANGES IN R VERSION 1.1.22
+
+NEW FEATURES
+
+    o	Convert: add plus 1 to each value before doing a log transform
+    o	EB: Catch Errors with Prior Plots
+    o	Supervised Clustering: stop converting data.frame strings to variables
+
+		CHANGES IN R VERSION 1.1.21
+
+NEW FEATURES
+
+    o	BEA-418 Pipeline: add subset testing
+    o	BEA-414 MBatch: Add Testing With Flags On and Off and Small Data Set
+
+		CHANGES IN R VERSION 1.1.20
+
+NEW FEATURES
+
+    o	BEA-416 Boxplot: plot appears significantly compressed (removed NAs before finding median)
+    o	BEA-374 MBatch: system is exactly singular error
+    o	BEA-417 PCA: Too Few Components
+    o	BEA-375 MANOVA error
+
+		CHANGES IN R VERSION 1.1.19
+
+NEW FEATURES
+
+    o	BEA-373	MBatch: Memory overflow when calling boxplot
+    o	BEA-376	MBatch: Out of memory writing out corrected data
+    o	BEA-377	MBatch: shutdown during DSC calculations
+    o	BEA-378	MBatch: bus errors
+    o	BEA-386 HC: adjust text size for more batch types
+    o	BEA-392	MBatch: Address memory loss during corrections
+    o	BEA-393	MBatch: Use Genes and Samples for Data Size
+    o	BEA-394	DSC: use IQR to select genes
+    o	BEA-404	MBatch: change API
+    o	BEA-408	PCA: fails if DSC is not done
+    o	BEA-413 PCA: skip RData if DSC skipped
+    o	Also, fixed bad line endings in some files.
+    o	Removed API functions doRunBEA_Files and doRunBEA_Structures
+    o	Removed API functions loadSamplesTopIntoMatrix, loadGenesTopIntoMatrix, filterGeneDataMatrix, loadBatchDataIntoDataframe and loadGeneDataIntoMatrix
+    o	Removed API functions SupervisedClustering_Pairs_Files, SupervisedClustering_Batches_Files, PCA_Regular_Files and PCA_DualBatch_Files
+    o	Removed API functions HierarchicalClustering_Files, Boxplot_Group_Files, Boxplot_AllSamplesRLE_Files and Boxplot_AllSamplesData_Files
+    o	Removed API classes InputOutput and DataFilters
+    o	Removed API classes Corrections_EB, Corrections_MP, Corrections_AN and Corrections_Setup
+    o	Added API functions mbatchLoadFiles, mbatchFilterData, mbatchTrimData, mbatchAssess, and mbatchCorrect
+    o	Added API class BEA_DATA
+
+		CHANGES IN R VERSION 1.1.18
+
+NEW FEATURES
+
+    o	BEA-344	Convert: Remove chr from Gene Score data
+    o	BEA-346	MBatch: Remove PhantomJS reference from package requirements
+    o	BEA-323	PCA-DSC: Permutations in Legends
+
+		CHANGES IN R VERSION 1.1.17
+
+NEW FEATURES
+
+    o	BEA-338 Convert: add support for multiple date formats
+    o	BEA-339 Convert: add support for new data format
+    o	BEA-326 Convert: Add HG19 output to monthly run
+    o	BEA-331 Convert: formal docs
+    o	BEA-332 Convert: traceback to converter and original file
+    o	BEA-324 BatchCorr: Adjust Not Occuring (working correctly--bug report incorrect)
+    o	BEA-341 Convert: unexpected data (not fixed--want data to fail)
+    o	BEA-329 rename SuperClust directory
+    o	BEA-344 Convert: Remove chr from Gene Score data
+
+		CHANGES IN R VERSION 1.1.16
+
+NEW FEATURES
+
+    o	BEA-325 MBatch: August Run and Docs for Run
+    o	BEA-301 EB: run parallelized EB with Non-Parametric Priors
+    o	BEA-295 MBatch: additional single assessment API functions
+    o	BEA-333 MBatch: reduce memory footprint
+    o	BEA-334 PCA: subset genes for PCA
+    o	BEA-335 PCA: Fix Version Number in PCAAnnotations.tsv
+    o	BEA-336 Added worker for BigFiles
+
+		CHANGES IN R VERSION 1.1.14
+
+NEW FEATURES
+
+    o	BEA-327 HC: check distanceMatrix output for NA/NaN/Inf
+    o	BEA-328 SuperClust: check distanceMatrix output for NA/NaN/Inf
+    o	BEA-??? Combine: Add check for empty dirs
+    o	BEA-?? again, fixing distanceMatrix NA/NaN/Inf
+    o	Fixed bad flags in createAssessmentsObject which were incorrectly causing extra assessments to be done.
+
+
+		CHANGES IN R VERSION 1.1.13
+
+NEW FEATURES
+
+    o	BEA-314 PCA: add DSC internal output.
+    o	Removed "basic" functions as part of BEA-295 MBatch: additional single assessment API functions
+    o	Fixed output locations for HC D3 data and image files
+
+		CHANGES IN R VERSION 1.1.12
+
+NEW FEATURES
+
+    o	Fixed parallelized Empirical Bayes with Non-Parametric Priors to reduce scope to prevent large memory copy to child processes.
+
+		CHANGES IN R VERSION 1.1.11
+
+NEW FEATURES
+
+    o	BEA-287 TcgaDamFileDl: handle >70GB Files
+    o	BEA-303 MBatch: time for worker
+    o	BEA-302 Papers: batch info for samples
+    o	BEA-15 Box-Plot: new algorithm
+    o	BEA-162 Supervised Clustering: new algorithm
+    o	BEA-160 MANOVA: new algorithm
+    o	BEA-283 MBatch: PCA p-value output
+    o	BEA-300 EB: parallelize EB without Priors (aka EB with Non-Parametric Priors)
+    o	BEA-298 D3: combine files for D3
+    o	BEA-299 D3: setup file for D3
+    o	BEA-311 MBatch: Add Non-Batch Annoations (Clinical Data) to API
+    o	BEA-312 HC/SC: Add Non-Batch Annotations to Output Files
+    o	BEA-310 DLD: Add Public Clinical Data to Download
+    o	BEA-301 EB: run parallelizeed EB without Priors (aka EB with Non-Parametric Priors)
+    o	BEA-313 HC/SC: Add Color Annotation Output (discrete, non-batch, continuous)
+    o	BEA-315 EB: correct "priors" phrasing
+    o	BEA-316 PCA: add check that dual batch types exist
+    o	BEA-317 SuperClust: Add NA/NaN/Inf Check Before hclust call
+
+		CHANGES IN R VERSION 1.1.8
+
+NEW FEATURES
+
+    o	Uses VennMaster http://www.informatik.uni-ulm.de/ni/staff/HKestler/vennm/doc.html under a Creative Commons Attribution-Noncommercial 3.0 License http://creativecommons.org/licenses/by-nc/3.0/ .
+
+		CHANGES IN R VERSION 1.1.6
+
+NEW FEATURES
+
+    o	Before calling hclust, filter for NA, NaN and Inf.
+
+		CHANGES IN R VERSION 1.1.5
+
+NEW FEATURES
+
+    o	Removed snowfall and replaced with Java 7 code and package rJava. MBatch now requires Java 7 as the default Java for DSC calculations.
+
+DEPRECATED & DEFUNCT
+    o	Remove use of snowfall.
+
+		CHANGES IN R VERSION 1.1.4
+
+NEW FEATURES
+
+    o	BEA_AssessmentsPca_pvalueDsc.R - Use snowfall with sfExport to reduce memory footprint of slave processes. (sfExport copies the data initially, without needing to send it for each call.)
+    o	BEA_AssessmentsHierclust.R  - Added library call for ClassDiscovery and squash
+    o	BEA_Corrections.R -- BEA-292 MBatch: change correction dir names
+    o	Changes for TcgaConvertFiles -- BEA-291 Convert: support new DNA Methylation Format
+    o	BEA-294 MBatch: correction batches as string or list
+    o	BEA-293 PCA: make legend wider
+    o	BEA-292 MBatch: change correction dir names and BEA-243 MBatch/Web: names for corrections dirs
+    o	BEA-289 ALL: remove BCR and CGCCandGSC batch types
+    o	BEA-281 MBatch: D3 hierarchical clustering files
+    o	BEA-282 MBatch: D3 batchcorr files
+
+BUG FIXES
+
+    o	Changes for related Java applications - ManageDirsAndFiles.moveFile - changed move to a copy and deleteQuietly so we silently overwrite files at destination. Needed since BatchData.tsv is written to same location by assessment algorithms and corrections algorithms.
+    o	bash scripts -- changed TACC and HPC scripts to manually load modules and to call all commands from bash scripts, as some commands don't see to work from within a script (such as qsub from an ssh command).
+    o	bash scripts -- Make future runs put all logs from job starts into the logs directory instead of the ManageMBatch-TACC directory.
+    o	MBatchSetup.buildPendingScripts - only do Assessment and EBwithPriors when "all" algorithms is selected
+    o	R script (runSimpleMBatch_BEA.R) change to only do corrections for TSS and BatchId
+
+
+DEPRECATED & DEFUNCT
+    o	Changes for related Java applications - Converted to IO Commons 2.2 JAR.
+    o	Remove use of doMC and related multicore, foreach packages, replaces with snowfall from new features above.

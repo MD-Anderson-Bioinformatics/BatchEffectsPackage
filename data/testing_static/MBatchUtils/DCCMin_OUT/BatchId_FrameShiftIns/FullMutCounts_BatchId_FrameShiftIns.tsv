@@ -1,0 +1,4 @@
+dataset	negLog10PValue	batchesCalled	negLog10Cutoff
+acc.illuminaga.hgsc_bcm_edu.Level_2_HG19	 0.1938588		5
+brca.illuminaga.genome_wustl_edu.Level_2_HG19	68.1374483	(00047, 00056, 00061)	5
+ov.solid.hgsc_bcm_edu.Level_2_HG18	 1.7126894		5
