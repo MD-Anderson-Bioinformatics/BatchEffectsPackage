@@ -17,7 +17,7 @@ isTrendBatch<-function(theBatchTypeName, theListOfBatchIds)
 	return(is.element(theBatchTypeName, c("ShipDate")))
 }
 
-mutationBatchAssess <- function(theTypeCountDir, theOutputDir, theJavaArgs="-Xms24000m", theThreads=5,
+mutationBatchAssess <- function(theTypeCountDir, theOutputDir, theJavaArgs=c("-Xms24000m", "-Djava.awt.headless=true"), theThreads=5,
 																thePvalueCutoff=.00001, theZScoreCutoff=1.96, thePCAflag=FALSE,
 																theBatchTypes=c("BatchId", "PlateId", "ShipDate", "TSS"),
 																theMutationTypes=NULL)
@@ -1340,7 +1340,8 @@ callMBatch_PCA_Structures_MBA <- function(theOutputDir, theDataObject, theTitle,
 }
 
 callMBatch_BoxplotGroup_Structures_MBA <- function(theOutputDir, theDataObject, theTitle,
-																							 theJavaParameters="-Xms8000m", theMaxGeneCount = 10000,
+																							 theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"),
+																							 theMaxGeneCount = 10000,
 																							 theFunction=c(mean), theFunctionName=c("Mean"))
 {
 	# output directory

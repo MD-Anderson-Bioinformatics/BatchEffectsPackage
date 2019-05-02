@@ -54,7 +54,7 @@ if (!is.null(inputDir))
                            theDSCPermutations=1000,
                            theDSCThreads=1,
                            theMinBatchSize=2,
-                           theJavaParameters="-Xms2000m",
+                           theJavaParameters=c("-Xms2000m", "-Djava.awt.headless=true"),
                            theSeed=theRandomSeed,
                            theMaxGeneCount=10000)
   correctedMatrix <- readAsGenericMatrix(file.path(theOutputDir, "BatchIdwithPlateId", "DualBatch", "PCAValues.tsv"))

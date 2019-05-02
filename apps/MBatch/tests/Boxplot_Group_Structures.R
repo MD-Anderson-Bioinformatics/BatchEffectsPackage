@@ -45,7 +45,7 @@ if (!is.null(inputDir))
                            theBatchTypeAndValuePairsToKeep=NULL,
                            theListOfGroupBoxFunction=c(mean),
                            theListOfGroupBoxLabels=c("Mean"),
-                           theJavaParameters="-Xms8000m",
+                           theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"),
                            theMaxGeneCount=10000)
   correctedMatrix <- readAsDataFrame(file.path(theOutputDir, "Group-MEAN", "BoxPlot_Group-MEAN_BoxData-BatchId.tsv"))
   compareMatrix <- readAsDataFrame(theCompareFile)

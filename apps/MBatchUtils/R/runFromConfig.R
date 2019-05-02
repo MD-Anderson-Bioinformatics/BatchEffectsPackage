@@ -472,11 +472,14 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
     theBoxplotMaxGenes <- 5000
   }
   callMBatch_BoxplotAllSamplesData_Structures(theOutputDir, theDataObject, theTitle,
-                                              theJavaParameters="-Xms8000m", theMaxGeneCount=theBoxplotMaxGenes)
+                                              theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"),
+                                              theMaxGeneCount=theBoxplotMaxGenes)
   callMBatch_BoxplotAllSamplesRLE_Structures(theOutputDir, theDataObject, theTitle,
-                                             theJavaParameters="-Xms8000m", theMaxGeneCount=theBoxplotMaxGenes)
+                                             theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"),
+                                             theMaxGeneCount=theBoxplotMaxGenes)
   callMBatch_BoxplotGroup_Structures(theOutputDir, theDataObject, theTitle,
-                                     theJavaParameters="-Xms8000m", theMaxGeneCount=theBoxplotMaxGenes,
+                                     theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"),
+                                     theMaxGeneCount=theBoxplotMaxGenes,
                                      theFunction=c(pipelineMean), theFunctionName=c("Mean"))
   if (!file.exists(file.path(theOutputDir, "BatchData.tsv")))
   {

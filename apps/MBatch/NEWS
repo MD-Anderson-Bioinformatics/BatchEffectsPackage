@@ -5,6 +5,12 @@
 	*						 *
 	**************************************************
 
+		CHANGES IN R VERSION 1.4.20
+
+NEW FEATURES
+
+    o	added headless default options for BoxPlot and tests
+
 		CHANGES IN R VERSION 1.4.19
 
 NEW FEATURES

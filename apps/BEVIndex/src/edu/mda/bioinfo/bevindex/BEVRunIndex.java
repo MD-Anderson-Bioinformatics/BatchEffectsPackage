@@ -212,6 +212,12 @@ public class BEVRunIndex
 			String indexDir = args[3];
 			String finalDir = args[4];
 			String tooltipTsv = args[5];
+			System.out.println("baseDir=" + baseDir);
+			System.out.println("runDir=" + runDir);
+			System.out.println("runName=" + runName);
+			System.out.println("indexDir=" + indexDir);
+			System.out.println("finalDir=" + finalDir);
+			System.out.println("tooltipTsv=" + tooltipTsv);
 			////////////////////////////////////////////////////////////////////
 			String archiveMarker = "MBATCH_SUCCESS.txt";
 			String archiveName = "ResultSet.zip";

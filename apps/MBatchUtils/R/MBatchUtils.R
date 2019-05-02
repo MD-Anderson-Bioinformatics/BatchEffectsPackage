@@ -8,7 +8,7 @@
 
 mbatchUtilVersion <- function()
 {
-  return("MBatchUtil 2019-02-06-1030")
+  return("MBatchUtils 2019-04-25-1400")
 }
 
 

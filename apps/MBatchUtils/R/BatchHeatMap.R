@@ -138,35 +138,7 @@ buildBatchHeatMap_Structures <- function(theMatrixData, theBatchData, theTitle, 
     }
   }
   message("chmExportToFile")
-  ##############################################################################]
-  ## testing replacing this this
-  ##result <- chmExportToFile(chm, theOutputFile, overwrite=TRUE, shaidyMapGen=theShaidyMapGen, shaidyMapGenJava=theShaidyMapGenJava, shaidyMapGenArgs=theShaidyMapGenArgs)
-  ## with this
-  shaidyDir <- file.path(dirname(theOutputFile), "tmp")
-
-  chm@format <- "shaidy"
-  chm <- chmAddProperty (chm, "chm.info.build.time", format(Sys.time(), "%F %H:%M:%S"))
-  chm <- chmMake (chm)
-
-  ngchmInitShaidyRepository(shaidyDir)
-  shaidyRepo <- shaidyLoadRepository('file', shaidyDir)
-  shaid <- shaidyGetShaid(chm)
-  status <- system2(theShaidyMapGenJava, c(theShaidyMapGenArgs, "-jar", theShaidyMapGen, shaidyRepo$basepath, shaid@value, shaid@value))
-  if (status != 0)
-  {
-    stop("export to ngchm failed")
-  }
-  if (!file.copy (shaidyRepo$blob.path ("viewer", shaid@value, chm@name, paste(chm@name,"ngchm",sep=".")), filename, TRUE))
-  {
-    stop("export to ngchm failed")
-  }
-  ##############################################################################
-  #message("copy file")
-  #standardImage <- system.file("NGCHM", "NGCHM_Diagram.png", package = "MBatchUtils")
-  #message(standardImage)
-  #dest <- file.path(dirname(theOutputFile), "NGCHM_Diagram.png")
-  #message(dest)
-  #file.copy(standardImage, dest, overwrite=TRUE)
+  result <- chmExportToFile(chm, theOutputFile, overwrite=TRUE, shaidyMapGen=theShaidyMapGen, shaidyMapGenJava=theShaidyMapGenJava, shaidyMapGenArgs=theShaidyMapGenArgs)
   result
 }
 
@@ -225,7 +197,15 @@ makeGenericColorMap <- function(theMatrix)
     myMin <- min(theMatrix)
     myMax <- max(theMatrix)
     divided <- (myMax+myMin)/5
-    quantiles <- c(myMin+divided, myMin+divided+divided, myMin+divided+divided+divided, myMin+divided+divided+divided+divided )
+    if (0!=divided)
+    {
+      quantiles <- c(myMin+divided, myMin+divided+divided, myMin+divided+divided+divided, myMin+divided+divided+divided+divided )
+    }
+    else
+    {
+      middle <- (myMin+myMax)/2
+      quantiles <- c(myMin-1, middle+(myMin/2), middle+(myMax/2), myMax+1 )
+    }
   }
   quantiles
 }

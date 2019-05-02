@@ -1,0 +1,9 @@
+apps/*/build
+apps/*/dist
+apps/*/nbproject/private
+apps/*/.Rproj.user
+apps/*/.Rbuildignore
+apps/*/.Rhistory
+data/apps_out/*
+data/testing_dynamic/*
+.Rproj.user

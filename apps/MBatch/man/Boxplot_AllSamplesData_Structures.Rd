@@ -8,7 +8,7 @@ A function to perform Box Plot all samples and all data analysis from data in St
 \usage{
 Boxplot_AllSamplesData_Structures (theData, theTitle, theOutputPath,
 theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
-theMaxGeneCount=20000, theJavaParameters = "-Xms8000m")
+theMaxGeneCount=20000, theJavaParameters = c("-Xms8000m", "-Djava.awt.headless=true"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,7 +24,7 @@ theMaxGeneCount=20000, theJavaParameters = "-Xms8000m")
   list() indicates none while NULL will cause an error. }
   \item{theMaxGeneCount}{Integer giving maximum number of features (genes) to keep. Default is 20000. 0 means keep all.}
   \item{theJavaParameters}{Object of class \code{"character"} String for initializing JVM.
-  Defaults to Xms8000m. }
+  Defaults to Xms8000m and Djava.awt.headless=true. }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~

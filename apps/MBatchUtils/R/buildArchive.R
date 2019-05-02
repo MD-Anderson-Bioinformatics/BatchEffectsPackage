@@ -45,31 +45,6 @@ buildInternalIndex <- function(theDataRunDir, theZipPath, theDataSetName, theDat
          .jnew("java/lang/String",theTooltipFile))
 }
 
-buildExternalIndex <- function(theDataRunDir, dataRunDirs, theDefaultLink, theDataSetName, theDataSetLabel,
-                               theExternalIndexPath, theLevelLabels, theTooltipFile)
-{
-  ########
-  message("buildExternalIndex::theDataRunDir=", theDataRunDir)
-  message("buildExternalIndex::dataRunDirs=", dataRunDirs)
-  message("buildExternalIndex::theDefaultLink=", theDefaultLink)
-  message("buildExternalIndex::theDataSetName=", theDataSetName)
-  message("buildExternalIndex::theDataSetLabel=", theDataSetLabel)
-  message("buildExternalIndex::theExternalIndexPath=", theExternalIndexPath)
-  message("buildExternalIndex::theLevelLabels=", theLevelLabels)
-  message("buildExternalIndex::theTooltipFile=", theTooltipFile)
-  ########
-  .jcall("edu/mda/bioinfo/bevindex/BEVIndex", returnSig = "V",
-         method='addExternalIndexToDataRun',
-         .jnew("java/lang/String",theDataRunDir),
-         .jarray(as.vector(as.character(dataRunDirs))),
-         .jarray(as.vector(as.character(theDefaultLink))),
-         .jarray(as.vector(as.character(theDataSetName))),
-         .jarray(as.vector(as.character(theDataSetLabel))),
-         .jarray(as.vector(as.character(theExternalIndexPath))),
-         .jarray(as.vector(as.character(theLevelLabels))),
-         .jnew("java/lang/String",theTooltipFile))
-}
-
 getLinks <- function(theSourceDir, theDefaultLink)
 {
   files <- list.files(theSourceDir, theDefaultLink, recursive=TRUE, include.dirs=TRUE)[1]
@@ -115,14 +90,13 @@ buildSingleArchive <- function(theSourceDir, theArchiveDir, theDataRunDir, theEx
                           system.file("BEVIndex", "commons-lang3-3.4.jar", package="MBatchUtils"),
                           system.file("BEVIndex", "gson-2.7.jar", package="MBatchUtils"),
                           fsep=.Platform$path.sep)
-  .jinit(classpath=myJavaJars, force.init = TRUE, parameters="-Xms4800m")
+  .jinit(classpath=myJavaJars, force.init = TRUE, parameters=c("-Xms4800m", "-Djava.awt.headless=true"))
   ########
-  # build the internal index
+  # build the index files
   buildInternalIndex(theDataRunDir, zipFile, theDataSetName, theDataSetLabel, defaultLinkVector, theLevelLabels, theTooltipFile)
   ########
-  # build the external index
-  buildExternalIndex(theDataRunDir, dataSetDirs, defaultLinkVector, theDataSetName, theDataSetLabel,
-                     theExternalIndexPath, theLevelLabels, theTooltipFile)
+  # copy the external index
+  file.copy(file.path(theArchiveDir, "index.json"), theExternalIndexPath)
 }
 
 #############################################################################

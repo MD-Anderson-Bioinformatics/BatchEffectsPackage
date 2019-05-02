@@ -39,16 +39,19 @@ public class GDCRunIndex
 	{
 		LinkedHashMap<String, String> results = new LinkedHashMap<>();
 		results.put("Run", runName);
-		try (BufferedReader br = new BufferedReader(new FileReader(archiveLocation.toFile())))
+		if ("matrix_data.tsv".equals(archiveLocation.toFile().getName()))
 		{
-			int samples = br.readLine().split("\t", -1).length - 1;
-			int features = 0;
-			while ((br.readLine()) != null)
+			try (BufferedReader br = new BufferedReader(new FileReader(archiveLocation.toFile())))
 			{
-				features += 1;
+				int samples = br.readLine().split("\t", -1).length - 1;
+				int features = 0;
+				while ((br.readLine()) != null)
+				{
+					features += 1;
+				}
+				results.put("Samples", Integer.toString(samples));
+				results.put("Features", Integer.toString(features));
 			}
-			results.put("Samples", Integer.toString(samples));
-			results.put("Features", Integer.toString(features));
 		}
 		return results;
 	}
@@ -122,11 +125,21 @@ public class GDCRunIndex
 		try
 		{
 			////////////////////////////////////////////////////////////////////
+			// complete path to release directory (timestamp)
 			String baseDir = args[0];
+			// complete path to current or legacy directory under release
 			String runDir = args[1];
+			// run name of form 2018_11_20_1200_GDC (current)
 			String runName = args[2];
+			// directory into which to write index file
 			String indexDir = args[3];
+			// filname directory (usually SDB)
 			String finalDir = args[4];
+			System.out.println("baseDir=" + baseDir);
+			System.out.println("runDir=" + runDir);
+			System.out.println("runName=" + runName);
+			System.out.println("indexDir=" + indexDir);
+			System.out.println("finalDir=" + finalDir);
 			//////////////////////////////////////////////////////////////////
 			String archiveMarker = "matrix_data.tsv";
 			String archiveName = "standardized.zip";

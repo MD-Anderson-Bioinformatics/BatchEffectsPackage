@@ -100,8 +100,8 @@ if (!is.null(inputDir))
                                        theEBNP_ParametricPriorsFlag=TRUE,
                                        theSeed=theRandomSeed,
                                        theEBNP_PriorPlotsFile=file.path(outdir, "priorplots.PNG"))
-  #outputFile <- file.path(outdir, "corrected.tsv")
-  #writeAsMatrix(outputFile, correctedMatrix)
+  outputFile <- file.path(outdir, "corrected.tsv")
+  writeAsMatrix(outputFile, correctedMatrix)
   compareMatrix <- as.matrix(read.delim(unz(theCompareFile, theCompareFilename), header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE, stringsAsFactors=FALSE, row.names=1))
   compared <- compareTwoMatrices(correctedMatrix, compareMatrix)
   print(compared)

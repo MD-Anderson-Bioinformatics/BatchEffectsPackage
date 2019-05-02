@@ -5,6 +5,17 @@
 	*						 *
 	**************************************************
 
+		CHANGES IN R VERSION 0.1.12
+
+NEW FEATURES
+
+    o	Updated NGCHM quantiles for color map for alternative to duplicates
+
+		CHANGES IN R VERSION 0.1.11
+
+NEW FEATURES
+
+    o	Updated build single archive to work with new index code
 
 		CHANGES IN R VERSION 0.1.10
 

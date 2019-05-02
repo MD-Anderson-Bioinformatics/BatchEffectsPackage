@@ -114,7 +114,7 @@ PCA_DualBatch_Structures <- function(theData, theTitle, theOutputPath, theBatchT
 #############################################################################
 
 Boxplot_AllSamplesData_Structures <- function(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
-                                              theMaxGeneCount=20000, theJavaParameters="-Xms8000m")
+                                              theMaxGeneCount=20000, theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
 {
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
@@ -129,7 +129,7 @@ Boxplot_AllSamplesData_Structures <- function(theData, theTitle, theOutputPath, 
 }
 
 Boxplot_AllSamplesRLE_Structures <- function(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
-                                             theMaxGeneCount=20000, theJavaParameters="-Xms8000m")
+                                             theMaxGeneCount=20000, theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
 {
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
@@ -144,7 +144,8 @@ Boxplot_AllSamplesRLE_Structures <- function(theData, theTitle, theOutputPath, t
 }
 
 Boxplot_Group_Structures <- function(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
-																theListOfGroupBoxFunction, theListOfGroupBoxLabels, theMaxGeneCount=20000, theJavaParameters="-Xms8000m")
+																theListOfGroupBoxFunction, theListOfGroupBoxLabels, theMaxGeneCount=20000,
+																theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
 {
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,

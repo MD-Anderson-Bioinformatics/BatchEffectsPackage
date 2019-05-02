@@ -212,7 +212,7 @@ callMBatch_PCADualBatch_Structures <- function(theOutputDir, theDataObject, theT
 ################################################################################
 
 callMBatch_BoxplotAllSamplesData <- function(theOutputDir, theGeneFile, theBatchFile, theTitle,
-                                             theJavaParameters="-Xms8000m", theMaxGeneCount = 10000)
+                                             theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"), theMaxGeneCount = 10000)
 {
   # load data
   myData <- loadDataManually(theGeneFile, theBatchFile)
@@ -220,7 +220,7 @@ callMBatch_BoxplotAllSamplesData <- function(theOutputDir, theGeneFile, theBatch
 }
 
 callMBatch_BoxplotAllSamplesData_Structures <- function(theOutputDir, theDataObject, theTitle,
-                                                        theJavaParameters="-Xms8000m", theMaxGeneCount = 10000)
+                                                        theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"), theMaxGeneCount = 10000)
 {
   # output directory
 	outdir <- file.path(theOutputDir, "BoxPlot")
@@ -244,7 +244,7 @@ callMBatch_BoxplotAllSamplesData_Structures <- function(theOutputDir, theDataObj
 ################################################################################
 
 callMBatch_BoxplotAllSamplesRLE <- function(theOutputDir, theGeneFile, theBatchFile, theTitle,
-                                            theJavaParameters="-Xms8000m", theMaxGeneCount = 10000)
+                                            theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"), theMaxGeneCount = 10000)
 {
   # load data
   myData <- loadDataManually(theGeneFile, theBatchFile)
@@ -252,7 +252,7 @@ callMBatch_BoxplotAllSamplesRLE <- function(theOutputDir, theGeneFile, theBatchF
 }
 
 callMBatch_BoxplotAllSamplesRLE_Structures <- function(theOutputDir, theDataObject, theTitle,
-                                                       theJavaParameters="-Xms8000m", theMaxGeneCount = 10000)
+                                                       theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"), theMaxGeneCount = 10000)
 {
 	# output directory
   outdir <- file.path(theOutputDir, "BoxPlot")
@@ -276,7 +276,7 @@ callMBatch_BoxplotAllSamplesRLE_Structures <- function(theOutputDir, theDataObje
 ################################################################################
 
 callMBatch_BoxplotGroup <- function(theOutputDir, theGeneFile, theBatchFile, theTitle,
-                                    theJavaParameters="-Xms8000m", theMaxGeneCount = 10000,
+                                    theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"), theMaxGeneCount = 10000,
                                     theFunction=c(mean), theFunctionName=c("Mean"))
 {
   # load data
@@ -287,7 +287,7 @@ callMBatch_BoxplotGroup <- function(theOutputDir, theGeneFile, theBatchFile, the
 }
 
 callMBatch_BoxplotGroup_Structures <- function(theOutputDir, theDataObject, theTitle,
-                                               theJavaParameters="-Xms8000m", theMaxGeneCount = 10000,
+                                               theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"), theMaxGeneCount = 10000,
                                                theFunction=c(mean), theFunctionName=c("Mean"))
 {
 	# output directory

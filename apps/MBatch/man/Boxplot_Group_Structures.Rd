@@ -9,7 +9,7 @@ A function to perform Box Plot group analysis from data in files.
 Boxplot_Group_Structures(theData,theTitle, theOutputPath,
 theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
 theListOfGroupBoxFunction, theListOfGroupBoxLabels,
-theMaxGeneCount=20000, theJavaParameters = "-Xms8000m")
+theMaxGeneCount=20000, theJavaParameters = c("-Xms8000m", "-Djava.awt.headless=true"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,7 +31,7 @@ theMaxGeneCount=20000, theJavaParameters = "-Xms8000m")
   A list of strings giving strings for labels to use for group assessments. }
   \item{theMaxGeneCount}{Integer giving maximum number of features (genes) to keep. Default is 20000. 0 means keep all.}
   \item{theJavaParameters}{Object of class \code{"character"}
-  String for initializing JVM. Defaults to Xms8000m. }
+  String for initializing JVM. Defaults to Xms8000m and Djava.awt.headless=true. }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~

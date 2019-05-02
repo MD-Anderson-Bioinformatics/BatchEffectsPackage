@@ -8,7 +8,6 @@ package edu.mda.bioinfo.bevindex;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.mda.bioinfo.bevindex.display.DisplayRun;
-import java.io.File;
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -27,7 +26,7 @@ import java.util.Map;
 public class BEVIndex
 {
 
-	static protected String mVersion = "BEVIndex 2019-03-07-1313";
+	static protected String mVersion = "BEVIndex 2019-04-29-1030";
 	static public String [] mBEVlabels = { "Version", "Program", "Disease", "Workflow", "Data Type", "Algorithm", "Diagram Type", "Sub-Type" };
 	static public String [] mBEVcurrentDefault = { "current", "TCGA", "KIRC", "methylation", "All-original", "PCA", "BatchId", "ManyToMany", "PCAValues" };
 	static public String [] mBEVlegacyDefault = { "legacy", "TCGA", "KIRC", "methylation", "All-original", "PCA", "BatchId", "ManyToMany", "PCAValues" };
@@ -69,27 +68,8 @@ public class BEVIndex
 			Path nf = fs.getPath("index.json");
 			Files.write(nf, gson.toJson(dr).getBytes(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 		}
-	}
-
-	public static void addExternalIndexToDataRun(String theDataRunDir, String[] theDataRuns, String[] theDefault,
-			String[] theNameRuns, String[] theLabelRuns, String[] theFilesRuns, String[] theLevelLabels, String theTooltipTsv) throws Exception
-	{
-		System.out.println(mVersion);
-		BEVtooltips btt = new BEVtooltips();
-		btt.readTsv(theTooltipTsv);
-		for (int index = 0; index < theDataRuns.length; index++)
-		{
-			String archiveMarker = "MBATCH_SUCCESS.txt";
-			String archiveName = "ResultSet.zip";
-			DisplayRun dr = new DisplayRun(archiveMarker, archiveName);
-			//(Path theBaseLocation, String theName, boolean theGDCFlag, String theLabel, String [] theDefaultDiagram)
-			dr.init(Paths.get(theDataRunDir), theNameRuns[index], theLevelLabels, theLabelRuns[index], theDefault, Paths.get(theDataRuns[index]), btt);
-			//
-			GsonBuilder builder = new GsonBuilder();
-			builder.setPrettyPrinting();
-			Gson gson = builder.create();
-			File output = new File(theFilesRuns[index]);
-			Files.write(output.toPath(), gson.toJson(dr).getBytes());
-		}
+		Path nf = Paths.get(path.getParent().toString(), "index.json");
+		System.out.println("write external index=" + nf);
+		Files.write(nf, gson.toJson(dr).getBytes(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 	}
 }

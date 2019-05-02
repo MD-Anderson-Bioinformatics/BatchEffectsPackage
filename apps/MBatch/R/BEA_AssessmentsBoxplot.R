@@ -6,7 +6,7 @@
 #
 #You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-boxplotJinit <- function(theJavaParameters="-Xms8000m")
+boxplotJinit <- function(theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
 {
 	myClass1 <- system.file("BoxplotJava", "jcommon-1.0.17.jar", package="MBatch")
 	myClass2 <- system.file("BoxplotJava", "jfreechart-1.0.14.jar", package="MBatch")
@@ -15,7 +15,7 @@ boxplotJinit <- function(theJavaParameters="-Xms8000m")
 	myClass5 <- system.file("BoxplotJava", "BoxplotJava.jar", package="MBatch")
 	myClass6 <- system.file("BoxplotJava", "LegendJava.jar", package="MBatch")
 	myJavaJars <- file.path(myClass1, myClass2, myClass3, myClass4, myClass5, myClass6, fsep=.Platform$path.sep)
-	logDebug("boxplotJinit - Calling .jinit ", myJavaJars)
+	#logDebug("boxplotJinit - Calling .jinit ", myJavaJars)
 	.jinit(classpath=myJavaJars, force.init = TRUE, parameters=theJavaParameters)
 }
 
@@ -23,7 +23,8 @@ boxplotJinit <- function(theJavaParameters="-Xms8000m")
 ###########################################################################################
 
 createBatchEffectsOutput_BoxPlot_AllSampleRLE<-function(theMatrixGeneData, theDataframeBatchData,
-																												theTitle, theOutputPath, thePngFlag, theJavaParameters="-Xms8000m")
+																												theTitle, theOutputPath, thePngFlag,
+																												theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
 {
 	title <- paste(theTitle, "AllSample-RLE", sep=" ")
 	checkCreateDir(theOutputPath)
@@ -52,7 +53,8 @@ createBatchEffectsOutput_BoxPlot_AllSampleRLE<-function(theMatrixGeneData, theDa
 }
 
 createBatchEffectsOutput_BoxPlot_AllSampleData<-function(theMatrixGeneData, theDataframeBatchData,
-																							 theTitle, theOutputPath, thePngFlag, theJavaParameters="-Xms8000m")
+																							 theTitle, theOutputPath, thePngFlag,
+																							 theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
 {
 	title <- paste(theTitle, "AllSample-Data", sep=" ")
 	checkCreateDir(theOutputPath)
@@ -92,7 +94,7 @@ createBatchEffectsOutput_BoxPlot_AllSampleData<-function(theMatrixGeneData, theD
 createBatchEffectsOutput_BoxPlot_Group<-function(theMatrixGeneData, theDataframeBatchData,
 																								 theTitle, theOutputPath,
 																								 theListOfGroupBoxFunction, theListOfGroupBoxLabels,
-																								 thePngFlag, theJavaParameters="-Xms8000m")
+																								 thePngFlag, theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
 {
 	title <- paste(theTitle, "Group", sep=" ")
 	stopifnotWithLogging("Group box list and group box labels should be the same length", length(theListOfGroupBoxFunction)==length(theListOfGroupBoxLabels))

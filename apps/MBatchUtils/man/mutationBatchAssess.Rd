@@ -6,7 +6,7 @@
 and does batch assessment processing on mutation data. Batch comparisons are both
 between platforms, within platforms, and between disease types.}
 \usage{
-mutationBatchAssess(theTypeCountDir, theOutputDir, theJavaArgs = "-Xms24000m",
+mutationBatchAssess(theTypeCountDir, theOutputDir, theJavaArgs = c("-Xms24000m", "-Djava.awt.headless=true"),
 theThreads = 5, thePvalueCutoff = 1e-05, theZScoreCutoff = 1.96,
 thePCAflag = FALSE, theBatchTypes = c("BatchId", "PlateId", "ShipDate", "TSS"),
 theMutationTypes = NULL)
@@ -15,7 +15,7 @@ theMutationTypes = NULL)
 \arguments{
   \item{theTypeCountDir}{full path to top level of directory containing disease sub-directories and files created by mutationBatchExtract}
   \item{theOutputDir}{full path to output directory for this function}
-  \item{theJavaArgs}{Default: "-Xms24000m" - argument to Java for Boxplot and DSC computations.}
+  \item{theJavaArgs}{Default: "-Xms24000m -Djava.awt.headless=true" - argument to Java for Boxplot and DSC computations.}
   \item{theThreads}{Default: 5 - argument to Java for # cores (threads) to use for DSC computations}
   \item{thePvalueCutoff}{Default: .00001 - P-value to use for cutoff for "significant" difference in Kruskal-Wallis and Dunn's tests}
   \item{theZScoreCutoff}{Default 1.96 - cut off for Dunn's test for "significant" confidence interval}

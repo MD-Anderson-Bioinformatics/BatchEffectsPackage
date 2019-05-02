@@ -34,11 +34,11 @@ if (!is.null(getTestOutputDir()))
   dir.create(gdcMinOut, showWarnings=FALSE, recursive=TRUE)
   ########################################################
   ########################################################
-  mutationBatchAssess(theTypeCountDir=dccMinMut, theOutputDir=dccMinOut, theJavaArgs="-Xms16000m", theThreads=5,
+  mutationBatchAssess(theTypeCountDir=dccMinMut, theOutputDir=dccMinOut, theJavaArgs=c("-Xms16000m", "-Djava.awt.headless=true"), theThreads=5,
                       thePvalueCutoff=.00001, theZScoreCutoff=1.96, thePCAflag=TRUE,
                       theBatchTypes=c("BatchId"),
                       theMutationTypes=c("FrameShiftIns", "Total"))
-  mutationBatchAssess(theTypeCountDir=gdcMinMut, theOutputDir=gdcMinOut, theJavaArgs="-Xms16000m", theThreads=5,
+  mutationBatchAssess(theTypeCountDir=gdcMinMut, theOutputDir=gdcMinOut, theJavaArgs=c("-Xms16000m", "-Djava.awt.headless=true"), theThreads=5,
                       thePvalueCutoff=.00001, theZScoreCutoff=1.96, thePCAflag=TRUE,
                       theBatchTypes=c("PlateId"),
                       theMutationTypes=c("FrameShiftIns", "Total"))
