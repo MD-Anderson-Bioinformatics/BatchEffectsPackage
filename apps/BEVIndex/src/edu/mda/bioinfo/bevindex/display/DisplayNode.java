@@ -7,6 +7,9 @@ package edu.mda.bioinfo.bevindex.display;
 
 import edu.mda.bioinfo.bevindex.BEVtooltips;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -29,6 +32,7 @@ public class DisplayNode extends DisplayRun
 			String theArchiveMarker, String theArchiveName)
 	{
 		super(getLevelLabel(theLevel, theLevelLabels), convertFilenameToDisplay(theLocation.getFileName().toString()), null, theTooltips,  theArchiveMarker, theArchiveName);
+		//super(getLevelLabel(theLevel, theLevelLabels), convertFilenameToDisplay(theLocation.getFileName().toString()), null, theTooltips,  theArchiveMarker, theArchiveName);
 		mLevel = theLevel;		// set here for real
 		mDiagramFlag = false;	// set false here or true/false in descendants
 		mZipFile = "";			// set in descendants
@@ -64,7 +68,22 @@ public class DisplayNode extends DisplayRun
 	static protected String convertFilenameToDisplay(String theString)
 	{
 		//return theString.replaceAll("([A-Z,-])", " $1").replaceAll("([_])", "");
-		return new StringBuilder(new StringBuilder(theString).reverse().toString().replaceFirst("([_])", " ")).reverse().toString().replaceAll("([_])", "-").replace(".tsv", "").replace(".TSV", "").replace(".png", "").replace(".PNG", "");
+		//return new StringBuilder(new StringBuilder(theString).reverse().toString().replaceFirst("([_])", " ")).reverse().toString().replaceAll("([_])", "-").replace(".tsv", "").replace(".TSV", "").replace(".png", "").replace(".PNG", "");
+		return theString.replace(".tsv", "").replace(".TSV", "").replace(".png", "").replace(".PNG", "");
 	}
 
+	public void dataRelations(TreeMap<String, String> theDataRelations, String thePath)
+	{
+		if ((null!=this.mZipFile)&&(!"".equals(this.mZipFile)))
+		{
+			theDataRelations.put(thePath + " - " + this.mName, this.mZipFile);
+		}
+		else
+		{
+			for (DisplayNode dn : this.mChildren)
+			{
+				dn.dataRelations(theDataRelations, thePath + " - " + this.mName);
+			}
+		}
+	}
 }

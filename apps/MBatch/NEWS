@@ -5,6 +5,26 @@
 	*						 *
 	**************************************************
 
+		CHANGES IN R VERSION 1.5.2
+
+NEW FEATURES
+
+    o	Clean up for R CMD CHECK
+
+		CHANGES IN R VERSION 1.5.1
+
+NEW FEATURES
+
+    o	When reading batches/dataframes, do not convert to NAs
+    o	hierarchical clustering writes RData file for uDend, for use with NGCHM creation
+    o	update readAsDataFrame to keep batch types unconverted text
+
+		CHANGES IN R VERSION 1.5.0
+
+NEW FEATURES
+
+    o	changed source of boxplot to fivenums
+
 		CHANGES IN R VERSION 1.4.20
 
 NEW FEATURES

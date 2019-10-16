@@ -16,26 +16,8 @@ writeAsMatrix(theFile, theMatrix, thePar = "-Xmx2000m")
   \item{theMatrix}{The matrix to write out--requires column names and double (numeric) data.}
   \item{thePar}{Parameters to pass to the Java VM -- by default this requests 8GB of memory.}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
 Returns TRUE if the save succeeded.
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----
@@ -43,7 +25,7 @@ Returns TRUE if the save succeeded.
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-#function (theFile, theMatrix, thePar = "-Xmx2000m") 
+#function (theFile, theMatrix, thePar = "-Xmx2000m")
 #{
 #    myClass1 <- system.file("ReadRJava", "ReadRJava.jar", package = "MBatch")
 #    myJavaJars <- file.path(myClass1, fsep = .Platform$path.sep)
@@ -63,13 +45,13 @@ Returns TRUE if the save succeeded.
 #    logDebug("writeAsMatrix - .jinit complete")
 #    logDebug("writeAsMatrix before java")
 #    if (is.null(myRows)) {
-#        success <- .jcall("org/mda/readrjava/ReadRJava", returnSig = "Z", 
-#            method = "writeDoubleData_Column", .jnew("java/lang/String", 
+#        success <- .jcall("org/mda/readrjava/ReadRJava", returnSig = "Z",
+#            method = "writeDoubleData_Column", .jnew("java/lang/String",
 #                theFile), .jarray(myCols), .jarray(myData))
 #    }
 #    else {
-#        success <- .jcall("org/mda/readrjava/ReadRJava", returnSig = "Z", 
-#            method = "writeDoubleData_All", .jnew("java/lang/String", 
+#        success <- .jcall("org/mda/readrjava/ReadRJava", returnSig = "Z",
+#            method = "writeDoubleData_All", .jnew("java/lang/String",
 #                theFile), .jarray(myCols), .jarray(myRows), .jarray(myData))
 #    }
 #    logDebug("writeAsMatrix after java")
@@ -77,7 +59,3 @@ Returns TRUE if the save succeeded.
 #    return(success)
 #  }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

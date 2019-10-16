@@ -24,24 +24,3 @@ theCombineOnlyFlag = FALSE, thePath = NULL, theWriteToFile = FALSE)
 \details{Uses RBN (Replicates Based Normalization) to correct one data group to match another.
 }
 \value{Returned the corrected matrix unless thePath is given and theWriteToFile is TRUE, in which case the full path and filename to the corrected data file is returned.}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
-\examples{
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

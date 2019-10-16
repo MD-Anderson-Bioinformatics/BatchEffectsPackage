@@ -8,6 +8,7 @@
 
 library(dunn.test)
 library(MBatch)
+library(Cairo)
 #source("GSColors.R")
 #source("MutationBatchExtractAPI.R")
 
@@ -864,7 +865,7 @@ buildCombinedDataframe <- function(theBatchFiles, theCountType, theAllSampleIds)
 	for (myBatchFile in theBatchFiles)
 	{
 		# read dataframe
-		myDF <- readAsGenericDataframe(myBatchFile, theNaString="NULL")
+		myDF <- readAsGenericDataframe(myBatchFile)
 		##TDC myDF$MBABatchFile <- myBatchFile
 		if (is.null(combined))
 		{
@@ -977,6 +978,12 @@ getBatchAddOn <- function(theBatches)
 
 makeKruskalPng <- function(theFile, theValues, theBatches, theMain, batchAddOn, thePvalueCutoff)
 {
+  message("theFile=", theFile)
+  message("theValues=", theValues)
+  message("theBatches=", theBatches)
+  message("theMain=", theMain)
+  message("batchAddOn=", batchAddOn)
+  message("thePvalueCutoff=", thePvalueCutoff)
   # PNG includes corresponding non-NA values (which may be a vector) from theBatches
   myWidth <- ((length(theValues)*25)+100)
   if (myWidth<100)
@@ -1273,7 +1280,7 @@ runMBatchForMutCounts <- function(theDataMatrix, theBatchesDf, theOutputDir, the
 	#																						theJavaParameters="-Xms12000m", theMaxGeneCount=maxBoxPlotGenes)
 	#callMBatch_BoxplotAllSamplesRLE_Structures(theOutputDir, theDataObject, theTitle,
 	callMBatch_BoxplotGroup_Structures_MBA(theOutputDir, theDataObject, theTitle,
-																		 theJavaParameters=theJavaArgs, theMaxGeneCount=maxBoxPlotGenes,
+																		 theMaxGeneCount=maxBoxPlotGenes,
 																		 theFunction=c(pipelineMean), theFunctionName=c("Mean"))
 }
 
@@ -1340,9 +1347,8 @@ callMBatch_PCA_Structures_MBA <- function(theOutputDir, theDataObject, theTitle,
 }
 
 callMBatch_BoxplotGroup_Structures_MBA <- function(theOutputDir, theDataObject, theTitle,
-																							 theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"),
 																							 theMaxGeneCount = 10000,
-																							 theFunction=c(mean), theFunctionName=c("Mean"))
+																							 theFunction=list(mean), theFunctionName=list("Mean"))
 {
 	# output directory
 	outdir <- file.path(theOutputDir, "BoxPlot")
@@ -1359,7 +1365,6 @@ callMBatch_BoxplotGroup_Structures_MBA <- function(theOutputDir, theDataObject, 
 													 theBatchTypeAndValuePairsToKeep=NULL,
 													 theListOfGroupBoxFunction=theFunction,
 													 theListOfGroupBoxLabels=theFunctionName,
-													 theJavaParameters=theJavaParameters,
 													 theMaxGeneCount=theMaxGeneCount)
 }
 

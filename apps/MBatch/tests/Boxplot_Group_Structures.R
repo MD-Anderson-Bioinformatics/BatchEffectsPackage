@@ -43,17 +43,18 @@ if (!is.null(inputDir))
                            theOutputPath=theOutputDir,
                            theBatchTypeAndValuePairsToRemove=NULL,
                            theBatchTypeAndValuePairsToKeep=NULL,
-                           theListOfGroupBoxFunction=c(mean),
-                           theListOfGroupBoxLabels=c("Mean"),
-                           theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"),
+                           theListOfGroupBoxFunction=list(function(x) {mean(x)}),
+                           theListOfGroupBoxLabels=list("Mean"),
                            theMaxGeneCount=10000)
   correctedMatrix <- readAsDataFrame(file.path(theOutputDir, "Group-MEAN", "BoxPlot_Group-MEAN_BoxData-BatchId.tsv"))
   compareMatrix <- readAsDataFrame(theCompareFile)
-  message("correctedMatrix")
+  message("correctedMatrix dim")
   print(dim(correctedMatrix))
-  print(correctedMatrix[1:4,1:3])
-  message("compareMatrix")
+  message("compareMatrix dim")
   print(dim(compareMatrix))
+  message("correctedMatrix content")
+  print(correctedMatrix[1:4,1:3])
+  message("compareMatrix content")
   print(compareMatrix[1:4,1:3])
   compared <- compareTwoMatrices(correctedMatrix, compareMatrix)
   print(compared)

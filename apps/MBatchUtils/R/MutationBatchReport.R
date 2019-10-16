@@ -34,7 +34,7 @@ htmlMutationBatchEffects <- function(theBaseDir)
 		{
 			file.remove(outFile)
 		}
-		myDF <- readAsGenericDataframe(myRef, theNaString="NULL")
+		myDF <- readAsGenericDataframe(myRef)
 		myDF$Disease <- sapply(myDF$MutationFile, function(theEntry)
 		{
 			strsplit(theEntry, ".", fixed=TRUE)[[1]][1]
@@ -207,7 +207,7 @@ collectMutationBatchEffects <- function(theBaseDirs)
 		for (myRef in refFiles)
 		{
 			message(myRef)
-			myDF <- readAsGenericDataframe(myRef, theNaString="NULL")
+			myDF <- readAsGenericDataframe(myRef)
 			myDF$Disease <- sapply(myDF$MutationFile, function(theEntry)
 			{
 				toupper(gsub(pattern="TCGA-", replacement="", x=strsplit(theEntry, ".", fixed=TRUE)[[1]][1], fixed=TRUE))

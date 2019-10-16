@@ -18,13 +18,3 @@ Reads a tab-delimited file using R in an efficient manner, into a matrix. First 
 \value{
 a matrix based on the file read in
 }
-\references{}
-\author{}
-\note{}
-\seealso{}
-\examples{
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

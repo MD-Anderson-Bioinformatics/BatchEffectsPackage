@@ -103,14 +103,14 @@ buildBatchHeatMap_Structures <- function(theMatrixData, theBatchData, theTitle, 
   if (!is.null(theRowCluster))
   {
     # c("pearson", "ward.D2")
-    rowClusters <- as.dendrogram(hierClustForNgchmCalc(theMatrixData, theRowCluster[1], theRowCluster[2]))
+    rowClusters <- as.dendrogram(hierClustForNgchmCalc(t(theMatrixData), theRowCluster[1], theRowCluster[2]))
   }
   message("compute col clusters")
   colClusters <- colnames(theMatrixData)
-  if (!is.null(theRowCluster))
+  if (!is.null(theColCluster))
   {
     # c("pearson", "ward.D2")
-    colClusters <- as.dendrogram(hierClustForNgchmCalc(t(theMatrixData), theColCluster[1], theColCluster[2]))
+    colClusters <- as.dendrogram(hierClustForNgchmCalc(theMatrixData, theColCluster[1], theColCluster[2]))
   }
   message("make quartiles")
   quartiles <- makeGenericColorMap(theMatrixData)
@@ -167,7 +167,20 @@ hierClustForNgchmCalc<-function(theMatrixGeneData, theDist="pearson", theClust="
     if(nrow(subMatrix)>0)
     {
       message("calculating HC")
-      d<-distanceMatrix(subMatrix, metric=theDist)
+      d <- NULL
+      tryCatch(
+        d<-distanceMatrix(subMatrix, metric=theDist),
+        error = function(e)
+        {
+          message("distanceMatrix failed")
+          d <- NULL
+        },
+        warning = function(e)
+        {
+          message("distanceMatrix failed")
+          d <- NULL
+        })
+
       #message("checking distance matrix results")
       #subMatrix <- d[!is.na(rowSums(d)),]
       #subMatrix <- subMatrix[!is.infinite(rowSums(subMatrix)),]
@@ -208,6 +221,89 @@ makeGenericColorMap <- function(theMatrix)
     }
   }
   quantiles
+}
+
+# ====================================================================================
+# ====================================================================================
+
+buildBatchHeatMapFromHC_Structures <- function(theMatrixData, theBatchData,
+                                               theTitle, theOutputFile,
+                                               theUDendRDataFile,
+                                         theRowType="labels", theColType="bio.tcga.barcode.sample",
+                                         theRowCluster=NULL,
+                                         theShaidyMapGen,
+                                         theShaidyMapGenJava="/usr/bin/java",
+                                         theShaidyMapGenArgs="-Xmx16G")
+{
+  message(mbatchUtilVersion())
+  # need to do this, since NGCHM uses title as filename, so slashed become directories.
+  theTitle <- compressIntoFilename(theTitle)
+  message("buildBatchHeatMapFromHC_Structures")
+  print(theTitle)
+  print(theOutputFile)
+  dir.create(dirname(theOutputFile), showWarnings=FALSE, recursive=TRUE)
+  message("theMatrixData size ", dim(theMatrixData)[1], " ", dim(theMatrixData)[2])
+  message("theBatchData size ", dim(theBatchData)[1], " ", dim(theBatchData)[2])
+  message("compute row clusters")
+  rowClusters <- rownames(theMatrixData)
+  if (!is.null(theRowCluster))
+  {
+    # c("pearson", "ward.D2")
+    message("theRowCluster[1]=", theRowCluster[1])
+    message("theRowCluster[2]=", theRowCluster[2])
+    rowClusters <- hierClustForNgchmCalc(t(theMatrixData), theRowCluster[1], theRowCluster[2])
+    if (is.null(rowClusters))
+    {
+      message("got NULL, use rownames")
+      rowClusters <- rownames(theMatrixData)
+    }
+    else
+    {
+      message("cast as.dendrogram")
+      rowClusters <- as.dendrogram(rowClusters)
+    }
+  }
+  message("compute col clusters")
+  colClusters <- colnames(theMatrixData)
+  if (!is.null(theUDendRDataFile))
+  {
+    # loaded from file, but needed for check
+    uDend <- NULL
+    load(theUDendRDataFile)
+    if (!is.null(uDend))
+    {
+      message("use HC clustering")
+      colClusters <-as.dendrogram(uDend)
+    }
+  }
+  message("make quartiles")
+  quartiles <- makeGenericColorMap(theMatrixData)
+  print(quartiles)
+  message("make color map")
+  cmap1 <- chmNewColorMap(quartiles, colors = c('black', 'blue','yellow', 'orange'), missing.color='red');
+  message("make data layer")
+  layer1 <- chmNewDataLayer('matrix data', theMatrixData, colors=cmap1, summarizationMethod = "average")
+  message("make CHM")
+  chm <- chmNew(name=theTitle, layer1, rowOrder=rowClusters, colOrder=colClusters, rowAxisType=theRowType, colAxisType=theColType)
+  message("add caption")
+  chm <- chmAddProperty(chm, "chm.info.caption", paste("TCGA heatmap: ", theTitle))
+  message("add covariates")
+  for(myCovariate in colnames(theBatchData))
+  {
+    message(myCovariate)
+    if("Sample"!=myCovariate)
+    {
+      myData <- as.vector(unlist(theBatchData[myCovariate]))
+      message(length(myData))
+      names(myData) <- as.vector(unlist(theBatchData["Sample"]))
+      message("covariate length ", length(myData))
+      covar <- chmNewCovariate(myCovariate, myData)
+      chm <- chmAddCovariateBar(chm, 'column', covar)
+    }
+  }
+  message("chmExportToFile")
+  result <- chmExportToFile(chm, theOutputFile, overwrite=TRUE, shaidyMapGen=theShaidyMapGen, shaidyMapGenJava=theShaidyMapGenJava, shaidyMapGenArgs=theShaidyMapGenArgs)
+  result
 }
 
 # ====================================================================================

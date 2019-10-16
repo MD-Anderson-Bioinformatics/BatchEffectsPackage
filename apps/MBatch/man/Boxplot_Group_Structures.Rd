@@ -9,7 +9,7 @@ A function to perform Box Plot group analysis from data in files.
 Boxplot_Group_Structures(theData,theTitle, theOutputPath,
 theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
 theListOfGroupBoxFunction, theListOfGroupBoxLabels,
-theMaxGeneCount=20000, theJavaParameters = c("-Xms8000m", "-Djava.awt.headless=true"))
+theMaxGeneCount=20000)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,34 +30,10 @@ theMaxGeneCount=20000, theJavaParameters = c("-Xms8000m", "-Djava.awt.headless=t
   \item{theListOfGroupBoxLabels}{Object of class \code{"vector"}
   A list of strings giving strings for labels to use for group assessments. }
   \item{theMaxGeneCount}{Integer giving maximum number of features (genes) to keep. Default is 20000. 0 means keep all.}
-  \item{theJavaParameters}{Object of class \code{"character"}
-  String for initializing JVM. Defaults to Xms8000m and Djava.awt.headless=true. }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 The Group Boxplots plot a summary value (such as the mean) for each feature within a batch (genes or probes). So the vertical axis is based on the summary of the values of the original data and the points plotted are features. The actual meaning of the data used, such as expression, read counts, and the like, will vary based on the data being processed.
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 #	#############################################################################
@@ -84,10 +60,6 @@ The Group Boxplots plot a summary value (such as the mean) for each feature with
 #	###
 #
 #	Boxplot_Group_Structures(myData, myTitle, myOutputPath, list(), list(),
-#			theListOfGroupBoxFunction=c(mean), theListOfGroupBoxLabels=c("mean"))
+#			theListOfGroupBoxFunction=list(mean), theListOfGroupBoxLabels=list("mean"))
 #
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

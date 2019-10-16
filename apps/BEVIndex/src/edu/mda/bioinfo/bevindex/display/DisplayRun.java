@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -47,7 +48,7 @@ public class DisplayRun implements Comparable<DisplayRun>
 			String theArchiveMarker, String theArchiveName)
 	{
 		mLabel = theLabel;
-		mName = DisplayNode.convertFilenameToDisplay(theName);
+		mName = theName; //DisplayNode.convertFilenameToDisplay(theName);
 		mTooltip = theTooltips.getTooltip(theLabel, theName);
 		mDefaultDiagram = null;
 		mChildren = theChildren;
@@ -76,7 +77,7 @@ public class DisplayRun implements Comparable<DisplayRun>
 	{
 		System.out.println("Display Run (entire) theSearchStart=" + theSearchStart);
 		mLabel = theLabel;
-		mName = DisplayNode.convertFilenameToDisplay(theName);
+		mName = theName; // DisplayNode.convertFilenameToDisplay(theName);
 		mTooltip = theTooltips.getTooltip(theLabel, theName);
 		mDefaultDiagram = theDefaultDiagram;
 		System.out.println("Start from " + theSearchStart);
@@ -217,5 +218,49 @@ public class DisplayRun implements Comparable<DisplayRun>
 				updateZipPaths(theOrig, theNew, dn.mChildren);
 			}
 		}
+	}
+	
+	public String getZipLocation(String thePath1, String thePath2, String thePath3, String thePath4)
+	{
+		String zipLocation = null;
+		for (DisplayNode dn1 : this.mChildren)
+		{
+			if (null==zipLocation)
+			{
+				if (dn1.mName.equals(thePath1))
+				{
+					for (DisplayNode dn2 : dn1.mChildren)
+					{
+						if (dn2.mName.equals(thePath2))
+						{
+							for (DisplayNode dn3 : dn2.mChildren)
+							{
+								if (dn3.mName.equals(thePath3))
+								{
+									for (DisplayNode dn4 : dn3.mChildren)
+									{
+										if (dn4.mName.equals(thePath4))
+										{
+											zipLocation = dn4.mZipFile;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return zipLocation;
+	}
+	
+	public TreeMap<String, String> dataRelations(String theIndexFile)
+	{
+		TreeMap<String, String> dataRelations = new TreeMap<>();
+		for (DisplayNode dn : this.mChildren)
+		{
+			dn.dataRelations(dataRelations, theIndexFile);
+		}
+		return dataRelations;
 	}
 }

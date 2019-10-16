@@ -35,12 +35,3 @@ Please note, support for performing corrections using replicate lists is not yet
 \value{
 No meaningful value. Performs a stop if conditions are not met.
 }
-\references{}
-\author{}
-\note{}
-\seealso{}
-\examples{}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

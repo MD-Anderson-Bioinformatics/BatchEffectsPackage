@@ -8,7 +8,7 @@
 
 mbatchUtilVersion <- function()
 {
-  return("MBatchUtils 2019-04-25-1400")
+  return("MBatchUtils 2019-09-04-0745")
 }
 
 
@@ -123,7 +123,19 @@ compareTwoMatrices <- function(theCorrected, theCompare)
 ###
 ####################################################################
 
-preprocessData <- function(theInputMatrixFile, theInputBatchFile, theOutputMatrixFile, theOutputBatchFile, theSize, theTransformFlag)
+removeSamplesWithListedBatches<-function(theDataframeFilteredSamplesToBatches, theBatchTypeAndValuePairsToRemove)
+{
+  for(myPair in theBatchTypeAndValuePairsToRemove)
+  {
+    theDataframeFilteredSamplesToBatches <- removeBatchAndValue(theDataframeFilteredSamplesToBatches, myPair[[1]], myPair[[2]])
+  }
+  return(theDataframeFilteredSamplesToBatches)
+}
+
+preprocessData <- function(theInputMatrixFile, theInputBatchFile,
+                           theOutputMatrixFile, theOutputBatchFile,
+                           theSize, theTransformFlag,
+                           theBatchTypeAndValuePairsToRemove=NULL)
 {
   mymatrix <- readAsGenericMatrix(theInputMatrixFile)
   batchs <- readAsDataFrame(theInputBatchFile)
@@ -138,6 +150,11 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile, theOutputMatri
     # assign Unknown to combined batches
     batchs <- rbind(batchs, c(newSample, rep("Unknown", length.out=length(batchsSamples)-1)))
   }
+  unusedSamples <- setdiff(batchsSamples, matrixSamples)
+  for (notSample in unusedSamples)
+  {
+    batchs <- batchs[batchs$Sample != notSample,]
+  }
   #############################################
   # sort, etc the data
   #############################################
@@ -147,7 +164,21 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile, theOutputMatri
   #############################################
   # filter to reduce size
   #############################################
-  matrix <- mbatchTrimData(mymatrix, theSize)
+  mymatrix <- mbatchTrimData(mymatrix, theSize)
+  #####################################################################################################################
+  ### remove any samples with given batch types and values
+  if (length(theBatchTypeAndValuePairsToRemove)>0)
+  {
+    print("preprocessData Before removing requested batches, batch data has ", length(batchs$Sample), " samples")
+    #print("preprocessData dataframe $Sample = ", paste(batchs$Sample, collapse=", "))
+    print("preprocessData Before removing requested batches, gene data has ", length(colnames(mymatrix)), " samples")
+    print("preprocessData Remove requested batches (", paste(theBatchTypeAndValuePairsToRemove, sep="", collapse=", "), ")")
+    batchs <- removeSamplesWithListedBatches(batchs, theBatchTypeAndValuePairsToRemove)
+    print("preprocessData After removing requested batches, batch data has ", length(batchs$Sample), " samples")
+    #print("preprocessData dataframe $Sample = ", paste(batchs$Sample, collapse=", "))
+    mymatrix <- setGenesToSameAsSamples(mymatrix, batchs)
+    print("preprocessData After removing requested batches, gene data has ", length(colnames(mymatrix)), " samples")
+  }
   #############################################
   # log transform (normalize)
   #############################################

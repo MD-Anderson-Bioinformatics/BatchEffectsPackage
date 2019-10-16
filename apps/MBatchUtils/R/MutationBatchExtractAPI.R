@@ -29,11 +29,21 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 	message("mutationBatchExtract")
 	message("find MAF files")
 	# collect the mutation data. This file name (pattern) is for GDC-derived data and newer DCC-derived data
-	fileVector <- fileVector <- list.files(theMafDir, pattern="mutations.tsv", full.names=TRUE, recursive=TRUE)
+	fileVector <- list.files(theMafDir, pattern="mutations.tsv", full.names=TRUE, recursive=TRUE)
+	message("mutations.tsv length=", length(fileVector))
 	if (0==length(fileVector))
 	{
-		# collect the mutation data. This file name (pattern) is for older DCC-derived data
-		fileVector <- fileVector <- list.files(theMafDir, pattern=".*.maf", full.names=TRUE, recursive=TRUE)
+	  message("MAF files")
+	  # collect the mutation data. This file name (pattern) is for older DCC-derived data
+		fileVector <- list.files(theMafDir, pattern=".*.maf", full.names=TRUE, recursive=TRUE)
+		message("maf length=", length(fileVector))
+		if (0==length(fileVector))
+		{
+		  message("mutation_matrix.tsv files")
+		  # collect the mutation data. This file name (pattern) is for older DCC-derived data
+		  fileVector <- list.files(theMafDir, pattern="mutation_matrix.tsv", full.names=TRUE, recursive=TRUE)
+		  message("mutation_matrix.tsv length=", length(fileVector))
+		}
 	}
 	# make sure the output directory exists
 	dir.create(theTypeCountDir, showWarnings=FALSE, recursive=TRUE)
@@ -122,6 +132,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 		else
 		{
 		  # process DCC data
+		  refBuilds <- df$NCBI_Build
 		  my37 <- (refBuilds=="37"|refBuilds=="hg19")
 		  message("my37 length is ", length(my37))
 		  if (sum(my37)>5)

@@ -15,7 +15,7 @@ public class BoxplotJava
 {
 	public static String getVersion()
 	{
-		return "BoxplotJava 2018-07-31-1330";
+		return "BoxplotJava 2019-05-20-0730";
 	}
 
 	public static SimpleDateFormat mLogDate = new SimpleDateFormat("yyyy_MM_dd_HHmm.ss.SSS");

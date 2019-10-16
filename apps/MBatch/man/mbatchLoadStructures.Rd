@@ -14,28 +14,9 @@ mbatchLoadStructures(theGeneMatrix, theBatchDataframe, theCovariatedataframe=NUL
   \item{theBatchDataframe}{Object of class \code{"data.frame"} A data.frame where the column "names" are batch types. The first batch "type" is "Sample". All names and values should be strings, not factors or numeric. }
   \item{theCovariatedataframe}{Object of class \code{"data.frame"} NULL or a data.frame where the column "names" are covariate types. The first covariate "type" is "Sample". All names and values should be strings, not factors or numeric. }
 }
-\details{
-}
 \value{
 An instance of BEA_DATA \code{\link{BEA_DATA-class}}
-}
-\references{
-%% ~put references to the literature/web site here ~
 }
 \author{
 Tod Casasent \email{tdcasasent@mdanderson.org}
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-}
-\examples{
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

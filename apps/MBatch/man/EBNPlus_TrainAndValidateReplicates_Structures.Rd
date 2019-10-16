@@ -74,12 +74,3 @@ A list of matrices.
   will be 0 x 0 matrices, but this list member will contain a matrix of
   corrected values, using all replicates.}
 }
-\references{}
-\author{}
-\note{}
-\seealso{}
-\examples{}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

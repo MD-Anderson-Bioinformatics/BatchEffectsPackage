@@ -90,9 +90,11 @@ writeAsGenericMatrixNoRows <- function(theFile, theMatrix)
 	return(TRUE)
 }
 
-readAsGenericDataframe <- function(theFile, theNaString="NA")
+readAsGenericDataframe <- function(theFile, theNaString=NULL, theUnknownString="Unknown")
 {
-	return( read.csv(theFile, header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE, stringsAsFactors=FALSE, colClasses="character", na.strings=theNaString) )
+	df <- read.csv(theFile, header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE, stringsAsFactors=FALSE, colClasses="character", na.strings=theNaString)
+	df[df==""] <- theUnknownString
+  return(df)
 }
 
 writeAsGenericDataframe <- function(theFile, theDataframe)

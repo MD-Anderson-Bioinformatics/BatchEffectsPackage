@@ -70,8 +70,16 @@ public class ZipDisplayNode extends DisplayNode
 					{
 						if (subPath.getFileName().toString().equalsIgnoreCase("RunInfo.PNG"))
 						{
+							// For normal data, look for RunInfo.PNG
 							InternalDisplayNode idn = new InternalDisplayNode(subPath.toFile().getAbsolutePath(), mLevel+1, mTransientLevelLabels, Paths.get(mZipFile), theTooltips,
 									trimToSubDirs(subPath, false), "Standardized Data", new TreeSet<String>(), mArchiveMarker, mArchiveName);
+							mChildren.add(idn);
+						}
+						else if (subPath.getFileName().toString().equalsIgnoreCase("DSCOverview.tsv"))
+						{
+							// handle DSC-Overview, which does not have RunInfo.PNG
+							InternalDisplayNode idn = new InternalDisplayNode(subPath.toFile().getAbsolutePath(), mLevel+1, mTransientLevelLabels, Paths.get(mZipFile), theTooltips,
+									trimToSubDirs(subPath, false), "DSC", new TreeSet<String>(), mArchiveMarker, mArchiveName);
 							mChildren.add(idn);
 						}
 					}					

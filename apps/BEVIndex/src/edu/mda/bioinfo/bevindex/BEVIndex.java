@@ -8,16 +8,12 @@ package edu.mda.bioinfo.bevindex;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.mda.bioinfo.bevindex.display.DisplayRun;
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -26,7 +22,7 @@ import java.util.Map;
 public class BEVIndex
 {
 
-	static protected String mVersion = "BEVIndex 2019-04-29-1030";
+	static protected String mVersion = "BEVIndex 2019-09-04-1400";
 	static public String [] mBEVlabels = { "Version", "Program", "Disease", "Workflow", "Data Type", "Algorithm", "Diagram Type", "Sub-Type" };
 	static public String [] mBEVcurrentDefault = { "current", "TCGA", "KIRC", "methylation", "All-original", "PCA", "BatchId", "ManyToMany", "PCAValues" };
 	static public String [] mBEVlegacyDefault = { "legacy", "TCGA", "KIRC", "methylation", "All-original", "PCA", "BatchId", "ManyToMany", "PCAValues" };
@@ -58,18 +54,9 @@ public class BEVIndex
 		GsonBuilder builder = new GsonBuilder();
 		builder.setPrettyPrinting();
 		Gson gson = builder.create();
-		Map<String, String> env = new HashMap<>();
-		env.put("create", "true");
-		Path path = Paths.get(theZipFilepath);
-		URI uri = URI.create("jar:" + path.toUri());
-		System.out.println("uri=" + uri);
-		try (FileSystem fs = FileSystems.newFileSystem(uri, env))
-		{
-			Path nf = fs.getPath("index.json");
-			Files.write(nf, gson.toJson(dr).getBytes(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-		}
-		Path nf = Paths.get(path.getParent().toString(), "index.json");
-		System.out.println("write external index=" + nf);
-		Files.write(nf, gson.toJson(dr).getBytes(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+		// Write file out (pre-ZIP), adding to existing ZIP corrupts file
+		File indexFile = new File(new File(theZipFilepath).getParentFile(), "index.json");
+		Path indexPath = indexFile.toPath();
+		Files.write(indexPath, gson.toJson(dr).getBytes(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 	}
 }

@@ -70,9 +70,6 @@ buildSingleArchive <- function(theSourceDir, theArchiveDir, theDataRunDir, theEx
   # get link path to theDefaultLink
   defaultLinkVector <- getLinks(theSourceDir, theDefaultLink)
   ########
-  # build the zip file
-  buildZip(theSourceDir, zipFile)
-  ########
   message("buildSingleArchive::theSourceDir=", theSourceDir)
   message("buildSingleArchive::theArchiveDir=", theArchiveDir)
   message("buildSingleArchive::theDataRunDir=", theDataRunDir)
@@ -97,6 +94,9 @@ buildSingleArchive <- function(theSourceDir, theArchiveDir, theDataRunDir, theEx
   ########
   # copy the external index
   file.copy(file.path(theArchiveDir, "index.json"), theExternalIndexPath)
+  ########
+  # build the zip file
+  buildZip(theSourceDir, zipFile)
 }
 
 #############################################################################

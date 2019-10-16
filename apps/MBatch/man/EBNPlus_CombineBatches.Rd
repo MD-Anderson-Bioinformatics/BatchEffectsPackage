@@ -33,12 +33,3 @@ Add the new "batch names" at batches for the two data sets and the EBNPlus batch
 Return a data.frame.
 Names for the data.frame are original names, with a new column "EBNPlus".
 }
-\references{}
-\author{}
-\note{}
-\seealso{}
-\examples{}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

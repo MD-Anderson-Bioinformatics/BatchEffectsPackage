@@ -1,17 +1,19 @@
 package edu.mda.bioinfo.boxplotjava;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.StatUtils;
 import org.jfree.chart.ChartFactory;
@@ -132,66 +134,107 @@ public abstract class Boxplot_Mixin
 		BoxplotJava.log("Boxplot_Mixin::processHistogram - theFileStub=" + theFileStub);
 		String pngFile = theFileStub + ".png";
 		String tsvFile = theFileStub + ".tsv";
+		String tmpFile = theFileStub + ".tmp";
 		TreeMap<String, ArrayList<Double>> histMap = mHistogramData;
 		BoxplotJava.log("Boxplot_Mixin::processHistogram - mHistogramData.size()=" + mHistogramData.size());
 		// build list of histogram data
-		ArrayList<JFreeChart> histList = new ArrayList<>();
-		TreeMap<String, ArrayList<Double>> histFileOutput = new TreeMap<>();
 		int maxLength = 0;
-		for (Entry<String, ArrayList<Double>> entry : histMap.entrySet())
+		// write png of histogram data
+		final CombinedDomainXYPlot plot = new CombinedDomainXYPlot();
+		TreeSet<String> sortedKeys = new TreeSet<>();
+		sortedKeys.addAll(histMap.keySet());
+		int histListSize = 200*sortedKeys.size();
+		for (String key : sortedKeys)
 		{
+			BoxplotJava.log("Boxplot_Mixin::processHistogram - key="+key);
+			ArrayList<Double> entry = histMap.get(key);
 			HistogramDataset hd = new HistogramDataset();
 			hd.setType(HistogramType.FREQUENCY);
-			double [] vals = entry.getValue().stream().mapToDouble(Double::doubleValue).toArray();
+			double [] vals = entry.stream().mapToDouble(Double::doubleValue).toArray();
 			int binCount = computeBinCount(vals);
+			BoxplotJava.log("Boxplot_Mixin::processHistogram - binCount="+binCount);
 			hd.addSeries("freq", vals, binCount);
-			histList.add(ChartFactory.createHistogram(entry.getKey(), null, null, hd, PlotOrientation.VERTICAL, false, false, false));
+			JFreeChart hist = ChartFactory.createHistogram(key, null, null, hd, PlotOrientation.VERTICAL, false, false, false);
 			ArrayList<Double> values = new ArrayList<>();
 			for(int x=0;x<binCount;x++)
 			{
 				values.add(hd.getX(0, x).doubleValue());
 				values.add(hd.getY(0, x).doubleValue());
 			}
+			addToTmpHistFile(tmpFile, key, values);
 			if (binCount>maxLength)
 			{
 				maxLength = binCount;
 			}
-			histFileOutput.put(entry.getKey(), values);
+			BoxplotJava.log("Boxplot_Mixin::processHistogram - add to PNG");
+			plot.add(hist.getXYPlot());
 		}
-		BoxplotJava.log("Boxplot_Mixin::processHistogram - histFileOutput.size()=" + histFileOutput.size());
+		BoxplotJava.log("Boxplot_Mixin::processHistogram - ChartUtilities.saveChartAsPNG");
+		ChartUtilities.saveChartAsPNG(new File(pngFile), new JFreeChart(plot), 1600, histListSize);
+		BoxplotJava.log("Boxplot_Mixin::processHistogram - write to TSV file");
+		writeHistFile(tsvFile, maxLength, tmpFile);
+		BoxplotJava.log("Boxplot_Mixin::processHistogram - remove temp file");
+		new File(tmpFile).delete();
+		BoxplotJava.log("Boxplot_Mixin::processHistogram - done");
+	}
+	
+	protected void addToTmpHistFile(String tmpFile, String key, ArrayList<Double> values) throws IOException
+	{
+		BoxplotJava.log("Boxplot_Mixin::addToTmpHistFile - start");
+		BoxplotJava.log("Boxplot_Mixin::addToTmpHistFile - tmpFile=" + tmpFile);
+		try(BufferedWriter bw = Files.newBufferedWriter(Paths.get(tmpFile), Charset.availableCharsets().get("ISO-8859-1"), StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.CREATE))
+		{
+			BoxplotJava.log("Boxplot_Mixin::addToTmpHistFile - values " + values.size());
+			bw.write(key);
+			bw.write("\t");
+			bw.write(Integer.toString(values.size()/2));
+			BoxplotJava.log("Boxplot_Mixin::addToTmpHistFile - vals loop");
+			for(Double val : values)
+			{
+				bw.write("\t");
+				bw.write(val.toString());
+			}
+			BoxplotJava.log("Boxplot_Mixin::addToTmpHistFile - vals after loop");
+			bw.newLine();
+			bw.flush();
+			BoxplotJava.log("Boxplot_Mixin::addToTmpHistFile - line");
+		}
+		BoxplotJava.log("Boxplot_Mixin::addToTmpHistFile - done");
+	}
+	
+	protected void writeHistFile(String tsvFile, int maxLength, String tmpFile) throws IOException
+	{
+		BoxplotJava.log("Boxplot_Mixin::writeHistFile - start");
 		try(BufferedWriter bw = Files.newBufferedWriter(Paths.get(tsvFile), Charset.availableCharsets().get("ISO-8859-1")))
 		{
 			bw.write("entry");
 			bw.write("\t");
 			bw.write("size");
+			BoxplotJava.log("Boxplot_Mixin::writeHistFile - x<maxLength " + maxLength);
 			for(int x=0;x<maxLength;x++)
 			{
 				bw.write("\tx" + x);
 				bw.write("\ty" + x);
 			}
 			bw.newLine();
+			bw.flush();
 			//
-			for (Entry<String, ArrayList<Double>> entry : histFileOutput.entrySet())
+			BoxplotJava.log("Boxplot_Mixin::writeHistFile - copy from temp " + tmpFile);
+			try(BufferedReader br = Files.newBufferedReader(Paths.get(tmpFile), Charset.availableCharsets().get("ISO-8859-1")))
 			{
-				bw.write(entry.getKey());
-				bw.write("\t");
-				ArrayList<Double> vals = entry.getValue();
-				bw.write(Integer.toString(vals.size()/2));
-				for(Double val : vals)
+				String line = br.readLine();
+				while(null!=line)
 				{
-					bw.write("\t");
-					bw.write(val.toString());
+					bw.write(line);
+					bw.newLine();
+					bw.flush();
+					line = br.readLine();
 				}
-				bw.newLine();
+				BoxplotJava.log("Boxplot_Mixin::writeHistFile - lines");
 			}
+			BoxplotJava.log("Boxplot_Mixin::writeHistFile - file done");
 		}
-		// write png of histogram data
-		final CombinedDomainXYPlot plot = new CombinedDomainXYPlot();
-		for(int x=0;x<histList.size();x++)
-		{
-			plot.add(histList.get(x).getXYPlot());
-		}
-		ChartUtilities.saveChartAsPNG(new File(pngFile), new JFreeChart(plot), 1600, (200*histList.size()));
+		BoxplotJava.log("Boxplot_Mixin::writeHistFile - done");
 	}
 	
 	protected void buildHistogramData(String theId, double [] theValues) throws Exception

@@ -7,10 +7,6 @@ echo "prepare copy to MBatch"
 cd MBatch
 cd inst
 
-echo "copy BoxplotJava to MBatch"
-cp ../../BoxplotJava/dist/*.jar BoxplotJava/.
-cp ../../BoxplotJava/dist/lib/*.jar BoxplotJava/.
-
 echo "copy DscJava to MBatch"
 cp ../../DscJava/dist/*.jar DscJava/.
 cp ../../DscJava/dist/lib/*.jar DscJava/.

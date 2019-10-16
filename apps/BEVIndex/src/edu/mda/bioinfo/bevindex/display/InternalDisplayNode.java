@@ -61,7 +61,10 @@ public class InternalDisplayNode extends ZipDisplayNode
 				{
 					if (subPath.toFile().isFile())
 					{
+						//System.out.println("IDN:init=" + subPath);
 						String filename = subPath.getFileName().toString();
+						File[] directories = subPath.toFile().getParentFile().listFiles(File::isDirectory);
+						boolean hasSubDirs = directories.length>0;
 						String trimmedFilename = trimToSubDirs(subPath, false);
 						String algorithm = null;
 						TreeSet<String> otherFiles = null;
@@ -158,8 +161,15 @@ public class InternalDisplayNode extends ZipDisplayNode
 							// add DSC Overview Node
 							algorithm = "DSC";
 							otherFiles = otherFilesDSC(trimmedFilename);
-							// DO NOT stop search here
-							stopSearch = false;
+							// DO NOT stop search here if there are subdirs
+							if (hasSubDirs)
+							{
+								stopSearch = false;
+							}
+							else
+							{
+								stopSearch = true;
+							}
 						}
 						if (null!=algorithm)
 						{

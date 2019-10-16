@@ -1,16 +1,20 @@
 Package: MBatch
 Title: MD Anderson Batch Assessment Tools (MBatch) Package
-Version: 1.4.20
-Date: 2018-12-21
-Author: Rehan Akbani <rakbani@mdanderson.org>
-				Tod Casasent <tdcasasent@mdanderson.org>
-				Bradley Broom <bbroom@mdanderson.org>
+Version: 1.5.2
+Date: 2019-10-15
+Author: Rehan Akbani <rakbani@mdanderson.org>,
+				Tod Casasent <tdcasasent@mdanderson.org>,
+				Bradley Broom <bbroom@mdanderson.org>,
 				John Weinstein <jweinstein@mdanderson.org>
 Maintainer: Rehan Akbani <rakbani@mdanderson.org>
-Depends: R (>= 3.4.0), Cairo, cluster, mclust, oompaBase, PreProcess, ClassDiscovery, squash, gtools, methods, rJava, parallel, Vennerable, limma, stats, epiR
+Depends: R (>= 3.6.0)
+Imports: Cairo, cluster, mclust, oompaBase, PreProcess, ClassDiscovery, squash, 
+    gtools, methods, rJava, parallel, Vennerable, limma, stats, epiR
 Suggests: batchcorr,
     knitr,
     rmarkdown
-Description: MBatch is an R package for assessment of batch effects in high throughput data such as microarray data. It includes R implementations of several conventional methods such as principal component analysis, clustering analysis , also includes novel correlation of correlation based methods such as CZR, CZN, CZNS, CZNL, and CZS. This package is mainly to deal with data with multiple batches and multiple batch effect sources such as data from The Cancer Genome Atlas (TCGA). Some novel visulization methods such as PCA plot with centroid are also included in this package. It also requires Java 8 for DSC computations. See https://github.com/MD-Anderson-Bioinformatics/MBatch
+Description: An R package, MBatch, for assessment of batch effects in high throughput data such as microarray data. It includes R implementations of several conventional methods such as principal component analysis, clustering analysis , also includes novel correlation of correlation based methods such as CZR, CZN, CZNS, CZNL, and CZS. This package is mainly to deal with data with multiple batches and multiple batch effect sources such as data from The Cancer Genome Atlas (TCGA). Some novel visulization methods such as PCA plot with centroid are also included in this package. It also requires Java 8 for DSC computations.
 License: GPL (>=2)
+Encoding: UTF-8
+URL: https://github.com/MD-Anderson-Bioinformatics/MBatch
 VignetteBuilder: knitr

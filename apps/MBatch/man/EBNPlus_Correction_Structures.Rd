@@ -56,12 +56,3 @@ string is attached, since the correction algorithm requires replicates,
 some barcode will be identical, so some method preserve distinctness is needed.
 The row names are gene symbols.
 }
-\references{}
-\author{}
-\note{}
-\seealso{}
-\examples{}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

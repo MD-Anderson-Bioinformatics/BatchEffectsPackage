@@ -26,6 +26,7 @@ createBatchEffectsOutput_hierclust<-function(theMatrixGeneData, theDataframeBatc
 	checkPackageSettings()
 	uDend<-hierClust_calc(theMatrixGeneData, theDataframeBatchData)
 	hierClustOutputDir <- checkCreateDir(theHierClustOutputDir, theHierClustFileBase)
+	rdataFile <- NULL
 	if (is.null(uDend))
 	{
 		filename<-makeHCFileName_PNG(hierClustOutputDir, "Diagram")
@@ -36,10 +37,11 @@ createBatchEffectsOutput_hierclust<-function(theMatrixGeneData, theDataframeBatc
 		### logDebug("RData output here, write uDend and theDataframeBatchData ", outputFile)
 		### RData output here, write uDend and theDataframeBatchData
 		### D3 Hierarchical Clustering output here
-		writeHCDataTSVs(uDend, hierClustOutputDir, "HCData.tsv", "HCOrder.tsv")
+	  rdataFile <-writeHCDataTSVs(uDend, hierClustOutputDir, "HCData.tsv", "HCOrder.tsv")
 		#logDebug("createBatchEffectsOutput_hierclust: theHierClustOutputDir=",theHierClustOutputDir, "theTitle=", theTitle, "theHierClustFileBase=", theHierClustFileBase)
 		hierClust_draw(uDend, theDataframeBatchData, theTitle, hierClustOutputDir, theHierClustFileBase)
 	}
+	rdataFile
 }
 
 ####################################################################
@@ -302,6 +304,7 @@ makeHCFileName_PNG<-function(theDir, theDiagramOrLegend, theLegendType="")
 
 writeHCDataTSVs<-function(uDend, theHierClustOutputDir, theOutputHCDataFileName, theOutputHCOrderFileName, theOutputHCSampleFileName)
 {
+  rdataFile <- file.path(theHierClustOutputDir,"uDend.RData")
 	data<-cbind(uDend$merge, uDend$height, deparse.level=0)
 	colnames(data)<-c("A", "B", "Height")
 	###Write out the data as a Tab separated file to the specified location
@@ -311,6 +314,9 @@ writeHCDataTSVs<-function(uDend, theHierClustOutputDir, theOutputHCDataFileName,
 	colnames(data)<-c("Id", "Order")
 	###Write out the order data as a Tab separated file to the specified location (1 more row than data file)
 	write.table(data, file = file.path(theHierClustOutputDir,theOutputHCOrderFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
+  # write udend RData file
+	save(uDend, file=rdataFile)
+	rdataFile
 }
 
 ####################################################################

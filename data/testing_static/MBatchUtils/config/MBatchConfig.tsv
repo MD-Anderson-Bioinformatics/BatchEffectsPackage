@@ -2,6 +2,7 @@ title	Automated Batch Effects Run
 sampleidBatchType	Sample
 batchTypesForMBatchArray	TSS
 filterMaxValue	4000000
+filterLogTransformFlag	TRUE
 filteringBatchType	PlateId
 filteringBatchesArray	null
 CDP_Flag	TRUE
@@ -15,6 +16,8 @@ selectedDSCSeed	314
 selectedDSCMaxGeneCount	10000
 selectedBoxplotMaxGeneCount	5000
 selectedNgchmFlag	FALSE
+filterLogTransformFlag2	false
+RBN_Only	false
 RBN_UseFirstAsInvariantFlag	null
 RBN_InvariantId	null
 RBN_VariantId	null

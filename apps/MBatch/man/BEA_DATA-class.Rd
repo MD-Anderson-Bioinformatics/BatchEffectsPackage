@@ -25,21 +25,8 @@ If you have no covariate data, use an empty data.frame created with \code{data.f
     \item{initialize}{\code{signature(.Object = "BEA_DATA")}: ... }
 	 }
 }
-\references{
-%%  ~~put references to the literature/web site here~~
-}
 \author{
 Tod Casasent \email{tdcasasent@mdanderson.org}
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%%  ~~objects to See Also as \code{\link{~~fun~~}}, ~~~
-%%  ~~or \code{\linkS4class{CLASSNAME}} for links to other classes ~~~
 }
 \examples{
 #showClass("BEA_DATA")

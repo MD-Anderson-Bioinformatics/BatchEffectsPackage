@@ -10,11 +10,6 @@ cd BEVIndex
 ant -f build.xml
 cd ..
 
-echo "compile BoxplotJava"
-cd BoxplotJava
-ant -f build.xml
-cd ..
-
 echo "compile DscJava"
 cd DscJava
 ant -f build.xml

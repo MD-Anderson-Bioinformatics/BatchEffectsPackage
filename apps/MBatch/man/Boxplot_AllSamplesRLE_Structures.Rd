@@ -8,7 +8,7 @@ A function to perform Box Plot RLE all data analysis from data in files.
 \usage{
 Boxplot_AllSamplesRLE_Structures(theData, theTitle, theOutputPath,
 theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
-theMaxGeneCount=20000, theJavaParameters = c("-Xms8000m", "-Djava.awt.headless=true"))
+theMaxGeneCount=20000)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,34 +23,10 @@ theMaxGeneCount=20000, theJavaParameters = c("-Xms8000m", "-Djava.awt.headless=t
   containing the batch type (or * for all types) and a vector of the the value(s) to keep.
   list() indicates none while NULL will cause an error. }
   \item{theMaxGeneCount}{Integer giving maximum number of features (genes) to keep. Default is 20000. 0 means keep all.}
-  \item{theJavaParameters}{Object of class \code{"character"} String for initializing JVM.
-  Defaults to Xms8000m and Djava.awt.headless=true. }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 The All Samples RLE Boxplots plot the value for each feature (genes or probes) for a sample, with the samples grouped and colored by batch. In this case, RLE is used to move the mean of each sample to zero on the vertical axis. So the vertical axis is based on the values of the original data and the points plotted are features. The actual meaning of the data used, such as expression, read counts, and the like, will vary based on the data being processed.
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 #	#############################################################################
@@ -78,7 +54,3 @@ The All Samples RLE Boxplots plot the value for each feature (genes or probes) f
 #
 #	Boxplot_AllSamplesRLE_Structures(myData, myTitle, myOutputPath, list(), list())
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

@@ -19,26 +19,8 @@ readAsMatrix(theFile, thePar = "-Xmx2000m")
   \item{thePar}{Parameters to pass to the Java VM --
   by default this requests 8GB of memory.}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
 The matrix read in.
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----
@@ -73,7 +55,3 @@ The matrix read in.
 #        byrow = TRUE, dimnames = list(myRows, myCols)))
 #  }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

@@ -114,7 +114,7 @@ PCA_DualBatch_Structures <- function(theData, theTitle, theOutputPath, theBatchT
 #############################################################################
 
 Boxplot_AllSamplesData_Structures <- function(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
-                                              theMaxGeneCount=20000, theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
+                                              theMaxGeneCount=20000)
 {
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
@@ -124,12 +124,11 @@ Boxplot_AllSamplesData_Structures <- function(theData, theTitle, theOutputPath, 
   createBatchEffectsOutput_BoxPlot_AllSampleData(theData@mData, theData@mBatches,
                                                  theTitle,
                                                  theOutputPath,
-                                                 thePngFlag=TRUE,
-                                                 theJavaParameters=theJavaParameters)
+                                                 thePngFlag=TRUE)
 }
 
 Boxplot_AllSamplesRLE_Structures <- function(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
-                                             theMaxGeneCount=20000, theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
+                                             theMaxGeneCount=20000)
 {
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
@@ -139,13 +138,12 @@ Boxplot_AllSamplesRLE_Structures <- function(theData, theTitle, theOutputPath, t
   createBatchEffectsOutput_BoxPlot_AllSampleRLE(theData@mData, theData@mBatches,
                                                  theTitle,
                                                  theOutputPath,
-                                                 thePngFlag=TRUE,
-                                                 theJavaParameters=theJavaParameters)
+                                                 thePngFlag=TRUE)
 }
 
-Boxplot_Group_Structures <- function(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
-																theListOfGroupBoxFunction, theListOfGroupBoxLabels, theMaxGeneCount=20000,
-																theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
+Boxplot_Group_Structures <- function(theData, theTitle, theOutputPath,
+                                     theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
+                                     theListOfGroupBoxFunction, theListOfGroupBoxLabels, theMaxGeneCount=20000)
 {
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
@@ -155,8 +153,7 @@ Boxplot_Group_Structures <- function(theData, theTitle, theOutputPath, theBatchT
   createBatchEffectsOutput_BoxPlot_Group(theData@mData, theData@mBatches,
                                          theTitle, theOutputPath,
                                          theListOfGroupBoxFunction, theListOfGroupBoxLabels,
-                                         thePngFlag=TRUE,
-                                         theJavaParameters=theJavaParameters)
+                                         thePngFlag=TRUE)
 }
 
 #############################################################################

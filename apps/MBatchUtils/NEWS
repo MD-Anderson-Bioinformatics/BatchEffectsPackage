@@ -5,6 +5,41 @@
 	*						 *
 	**************************************************
 
+		CHANGES IN R VERSION 0.2.2
+
+NEW FEATURES
+
+    o	Fix tests and imports, since MBatch imports changed
+
+		CHANGES IN R VERSION 0.2.1
+
+NEW FEATURES
+
+    o	When reading batches/dataframes, do not convert to NAs
+    o	in mbatchRunFromConfig filter batches/types before writing out new version of files.
+    o	catch errors and warnings in HC/NGCHM, to prevent overall error entry.
+
+		CHANGES IN R VERSION 0.2.0
+
+NEW FEATURES
+
+    o	changed source of boxplot to fivenums
+    o	fixed problem in preprocessData, which did not reduce feature set
+
+		CHANGES IN R VERSION 0.1.14
+
+NEW FEATURES
+
+    o	Updated buildSingleArchive to create index before ZIP
+
+		CHANGES IN R VERSION 0.1.13
+
+NEW FEATURES
+
+    o	Updated runFromConfig to automatically complete batch files
+    o	Added arguments to runFromConfig for Java memory parameters
+    o	Added arguments to runFromConfig for log transforming data
+
 		CHANGES IN R VERSION 0.1.12
 
 NEW FEATURES

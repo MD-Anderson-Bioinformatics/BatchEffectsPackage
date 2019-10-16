@@ -38,7 +38,7 @@ readAsMatrix <- function(theFile, thePar="-Xmx2000m")
 }
 
 ## JavaFile loadData(String theFile)
-readAsDataFrame <- function(theFile, thePar="-Xmx2000m")
+readAsDataFrame <- function(theFile, thePar="-Xmx2000m", theUnknownString="Unknown")
 {
 	myClass1 <- system.file("ReadRJava", "ReadRJava.jar", package="MBatch")
 	myJavaJars <- file.path(myClass1, fsep=.Platform$path.sep)
@@ -61,8 +61,11 @@ readAsDataFrame <- function(theFile, thePar="-Xmx2000m")
 	logDebug("readAsDataFrame - length(myRows) ", length(myRows))
 	logDebug("readAsDataFrame - myCols ", paste(myCols, collapse=", "))
 	logDebug("readAsDataFrame - myRows ", paste(myRows, collapse=", "))
-	return(data.frame(matrixWithIssues(myData, ncol=length(myCols), byrow=TRUE,
-															dimnames=list(myRows, myCols)), stringsAsFactors=FALSE))
+	df <- data.frame(matrixWithIssues(myData, ncol=length(myCols), byrow=TRUE,
+	                                  dimnames=list(myRows, myCols)), stringsAsFactors=FALSE)
+	colnames(df) <- myCols
+	df[df==""] <- theUnknownString
+	return(df)
 }
 
 ## boolean writeDoubleData(String theFile, String [] theCols, String [] theRows, double [] theData)

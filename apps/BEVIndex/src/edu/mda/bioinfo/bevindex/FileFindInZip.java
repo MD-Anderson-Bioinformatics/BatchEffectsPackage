@@ -6,10 +6,13 @@
 package edu.mda.bioinfo.bevindex;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
@@ -25,12 +28,12 @@ public class FileFindInZip
 	public int mColumns = -1;
 	public int mRows = -1;
 
-	FileFindInZip()
+	public FileFindInZip()
 	{
 		mMatches = new TreeSet<>();
 	}
 
-	void find(Path theZipPath, String theFilename) throws IOException
+	public void find(Path theZipPath, String theFilename) throws IOException
 	{
 		if (theZipPath.toFile().exists())
 		{
@@ -49,6 +52,38 @@ public class FileFindInZip
 							while ((br.readLine()) != null)
 							{
 								mRows += 1;
+							}
+						}
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	public void findAndCopy(Path theZipPath, String theFilename, File theCopyTo) throws IOException
+	{
+		if (theZipPath.toFile().exists())
+		{
+			try(ZipFile zf = new ZipFile(theZipPath.toFile()))
+			{
+				Enumeration<? extends ZipEntry> entries = zf.entries();
+				while(entries.hasMoreElements())
+				{
+					ZipEntry entry = entries.nextElement();
+					if (new File(entry.getName()).getName().equals(theFilename))
+					{
+						try(BufferedReader br = new BufferedReader(new InputStreamReader(zf.getInputStream(entry))))
+						{
+							try (BufferedWriter bw = java.nio.file.Files.newBufferedWriter(Paths.get(theCopyTo.getAbsolutePath()), Charset.availableCharsets().get("UTF-8")))
+							{
+								String line = br.readLine();
+								while (line != null)
+								{
+									bw.write(line);
+									bw.newLine();
+									line = br.readLine();
+								}
 							}
 						}
 						return;

@@ -42,23 +42,9 @@ Objects can be created by calls of the form \code{
 \section{Methods}{
 No methods defined with class "Logging" in the signature.
 }
-\references{
-%%  ~~put references to the literature/web site here~~
-}
 \author{
 Tod Casasent \email{tdcasasent@mdanderson.org}
 Nianxiang Zhang \email{nzhang@mdanderson.org}
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-See also \code{\link{new}}
-%%  ~~objects to See Also as \code{\link{~~fun~~}}, ~~~
-%%  ~~or \code{\linkS4class{CLASSNAME}} for links to other classes ~~~
 }
 \examples{
 \dontrun{

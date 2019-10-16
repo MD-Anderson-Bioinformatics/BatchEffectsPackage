@@ -1,0 +1,1 @@
+Java code is available from: <https://github.com/MD-Anderson-Bioinformatics/BatchEffectsPackage>

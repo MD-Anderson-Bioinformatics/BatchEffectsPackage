@@ -6,123 +6,303 @@
 #
 #You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-boxplotJinit <- function(theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
-{
-	myClass1 <- system.file("BoxplotJava", "jcommon-1.0.17.jar", package="MBatch")
-	myClass2 <- system.file("BoxplotJava", "jfreechart-1.0.14.jar", package="MBatch")
-	myClass3 <- system.file("BoxplotJava", "commons-lang3-3.3.2.jar", package="MBatch")
-	myClass4 <- system.file("BoxplotJava", "commons-math3-3.3.jar", package="MBatch")
-	myClass5 <- system.file("BoxplotJava", "BoxplotJava.jar", package="MBatch")
-	myClass6 <- system.file("BoxplotJava", "LegendJava.jar", package="MBatch")
-	myJavaJars <- file.path(myClass1, myClass2, myClass3, myClass4, myClass5, myClass6, fsep=.Platform$path.sep)
-	#logDebug("boxplotJinit - Calling .jinit ", myJavaJars)
-	.jinit(classpath=myJavaJars, force.init = TRUE, parameters=theJavaParameters)
-}
-
 ###########################################################################################
 ###########################################################################################
 
 createBatchEffectsOutput_BoxPlot_AllSampleRLE<-function(theMatrixGeneData, theDataframeBatchData,
-																												theTitle, theOutputPath, thePngFlag,
-																												theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
+																												theTitle, theOutputPath, thePngFlag)
 {
-	title <- paste(theTitle, "AllSample-RLE", sep=" ")
+  logDebug("createBatchEffectsOutput_BoxPlot_AllSampleRLE - theOutputPath=", theOutputPath)
+  checkCreateDir(theOutputPath)
+  logDebug("dim(theMatrixGeneData)", dim(theMatrixGeneData))
+  logDebug("length(colnames(theMatrixGeneData))", length(colnames(theMatrixGeneData)))
+  logDebug("length(rownames(theMatrixGeneData))", length(rownames(theMatrixGeneData)))
+  logDebug("dim(theDataframeBatchData)", dim(theDataframeBatchData))
+  logDebug("length(names(theDataframeBatchData))", length(names(theDataframeBatchData)))
+  theOutputPath <- file.path(theOutputPath, "AllSample-RLE")
+  for(batchTypeIndex in c(2:length(theDataframeBatchData)))
+  {
+    ### compile data and information for display
+    batchTypeName <- names(theDataframeBatchData)[batchTypeIndex]
+    logDebug("batchTypeName = ", batchTypeName)
+    #	  samplesForBatches <- as.character(as.vector(unlist(theDataframeBatchData$Sample)))
+    #	  batchIdsForSamples <- as.character(as.vector(unlist(theDataframeBatchData[batchTypeIndex])))
+    # add " / batch-id" to sample ids for theMatrixGeneData
+    # index of sorted values from theDataframeBatchData
+    #	  labelsSorted <- theDataframe$Sample[order(batchIdsForSamples)]
+    #	  batchIdsSorted <- batchIdsForSamples[order(batchIdsForSamples)]
+    #	  labelWithBatch <- paste(labelsSorted, batchIdsSorted, sep=" / ")
+    #
+    # build names for output files
+    theBoxDataFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_BoxData-", batchTypeName, ".tsv", sep=""))
+    theHistogramFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Histogram-", batchTypeName, ".tsv", sep=""))
+    theAnnotationsFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Annotations-", batchTypeName, ".tsv", sep=""))
+    thePngFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Diagram-", batchTypeName, ".png", sep=""))
+    title <- paste(theTitle, "AllSample-RLE", batchTypeName, sep=" ")
+    boxplotLabels <- buildBoxplotLabels(theDataframeBatchData, batchTypeName)
+    #
+    calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels, median(theMatrixGeneData, na.rm=TRUE))
+  }
+  TRUE
+}
+
+buildBoxplotLabels <- function(theDataframeBatchData, theBatchType)
+{
+  logDebug("theBatchType=", theBatchType)
+  samplesForBatches <- as.character(as.vector(unlist(theDataframeBatchData$Sample)))
+  batchIdsForSamples <- as.character(as.vector(unlist(theDataframeBatchData[theBatchType])))
+  # add " / batch-id" to sample ids for theMatrixGeneData
+  # index of sorted values from theDataframeBatchData
+  labelWithBatch <- paste(batchIdsForSamples, samplesForBatches, sep=" / ")
+  labelWithBatch
+}
+
+createBatchEffectsOutput_BoxPlot_AllSampleData<-function(theMatrixGeneData, theDataframeBatchData,
+																							 theTitle, theOutputPath, thePngFlag)
+{
 	checkCreateDir(theOutputPath)
-	boxplotJinit(theJavaParameters)
 	logDebug("dim(theMatrixGeneData)", dim(theMatrixGeneData))
 	logDebug("length(colnames(theMatrixGeneData))", length(colnames(theMatrixGeneData)))
 	logDebug("length(rownames(theMatrixGeneData))", length(rownames(theMatrixGeneData)))
 	logDebug("dim(theDataframeBatchData)", dim(theDataframeBatchData))
 	logDebug("length(names(theDataframeBatchData))", length(names(theDataframeBatchData)))
-	success <- .jcall("edu/mda/bioinfo/boxplotjava/BoxplotJava",
-										returnSig = "Z",
-										method="allSampleRLE",
-										.jarray(as.vector(as.numeric(theMatrixGeneData)), contents.class="[D"),
-										.jarray(as.vector(as.character(colnames(theMatrixGeneData)))),
-										.jarray(as.vector(as.character(rownames(theMatrixGeneData)))),
-										.jarray(as.vector(as.character(unlist(theDataframeBatchData[2:length(names(theDataframeBatchData))])))),
-										.jarray(as.vector(as.character(names(theDataframeBatchData)[2:length(names(theDataframeBatchData))]))),
-										.jnew("java/lang/String",as.character(theOutputPath)),
-										.jnew("java/lang/String",as.character(title)))
-	if (FALSE==success)
+	theOutputPath <- file.path(theOutputPath, "AllSample-Data")
+	for(batchTypeIndex in c(2:length(theDataframeBatchData)))
 	{
-		logError("createBatchEffectsOutput_BoxPlot_AllSampleRLE Java indicated error")
+	  ### compile data and information for display
+	  batchTypeName <- names(theDataframeBatchData)[batchTypeIndex]
+	  logDebug("batchTypeName = ", batchTypeName)
+	  # build names for output files
+	  theBoxDataFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_BoxData-", batchTypeName, ".tsv", sep=""))
+	  theHistogramFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Histogram-", batchTypeName, ".tsv", sep=""))
+	  theAnnotationsFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Annotations-", batchTypeName, ".tsv", sep=""))
+	  thePngFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Diagram-", batchTypeName, ".png", sep=""))
+	  title <- paste(theTitle, "AllSample-Data", batchTypeName, sep=" ")
+	  boxplotLabels <- buildBoxplotLabels(theDataframeBatchData, batchTypeName)
+	  #
+	  calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels)
 	}
-	logDebug("after allSampleRLE call")
-	success
-}
-
-createBatchEffectsOutput_BoxPlot_AllSampleData<-function(theMatrixGeneData, theDataframeBatchData,
-																							 theTitle, theOutputPath, thePngFlag,
-																							 theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
-{
-	title <- paste(theTitle, "AllSample-Data", sep=" ")
-	checkCreateDir(theOutputPath)
-	boxplotJinit(theJavaParameters)
-# 	logDebug("dim(theMatrixGeneData)", dim(theMatrixGeneData))
-# 	logDebug("length(colnames(theMatrixGeneData))", length(colnames(theMatrixGeneData)))
-# 	logDebug("length(rownames(theMatrixGeneData))", length(rownames(theMatrixGeneData)))
-# 	logDebug("dim(theDataframeBatchData)", dim(theDataframeBatchData))
-# 	logDebug("length(names(theDataframeBatchData))", length(names(theDataframeBatchData)))
-# 	logDebug("theMatrixGeneData[1:10,1]", paste(theMatrixGeneData[1:10,1], sep=", ", collapse="; "))
-# 	logDebug("theMatrixGeneData[1:10,2]", paste(theMatrixGeneData[1:10,2], sep=", ", collapse="; "))
-# 	logDebug("theDataframeBatchData$Sample[1:5]", paste(theDataframeBatchData$Sample[1:5], sep=", ", collapse="; "))
-# 	logDebug("theDataframeBatchData$BatchId[1:5]", paste(theDataframeBatchData$BatchId[1:5], sep=", ", collapse="; "))
-# 	logDebug("theDataframeBatchData$PlateId[1:5]", paste(theDataframeBatchData$PlateId[1:5], sep=", ", collapse="; "))
-# 	logDebug("theDataframeBatchData$ShipDate[1:5]", paste(theDataframeBatchData$ShipDate[1:5], sep=", ", collapse="; "))
-# 	logDebug("theDataframeBatchData$TSS[1:5]", paste(theDataframeBatchData$TSS[1:5], sep=", ", collapse="; "))
-#
-
-	success <- .jcall("edu/mda/bioinfo/boxplotjava/BoxplotJava",
-										returnSig = "Z",
-										method="allSampleData",
-										.jarray(as.vector(as.numeric(theMatrixGeneData)), contents.class="[D"),
-										.jarray(as.vector(as.character(colnames(theMatrixGeneData)))),
-										.jarray(as.vector(as.character(rownames(theMatrixGeneData)))),
-										.jarray(as.vector(as.character(unlist(theDataframeBatchData[2:length(names(theDataframeBatchData))])))),
-										.jarray(as.vector(as.character(names(theDataframeBatchData)[2:length(names(theDataframeBatchData))]))),
-										.jnew("java/lang/String",as.character(theOutputPath)),
-										.jnew("java/lang/String",as.character(title)))
-	if (FALSE==success)
-	{
-		logError("createBatchEffectsOutput_BoxPlot_AllSampleData Java indicated error")
-	}
-	logDebug("after allSampleData call")
-	success
+	TRUE
 }
 
 createBatchEffectsOutput_BoxPlot_Group<-function(theMatrixGeneData, theDataframeBatchData,
 																								 theTitle, theOutputPath,
 																								 theListOfGroupBoxFunction, theListOfGroupBoxLabels,
-																								 thePngFlag, theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"))
+																								 thePngFlag)
 {
-	title <- paste(theTitle, "Group", sep=" ")
 	stopifnotWithLogging("Group box list and group box labels should be the same length", length(theListOfGroupBoxFunction)==length(theListOfGroupBoxLabels))
 	checkCreateDir(theOutputPath)
-	boxplotJinit(theJavaParameters)
+	logDebug("groupFunction")
 	logDebug("dim(theMatrixGeneData)", dim(theMatrixGeneData))
 	logDebug("length(colnames(theMatrixGeneData))", length(colnames(theMatrixGeneData)))
 	logDebug("length(rownames(theMatrixGeneData))", length(rownames(theMatrixGeneData)))
 	logDebug("dim(theDataframeBatchData)", dim(theDataframeBatchData))
 	logDebug("length(names(theDataframeBatchData))", length(names(theDataframeBatchData)))
-	success <- .jcall("edu/mda/bioinfo/boxplotjava/BoxplotJava",
-										returnSig = "Z",
-										method="groupFunction",
-										.jarray(as.vector(as.numeric(theMatrixGeneData)), contents.class="[D"),
-										.jarray(as.vector(as.character(colnames(theMatrixGeneData)))),
-										.jarray(as.vector(as.character(rownames(theMatrixGeneData)))),
-										.jarray(as.vector(as.character(unlist(theDataframeBatchData[2:length(names(theDataframeBatchData))])))),
-										.jarray(as.vector(as.character(names(theDataframeBatchData)[2:length(names(theDataframeBatchData))]))),
-										.jnew("java/lang/String",as.character(theOutputPath)),
-										as.integer(2),
-										.jnew("java/lang/String",as.character(title)))
-	if (FALSE==success)
+	for(index in 1:length(theListOfGroupBoxFunction))
 	{
-		logError("createBatchEffectsOutput_BoxPlot_Group Java indicated error")
+	  groupLabel <- theListOfGroupBoxLabels[[index]]
+	  logDebug("groupLabel = ", groupLabel)
+	  groupAndLabel <- paste("Group-", groupLabel, sep="")
+	  myOutputPath <- file.path(theOutputPath, groupAndLabel)
+	  for(batchTypeIndex in c(2:length(theDataframeBatchData)))
+	  {
+	    ### compile data and information for display
+	    batchTypeName <- names(theDataframeBatchData)[batchTypeIndex]
+	    logDebug("batchTypeName = ", batchTypeName)
+	    ###############################################################
+	    # build new matrix, with
+	    # columns being batches
+	    # rows being sample ids
+	    # sample ids not in group are set to NA
+	    ###############################################################
+	    newMatrix <- buildGroupMatrix(theMatrixGeneData, theDataframeBatchData, batchTypeName, theListOfGroupBoxFunction[[index]])
+	    ####
+	    # build names for output files
+	    theBoxDataFile <- file.path(myOutputPath, paste("BoxPlot_", groupAndLabel, "_BoxData-", batchTypeName, ".tsv", sep=""))
+	    theHistogramFile <- file.path(myOutputPath, paste("BoxPlot_", groupAndLabel, "_Histogram-", batchTypeName, ".tsv", sep=""))
+	    theAnnotationsFile <- file.path(myOutputPath, paste("BoxPlot_", groupAndLabel, "_Annotations-", batchTypeName, ".tsv", sep=""))
+	    thePngFile <- file.path(myOutputPath, paste("BoxPlot_", groupAndLabel, "_Diagram-", batchTypeName, ".png", sep=""))
+	    title <- paste(theTitle, groupAndLabel, batchTypeName, sep=" ")
+	    boxplotLabels <- colnames(newMatrix)
+	    #
+	    calcAndWriteBoxplot(newMatrix, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels)
+	  }
 	}
-	logDebug("after groupFunction call")
-	success
+	TRUE
 }
 
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+
+calcAndWriteBoxplot <- function(theData, theTitle, theBoxDataFile, thePngFile, theHistogramFile,
+                                theAnnotationsFile, theBoxplotLabels, theMedian=0)
+{
+  #logDebug("theBoxplotLabels=", theBoxplotLabels)
+  logDebug("calcAndWriteBoxplot - theBoxDataFile=", theBoxDataFile)
+  logDebug("calcAndWriteBoxplot - theMedian=", theMedian)
+  logDebug("calcAndWriteBoxplot - dim(theData)[1]=", dim(theData)[1])
+  logDebug("calcAndWriteBoxplot - dim(theData)[2]=", dim(theData)[2])
+  checkCreateDir(dirname(theBoxDataFile))
+  calcAndWriteBoxDataFile(theData, theBoxDataFile, thePngFile, theBoxplotLabels, theTitle, theMedian)
+  calcAndWriteHistogramFile(theData, theHistogramFile, theMedian)
+  calcAndWriteAnnotationsFile(theData, theAnnotationsFile)
+}
+
+###########################################################################################
+###########################################################################################
+
+getBatchFactorsForBoxplot <- function(theBoxplotLabels)
+{
+  splitted <- strsplit(x=theBoxplotLabels, split=" / ", fixed=TRUE)
+  batches <- sapply(splitted, function(x) x[1])
+  factor(batches)
+}
+
+getColorsForBoxplot <- function(theBoxplotLabels)
+{
+  batchLevels <- getBatchFactorsForBoxplot(theBoxplotLabels)
+  batchCount <- length(unique(sort(batchLevels)))
+  colors <- beaRainbow(batchCount)
+  colors[batchLevels]
+}
+
+calcAndWriteBoxDataFile <- function(theData, theFile, thePngFile, theBoxplotLabels, theTitle, theMedian=0)
+{
+  listOfFivenumResults <- list()
+  ######################################
+  # theBoxDataFile Id	LowerOutMax	LowerOutMin	LowerNotch	LowerWhisker	LowerHinge	Median	UpperHinge	UpperWhisker	UpperNotch	UpperOutMin	UpperOutMax
+  cat("Id	LowerOutMax	LowerOutMin	LowerNotch	LowerWhisker	LowerHinge	Median	UpperHinge	UpperWhisker	UpperNotch	UpperOutMin	UpperOutMax", "\n", file=theFile, sep="", append=FALSE)
+  for(i in 1:ncol(theData))
+  {
+    boxNumbers <- fivenum(as.vector(unlist(theData[,i]-theMedian)), na.rm=TRUE)
+    listOfFivenumResults[[length(listOfFivenumResults)+1]] <- boxNumbers
+    cat(paste(
+      colnames(theData)[i], # Id
+      minEpsilon(theData[,i], boxNumbers[1]),     # LowerOutMax
+      NA,                   #	LowerOutMin
+      NA,                   # LowerNotch
+      paste(boxNumbers, collapse="\t"), # LowerWhisker	LowerHinge	Median	UpperHinge	UpperWhisker
+      NA,                   #	UpperNotch
+      NA,                   # UpperOutMin
+      maxEpsilon(theData[,i], boxNumbers[5]),     # UpperOutMax
+      sep="\t"), "\n", sep="", file=theFile, append=TRUE)
+  }
+  propWidth = 20*length(theBoxplotLabels)
+  if (propWidth<500)
+  {
+    propWidth <-500
+  }
+  if (propWidth>2000)
+  {
+    propWidth <-2000
+  }
+  CairoPNG(filename=thePngFile, pointsize=12, width = propWidth, height = 600)
+  on.exit(dev.off())
+  on.exit(par("mar"), add=TRUE)
+  par(mar=c(20,4,4,2))
+  # , theBoxplotLabels
+  listOfFivenumResults <- listOfFivenumResults[order(theBoxplotLabels)]
+  boxplot(listOfFivenumResults, main=theTitle,
+          col=getColorsForBoxplot(sort(theBoxplotLabels)),
+          xaxt="n", xlab="")
+  text(1:length(listOfFivenumResults), par("usr")[3] - 0.05, labels=sort(theBoxplotLabels), xpd=TRUE, srt=45, adj=1)
+}
+
+###########################################################################################
+###########################################################################################
+
+calcAndWriteHistogramFile <- function(theData, theFile, theMedian=0)
+{
+  # count number of breaks
+  maxBins <- 0
+  for(i in 1:ncol(theData))
+  {
+    myH <- hist(theData[,i]-theMedian, plot=FALSE)
+    tmpBins <- length(myH$mids)
+    if (tmpBins<maxBins)
+    {
+      maxBins <- tmpBins
+    }
+  }
+  ######################################
+  # theHistogramFile entry	size	x0	y0	x1	y1  ...	xN	yN
+  cat("entry	size", file=theFile, sep="", append=FALSE)
+  for (i in 0:maxBins-1)
+  {
+    cat(paste("\tx", i, "\ty", i, sep=""), file=theFile, sep="", append=TRUE)
+  }
+  cat("\n", file=theFile, sep="", append=TRUE)
+  # and then the values
+  for(i in 1:ncol(theData))
+  {
+    myH <- hist(theData[,i]-theMedian, plot=FALSE)
+    cat(paste(
+      colnames(theData)[i], # entry
+      sum(myH$counts),      # size
+      paste(myH$density, myH$mids, sep="\t", collapse="\t"),
+      sep="\t"), "\n", sep="", file=theFile, append=TRUE)
+  }
+}
+
+###########################################################################################
+###########################################################################################
+
+calcAndWriteAnnotationsFile <- function(theData, theFile)
+{
+  ######################################
+  # theAnnotationsFile
+  # key	value
+  # Total-Data-Points	5000
+  # Non-NA-Points-TCGA-06-0650-01A-02D-1697-05	4980
+  cat("key	value", "\n", file=theFile, sep="", append=FALSE)
+  cat(paste("Total-Data-Points", ncol(theData),sep="\t"), "\n", file=theFile, sep="", append=TRUE)
+  for(i in 1:ncol(theData))
+  {
+    cat(paste(paste("Non-NA-Points-", colnames(theData)[i], sep=""), sum(is.na(theData[,i])), sep="\t"), "\n", file=theFile, sep="", append=TRUE)
+  }
+}
+
+###########################################################################################
+###########################################################################################
+
+buildGroupMatrix <- function(theDataMatrix, theBatchDF, theBatchType, theFunction)
+{
+  logDebug("buildGroupMatrix - dim(theDataMatrix)[1]=", dim(theDataMatrix)[1])
+  logDebug("buildGroupMatrix - dim(theDataMatrix)[2]=", dim(theDataMatrix)[2])
+  logDebug("buildGroupMatrix - dim(theBatchDF)[1]=", dim(theBatchDF)[1])
+  logDebug("buildGroupMatrix - dim(theBatchDF)[2]=", dim(theBatchDF)[2])
+  logDebug("buildGroupMatrix theBatchType=", theBatchType)
+  ###############################################################
+  # build new matrix, with
+  # columns being batches
+  # rows being sample ids
+  # sample ids not in group are set to NA
+  ###############################################################
+  fullBatchList <- as.vector(unlist(theBatchDF[theBatchType]))
+  logDebug("buildGroupMatrix fullBatchList=", length(fullBatchList))
+  batchNameList <- unique(sort(fullBatchList))
+  logDebug("buildGroupMatrix batchNameList=", length(batchNameList))
+  sampleIdList <- theBatchDF$Sample
+  logDebug("buildGroupMatrix sampleIdList=", length(sampleIdList))
+  # build matrix of NAs
+  newMatrix <- matrix(nrow=length(sampleIdList), ncol=length(batchNameList), dimnames=list(sampleIdList, batchNameList))
+  for (batchName in batchNameList)
+  {
+    for (sampleId in sampleIdList[which(fullBatchList==batchName)])
+    {
+      val <- theDataMatrix[,sampleId]
+      res <- theFunction(val)
+      newMatrix[sampleId, batchName] <- res
+    }
+  }
+  newMatrix
+}
+
+###########################################################################################
+###########################################################################################
 ###########################################################################################
 ###########################################################################################

@@ -1,15 +1,15 @@
 Package: MBatchUtils
 Type: Package
 Title: MBatchUtils: Utility Functions for MBatch
-Date: 2019-04-25
-Version: 0.1.12
+Date: 2019-10-15
+Version: 0.2.2
 Author:			Rehan Akbani <rakbani@mdanderson.org>
 				Tod Casasent <tdcasasent@mdanderson.org>
 				Bradley Broom <bbroom@mdanderson.org>
 				John Weinstein <jweinstein@mdanderson.org>
 Maintainer: Rehan Akbani <rakbani@mdanderson.org>
-Depends: R (>= 3.4.0), MBatch, Cairo, NGCHM, dunn.test, ClassDiscovery
-Imports: methods
-Description: MBatchUtils 2019-04-25-1400 is an R package that adds utility functions and optional assessment algorithms for use with MBatch.
+Depends: R (>= 3.6.0), MBatch, NGCHM
+Imports: methods, ClassDiscovery, dunn.test, rJava, Cairo
+Description: MBatchUtils is an R package that adds utility functions and optional assessment algorithms for use with MBatch.
 License: GPL (>=2)
 LazyData: true

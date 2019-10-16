@@ -11,7 +11,7 @@ library(rJava, warn.conflicts=FALSE, verbose=FALSE)
 
 getMBatchVersion<-function()
 {
-	return("MBatch Version: 2018-12-21-0930")
+	return("MBatch Version: 2019-09-04-1100")
 }
 
 mbatchWriteSuccessfulLog <- function()
@@ -94,7 +94,7 @@ mbatchLoadStructures<-function(theGeneMatrix, theBatchDataframe, theCovariatedat
 	return(myData)
 }
 
-mbatchLoadFiles<-function(theGeneDataFile, theBatchFile, theCovariateFile=NULL, theNaStrings="NA")
+mbatchLoadFiles<-function(theGeneDataFile, theBatchFile, theCovariateFile=NULL, theNaStrings=NULL)
 {
 	########################################################
 	collateOrigValue<-Sys.getlocale("LC_COLLATE")
@@ -271,6 +271,9 @@ mbatchTrimData<-function(theMatrix, theMaxSize=15000000)
 		genesToKeep <- sort(names(iqr)[1:numberOfGenesToUse])
 		theMatrix <- theMatrix[genesToKeep, ]
 	}
+	logInfo("mbatchTrimData theMaxSize=", theMaxSize)
+	logInfo("mbatchTrimData ncol(theMatrix)=", ncol(theMatrix))
+	logInfo("mbatchTrimData nrow(theMatrix)=", nrow(theMatrix))
 	logInfo("mbatchTrimData Finishing")
 	logInfo("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 	return(theMatrix)
@@ -880,6 +883,34 @@ epsilonZeroCheck<-function(theValue)
 	{
 		return(theValue)
 	}
+}
+
+minEpsilon<-function(theValueVector, theValue)
+{
+  tmpMin <- min(theValueVector, theValue)
+  epsVal <- epsilonZeroCheck(abs(abs(tmpMin)-abs(theValue)))
+  if (!is.na(epsVal))
+  {
+    if (0==epsVal)
+    {
+      tmpMin <- NA
+    }
+  }
+  tmpMin
+}
+
+maxEpsilon<-function(theValueVector, theValue)
+{
+  tmpMax <- max(theValueVector, theValue)
+  epsVal <- epsilonZeroCheck(abs(abs(tmpMax)-abs(theValue)))
+  if (!is.na(epsVal))
+  {
+    if (0==epsVal)
+    {
+      tmpMax <- NA
+    }
+  }
+  tmpMax
 }
 
 ################################################################################

@@ -43,7 +43,6 @@ if (!is.null(inputDir))
                                     theOutputPath=theOutputDir,
                                     theBatchTypeAndValuePairsToRemove=NULL,
                                     theBatchTypeAndValuePairsToKeep=NULL,
-                                    theJavaParameters=c("-Xms8000m", "-Djava.awt.headless=true"),
                                     theMaxGeneCount=10000)
   correctedMatrix <- readAsGenericMatrix(file.path(theOutputDir, "AllSample-Data", "BoxPlot_AllSample-Data_BoxData-BatchId.tsv"))
   compareMatrix <- readAsGenericMatrix(theCompareFile)
