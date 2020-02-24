@@ -38,7 +38,7 @@ biocLite(c("limma","RBGL","graph","Biobase"), ask="a")
 install.packages(c("oompaBase", "ClassDiscovery", "PreProcess"), dependencies=TRUE, repos=c("http://cloud.r-project.org", "http://silicovore.com/OOMPA/"))
 
 ## MBatch package
-devtools::install_github("MD-Anderson-Bioinformatics/MBatchPackage/apps/MBatch")
+devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MBatch")
 ```
 
 # MBatchUtils R Package
