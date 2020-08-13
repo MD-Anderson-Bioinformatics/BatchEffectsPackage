@@ -1,10 +1,13 @@
-#MBatch Copyright ? 2011, 2012, 2013, 2014, 2015, 2016, 2017 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
 #
-#This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
+# MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
 ###########################################################################################
 ###########################################################################################
@@ -147,9 +150,33 @@ calcAndWriteBoxplot <- function(theData, theTitle, theBoxDataFile, thePngFile, t
   logDebug("calcAndWriteBoxplot - dim(theData)[1]=", dim(theData)[1])
   logDebug("calcAndWriteBoxplot - dim(theData)[2]=", dim(theData)[2])
   checkCreateDir(dirname(theBoxDataFile))
-  calcAndWriteBoxDataFile(theData, theBoxDataFile, thePngFile, theBoxplotLabels, theTitle, theMedian)
-  calcAndWriteHistogramFile(theData, theHistogramFile, theMedian)
-  calcAndWriteAnnotationsFile(theData, theAnnotationsFile)
+  tryCatch({
+    logDebug("calcAndWriteBoxplot - before calcAndWriteBoxDataFile")
+    calcAndWriteBoxDataFile(theData, theBoxDataFile, thePngFile, theBoxplotLabels, theTitle, theMedian)
+    logDebug("calcAndWriteBoxplot - after calcAndWriteBoxDataFile")
+  },error=function(myError)
+  {
+    logError("calcAndWriteBoxplot(): error in calcAndWriteBoxDataFile, ERROR= ", myError)
+    traceback()
+  })
+  tryCatch({
+    logDebug("calcAndWriteBoxplot - before calcAndWriteHistogramFile")
+    calcAndWriteHistogramFile(theData, theHistogramFile, theMedian)
+    logDebug("calcAndWriteBoxplot - after calcAndWriteHistogramFile")
+  },error=function(myError)
+  {
+    logError("calcAndWriteBoxplot(): error in calcAndWriteHistogramFile, ERROR= ", myError)
+    traceback()
+  })
+  tryCatch({
+    logDebug("calcAndWriteBoxplot - before calcAndWriteAnnotationsFile")
+    calcAndWriteAnnotationsFile(theData, theAnnotationsFile)
+    logDebug("calcAndWriteBoxplot - after calcAndWriteAnnotationsFile")
+  },error=function(myError)
+  {
+    logError("calcAndWriteBoxplot(): error in calcAndWriteAnnotationsFile, ERROR= ", myError)
+    traceback()
+  })
 }
 
 ###########################################################################################
@@ -172,6 +199,8 @@ getColorsForBoxplot <- function(theBoxplotLabels)
 
 calcAndWriteBoxDataFile <- function(theData, theFile, thePngFile, theBoxplotLabels, theTitle, theMedian=0)
 {
+  logDebug("calcAndWriteBoxDataFile theFile=", theFile)
+  logDebug("calcAndWriteBoxDataFile thePngFile=", thePngFile)
   listOfFivenumResults <- list()
   ######################################
   # theBoxDataFile Id	LowerOutMax	LowerOutMin	LowerNotch	LowerWhisker	LowerHinge	Median	UpperHinge	UpperWhisker	UpperNotch	UpperOutMin	UpperOutMax
@@ -200,16 +229,20 @@ calcAndWriteBoxDataFile <- function(theData, theFile, thePngFile, theBoxplotLabe
   {
     propWidth <-2000
   }
+  logDebug("calcAndWriteBoxDataFile CairoPNG=", thePngFile)
   CairoPNG(filename=thePngFile, pointsize=12, width = propWidth, height = 600)
   on.exit(dev.off())
   on.exit(par("mar"), add=TRUE)
   par(mar=c(20,4,4,2))
   # , theBoxplotLabels
   listOfFivenumResults <- listOfFivenumResults[order(theBoxplotLabels)]
+  logDebug("calcAndWriteBoxDataFile call boxplot")
   boxplot(listOfFivenumResults, main=theTitle,
           col=getColorsForBoxplot(sort(theBoxplotLabels)),
           xaxt="n", xlab="")
+  logDebug("calcAndWriteBoxDataFile call text")
   text(1:length(listOfFivenumResults), par("usr")[3] - 0.05, labels=sort(theBoxplotLabels), xpd=TRUE, srt=45, adj=1)
+  logDebug("calcAndWriteBoxDataFile done")
 }
 
 ###########################################################################################
@@ -217,6 +250,7 @@ calcAndWriteBoxDataFile <- function(theData, theFile, thePngFile, theBoxplotLabe
 
 calcAndWriteHistogramFile <- function(theData, theFile, theMedian=0)
 {
+  logDebug("calcAndWriteHistogramFile ", theFile)
   # count number of breaks
   maxBins <- 0
   for(i in 1:ncol(theData))
@@ -253,6 +287,7 @@ calcAndWriteHistogramFile <- function(theData, theFile, theMedian=0)
 
 calcAndWriteAnnotationsFile <- function(theData, theFile)
 {
+  logDebug("calcAndWriteAnnotationsFile theFile=", theFile)
   ######################################
   # theAnnotationsFile
   # key	value

@@ -48,6 +48,14 @@ theEBNP_AddData1Rows = FALSE, theEBNP_AddData2Rows = FALSE)
 \details{
 Take two matrices and correct them into a single data set using the EBNPlus
 algorithm and the provided arguments, using all replicates for training.
+
+The function takes the variant data set and corrects it to become part of
+the invariant data set using replicates shared between the sets. Replicates
+are determined by finding matching sample ids. It uses a validation ratio
+value of 0 to use all replicates for training. Any duplicates in genes or
+barcodes are removed. Genes that start with "?" are also removed.
+See EBNPlus_CheckData_Structures and EBNPlus_CombineBatches for
+details on data prep.
 }
 \value{
 BeaEBNplusFiles returns a matrix. The columns of the matrix are the

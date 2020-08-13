@@ -8,7 +8,7 @@ reproduciblity or for use with Batch Effects Interface}
 mbatchRunFromConfig(theConfigFile, theOutputDir, theNaStrings,
 theShaidyMapGen, theShaidyMapGenJava,
                  theNGCHMShaidyMem = "16G", thePCAMem = "4800m",
-                 theBoxplotMem = "16G")
+                 theBoxplotMem = "16G", theRunPostFlag=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,6 +24,7 @@ theShaidyMapGen, theShaidyMapGenJava,
   \item{theNGCHMShaidyMem}{16G default}
   \item{thePCAMem}{4800m default.}
   \item{theBoxplotMem}{16G default.}
+  \item{theRunPostFlag}{FALSE default. If TRUE, build DSC Overview file.}
 }
 \details{
 Does not return any meaningful value, but creates an empty file

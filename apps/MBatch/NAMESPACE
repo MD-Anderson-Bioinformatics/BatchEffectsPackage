@@ -35,6 +35,7 @@ export(mbatchIncludeExcludeData)
 export(readAsGenericMatrix)
 export(readAsGenericDataframe)
 export(mbatchWriteSuccessfulLog)
+export(as.numericWithIssues)
 
 # Assessments
 export(SupervisedClustering_Pairs_Structures)

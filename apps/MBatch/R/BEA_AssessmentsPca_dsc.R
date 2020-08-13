@@ -1,10 +1,13 @@
-#MBatch Copyright ? 2011, 2012, 2013, 2014, 2015, 2016, 2017 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
 #
-#This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
+# MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
 setClass("PCA-DSC", representation(mListOfDSCbyGene="vector", mListOfDWbyGene="vector",mListOfDBbyGene="vector",mDSC="numeric",mDB="numeric",mDW="numeric"))
 
@@ -24,16 +27,16 @@ clearDSCOverviewFiles<-function(theStartDir)
 		### 	For each *_OverallDSC.RData files
 		for (myOverallDscFile in myOverallDscFileList)
 		{
-			###			find all the *__CompDSC.RData files in the same directory as the OverallDSC file 
+			###			find all the *__CompDSC.RData files in the same directory as the OverallDSC file
 			logDebug("clearDSCOverviewFiles - find all the *__CompDSC.RData files")
 			myCompDscFileList <- dir(path=dirname(myOverallDscFile), pattern=glob2rx("*__CompDSC.RData"), full.names = TRUE, recursive = FALSE)
 			###			For each of the *__CompDSC.RData files
 			for(myCompDscFile in myCompDscFileList)
 			{
-				###				delete the *__CompDSC.RData files 
+				###				delete the *__CompDSC.RData files
 				unlink(myCompDscFile)
 			}
-			###			delete the *__OverallDSC.RData file 
+			###			delete the *__OverallDSC.RData file
 			unlink(myOverallDscFile)
 		}
 		###		delete the *__CompListDSC.RData file
@@ -41,8 +44,13 @@ clearDSCOverviewFiles<-function(theStartDir)
 	}
 	logDebug("clearDSCOverviewFiles - done")
 }
-	
-buildDSCOverviewFile<-function(theStartDir, theOutputFile)
+
+getDSCSubPath<-function(theBaseDir, theCurrentDir)
+{
+  gsub(theBaseDir, "", theCurrentDir, fixed=TRUE)
+}
+
+buildDSCOverviewFile<-function(theStartDir, theAllOutDir, theBaseDir, theOutputFile, theAltDatasetName=NULL)
 {
 	### buildDSCOverviewFile
 	########################################################################
@@ -57,16 +65,16 @@ buildDSCOverviewFile<-function(theStartDir, theOutputFile)
 	### 	For each *_OverallDSC.RData files
 	###			Load the *__OverallDSC.RData file which has the overall DSC object
 	###			add the new Overall DSC data into structure for storing DSC Overview data
-	###			delete the *__OverallDSC.RData file 
-	###			find all the *__CompDSC.RData files in the same directory as the OverallDSC file 
+	###			delete the *__OverallDSC.RData file
+	###			find all the *__CompDSC.RData files in the same directory as the OverallDSC file
 	###			For each of the *__CompDSC.RData files
 	###				load the file
 	###				add the component data into exising entry in structure for storing DSC Overview data
-	###				delete the *__CompDSC.RData files 
+	###				delete the *__CompDSC.RData files
 	### sort the structure for storing DSC Overview data
 	### write DSC Overview file
 	########################################################################
-	
+
 	myDscOverviewStruct <- NULL
 	### first find all the *__CompListDSC.RData file (aka PCA directories)
 	myListOfCompListDscFiles <- dir(path=theStartDir, pattern=glob2rx("*__CompListDSC.RData"), full.names = TRUE, recursive = TRUE)
@@ -75,7 +83,8 @@ buildDSCOverviewFile<-function(theStartDir, theOutputFile)
 	logDebug("myCompListDscFile")
 	for (myCompListDscFile in myListOfCompListDscFiles)
 	{
-		###logDebug("loop myCompListDscFile")
+	  logDebug("loop myCompListDscFile=", myCompListDscFile)
+	  ###logDebug("loop myCompListDscFile")
 		###		if structure for storing DSC Overview data is null
 		if (is.null(myDscOverviewStruct))
 		{
@@ -90,12 +99,12 @@ buildDSCOverviewFile<-function(theStartDir, theOutputFile)
 			load(myCompListDscFile)
 			###logDebug("myCompListDscFile", myCompListDscFile)
 			### theList has list of components
-			columnNames <- c("run-date", "disease-type", "data-type", "platform", "data-level", "correction-type", "PCA", "batch-type", "diagram-batch", "Overall-DSC", "Overall-DSC-pvalue")
+			columnNames <- c("dataset", "Overall-DSC", "Overall-DSC-pvalue")
 			for(i in seq(from=1, to=(length(theList)-1), by=2 ))
 			{
 				componentA <- theList[[i]]
 				componentB <- theList[[i+1]]
-				columnNames <- c(columnNames, paste("DSC(", componentA, ",", componentB, ")", sep="")) 
+				columnNames <- c(columnNames, paste("DSC(", componentA, ",", componentB, ")", sep=""))
 				columnNames <- c(columnNames, paste("DSC-pvalue(", componentA, ",", componentB, ")", sep=""))
 				###logDebug("comp A ", componentA, ", comp B", componentB)
 			}
@@ -103,7 +112,7 @@ buildDSCOverviewFile<-function(theStartDir, theOutputFile)
 			numberOfRows <- length(dir(path=theStartDir, pattern=glob2rx("*__OverallDSC.RData"), full.names = FALSE, recursive = TRUE))
 			numberOfColumns <- length(columnNames)
 			###			build structure for storing DSC Overview data
-			### this has the columnNames across the top and numberOfEntries number of row entries, prepopulated with NA values 
+			### this has the columnNames across the top and numberOfEntries number of row entries, prepopulated with NA values
 			if ((0!=numberOfRows)&&(0!=numberOfColumns))
 			{
 				myDscOverviewStruct <- matrixWithIssues(data = buildList(NA, (numberOfRows*numberOfColumns)), nrow=numberOfRows, ncol=numberOfColumns)
@@ -116,7 +125,7 @@ buildDSCOverviewFile<-function(theStartDir, theOutputFile)
 		### 	For each *_OverallDSC.RData files
 		for (myOverallDscFile in myOverallDscFileList)
 		{
-			###logDebug("myOverallDscFile ", myOverallDscFile)
+			logDebug("myOverallDscFile ", myOverallDscFile)
 			rowCounter <- rowCounter + 1
 			###logDebug("rowCounter ", rowCounter)
 			###			Load the *__OverallDSC.RData file which has the overall DSC object
@@ -125,57 +134,38 @@ buildDSCOverviewFile<-function(theStartDir, theOutputFile)
 			###			add the new Overall DSC data into structure for storing DSC Overview data
 			### info from path
 			dirpathForData <- dirname(myOverallDscFile)
-			diagramBatch <- basename(dirpathForData)
-			dirpathForData <- dirname(dirpathForData)
-			batchtype <- basename(dirpathForData)
-			dirpathForData <- dirname(dirpathForData)
-			PCA <- basename(dirpathForData)
-			dirpathForData <- dirname(dirpathForData)
-			correctiontype <- basename(dirpathForData)
-			dirpathForData <- dirname(dirpathForData)
-			datalevel <- basename(dirpathForData)
-			dirpathForData <- dirname(dirpathForData)
-			platform <- basename(dirpathForData)
-			dirpathForData <- dirname(dirpathForData)
-			datatype <- basename(dirpathForData)
-			dirpathForData <- dirname(dirpathForData)
-			diseasetype <- basename(dirpathForData)
-			dirpathForData <- dirname(dirpathForData)
-			rundate <- basename(dirpathForData)
+			datasetDesc <- getDSCSubPath(theBaseDir, dirpathForData)
+			logDebug("datasetDesc ", datasetDesc)
+			#if (!is.null(theAltDatasetName))
+			#{
+  		#	  datasetDesc <- paste(theAltDatasetName, datasetDesc, sep="")
+			#}
 			### info from file
 			overallDSC <- theOverallObject@mDSC
 			overallPvalue <- theOverallObject@mPvalue
 			###
-			myDscOverviewStruct[rowCounter, "run-date"] <- rundate  
-			myDscOverviewStruct[rowCounter, "disease-type"] <- diseasetype  
-			myDscOverviewStruct[rowCounter, "data-type"] <- datatype  
-			myDscOverviewStruct[rowCounter, "platform"] <- platform  
-			myDscOverviewStruct[rowCounter, "data-level"] <- datalevel  
-			myDscOverviewStruct[rowCounter, "correction-type"] <- correctiontype  
-			myDscOverviewStruct[rowCounter, "PCA"] <- PCA  
-			myDscOverviewStruct[rowCounter, "batch-type"] <- batchtype 
-			myDscOverviewStruct[rowCounter, "diagram-batch"] <- diagramBatch  
-			myDscOverviewStruct[rowCounter, "Overall-DSC"] <- overallDSC  
-			myDscOverviewStruct[rowCounter, "Overall-DSC-pvalue"] <- overallPvalue  
-			###			find all the *__CompDSC.RData files in the same directory as the OverallDSC file 
+			myDscOverviewStruct[rowCounter, "dataset"] <- datasetDesc
+			myDscOverviewStruct[rowCounter, "Overall-DSC"] <- overallDSC
+			myDscOverviewStruct[rowCounter, "Overall-DSC-pvalue"] <- overallPvalue
+			###			find all the *__CompDSC.RData files in the same directory as the OverallDSC file
 			myCompDscFileList <- dir(path=dirname(myOverallDscFile), pattern=glob2rx("*__CompDSC.RData"), full.names = TRUE, recursive = FALSE)
 			###			For each of the *__CompDSC.RData files
 			for(myCompDscFile in myCompDscFileList)
 			{
-				###logDebug("myCompDscFile ", myCompDscFile)
+				logDebug("myCompDscFile ", myCompDscFile)
 				###				load the file
 				load(myCompDscFile)
 				### theObject, theComponentA, theComponentB
-				dscColId <- paste("DSC(", theComponentA, ",", theComponentB, ")", sep="") 
+				dscColId <- paste("DSC(", theComponentA, ",", theComponentB, ")", sep="")
 				pvaColId <- paste("DSC-pvalue(", theComponentA, ",", theComponentB, ")", sep="")
 				###				add the component data into exising entry in structure for storing DSC Overview data
 				myDscOverviewStruct[rowCounter, dscColId] <- theObject@mDSC
 				myDscOverviewStruct[rowCounter, pvaColId] <- theObject@mPvalue
-				###logDebug("myCompDscFile values (", theComponentA, ",", theComponentB, ") DSC=", theObject@mDSC, " pvalue=", theObject@mPvalue)   
-				###				delete the *__CompDSC.RData files 
+				###logDebug("myCompDscFile values (", theComponentA, ",", theComponentB, ") DSC=", theObject@mDSC, " pvalue=", theObject@mPvalue)
+				###				delete the *__CompDSC.RData files
 				#--unlink(myCompDscFile)
 			}
-			###			delete the *__OverallDSC.RData file 
+			###			delete the *__OverallDSC.RData file
 			#--unlink(myOverallDscFile)
 		}
 		###		delete the *__CompListDSC.RData file
@@ -183,6 +173,7 @@ buildDSCOverviewFile<-function(theStartDir, theOutputFile)
 	}
 	if (!is.null(myDscOverviewStruct))
 	{
+	  logDebug("overall DSC ", file.path(theAllOutDir, theOutputFile))
 		### sort the structure for storing DSC Overview data
 		oldColNames <- colnames(myDscOverviewStruct)
 		myDscOverviewStruct <- data.frame(myDscOverviewStruct, check.names=FALSE)
@@ -191,15 +182,15 @@ buildDSCOverviewFile<-function(theStartDir, theOutputFile)
 		myDscOverviewStruct <- as.matrix(myDscOverviewStruct)
 		colnames(myDscOverviewStruct) <- oldColNames
 		### write DSC Overview file
-		write.table(myDscOverviewStruct, file=file.path(theStartDir, theOutputFile), quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE)
-	}	
+		write.table(myDscOverviewStruct, file=file.path(theAllOutDir, theOutputFile), quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE)
+	}
 	return(myDscOverviewStruct)
 }
 
 getDSC <- function(thePca, theBatchIdsForSamples, theFirstComponent, theSecondComponent)
 {
 	### pca@scores[sample,componentId]
-	pcaDataExcerpt <- t(thePca@scores[,((1:ncol(thePca@scores))==theFirstComponent)|((1:ncol(thePca@scores))==theSecondComponent)]) 
+	pcaDataExcerpt <- t(thePca@scores[,((1:ncol(thePca@scores))==theFirstComponent)|((1:ncol(thePca@scores))==theSecondComponent)])
 	results <- getDSCwithExcerpt(pcaDataExcerpt, theBatchIdsForSamples)
 	###logDebug(" DSCij=", results[[1]], " Dwij=", results[[2]], " Dbij=", results[[3]])
 	return(results)
@@ -214,9 +205,9 @@ getDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples)
 	logDebug("length(theBatchIdsForSamples)=", length(theBatchIdsForSamples))
 	dscJavaObj <- .jnew("org/mda/dscjava/DscJava")
 	logDebug("getDSCwithExcerpt before java")
-	javaPcaDscObj <- .jcall(dscJavaObj, "Lorg/mda/dscjava/PcaDsc;", "getDSCwithExcerpt", 
-													as.vector(thePcaDataExcerpt), 
-													dim(thePcaDataExcerpt), 
+	javaPcaDscObj <- .jcall(dscJavaObj, "Lorg/mda/dscjava/PcaDsc;", "getDSCwithExcerpt",
+													as.vector(thePcaDataExcerpt),
+													dim(thePcaDataExcerpt),
 													as.vector(theBatchIdsForSamples))
 	logDebug("getDSCwithExcerpt after java")
 	results <- new("PCA-DSC")
@@ -230,5 +221,5 @@ getDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples)
 }
 
 ####################################################################
-### 
+###
 ####################################################################

@@ -1,8 +1,8 @@
 Package: MBatchUtils
 Type: Package
 Title: MBatchUtils: Utility Functions for MBatch
-Date: 2019-10-15
-Version: 0.2.2
+Date: 2020-07-13
+Version: 1.7.0
 Author:			Rehan Akbani <rakbani@mdanderson.org>
 				Tod Casasent <tdcasasent@mdanderson.org>
 				Bradley Broom <bbroom@mdanderson.org>

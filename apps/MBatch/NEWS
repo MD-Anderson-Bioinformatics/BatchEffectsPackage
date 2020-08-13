@@ -1,9 +1,24 @@
 
 	**************************************************
 	*						 *
-	*	       1.4 SERIES NEWS			 *
+	*	       1.7 SERIES NEWS			 *
 	*						 *
 	**************************************************
+
+		CHANGES IN R VERSION 1.6.0
+
+NEW FEATURES
+
+    o Added dataset prefix option to buildDSCOverviewFile
+    o Added boxplot logging and wrap some errors to prevent stopping
+    o Removed full path from DSCOverview output
+
+		CHANGES IN R VERSION 1.5.3
+
+NEW FEATURES
+
+    o	Changed arguments for creating DSC overview
+    o	Moved all DSC Overview creation to buildDSCOverviewFile
 
 		CHANGES IN R VERSION 1.5.2
 

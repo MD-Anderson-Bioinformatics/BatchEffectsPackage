@@ -1,10 +1,14 @@
-#MBatchUtils Copyright ? 2018 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
 #
-#This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
+# MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
+
 library(MBatch)
 
 ################################################################################
@@ -27,7 +31,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 	##############################################################################
   message(mbatchUtilVersion())
 	message("mutationBatchExtract")
-	message("find MAF files")
+	message("find MAF files in ", theMafDir)
 	# collect the mutation data. This file name (pattern) is for GDC-derived data and newer DCC-derived data
 	fileVector <- list.files(theMafDir, pattern="mutations.tsv", full.names=TRUE, recursive=TRUE)
 	message("mutations.tsv length=", length(fileVector))
@@ -87,11 +91,14 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 	for(myMaf in fileVector)
 	{
 		# for each mutation file
-		print(myMaf)
+	  message("Copy Batch Files for each mutation file")
+	  print(myMaf)
 		# create the destination directory with disease sub-directory
-		dir.create(file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), showWarnings=FALSE, recursive=TRUE)
+	  message("create the destination directory with disease sub-directory")
+	  dir.create(file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), showWarnings=FALSE, recursive=TRUE)
 		# copy batches file into disease sub-directory
-		file.copy(file.path(dirname(myMaf), "batches.tsv"),
+	  message("copy batches file into disease sub-directory")
+	  file.copy(file.path(dirname(myMaf), "batches.tsv"),
 							file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag), paste(convertPathToName(myMaf, theGDCflag), "_batches.tsv", sep="")))
 	}
 	##############################################################################
@@ -438,6 +445,7 @@ cleanString <- function(theString)
 
 convertPathToName <- function(thePath, theGDCflag)
 {
+  message("convertPathToName")
 	# Pull the "unique" data out of path to form file names for GDC and DCC data
 	# thePath - path to data from which to extract name
 	# theGDCflag - TRUE means use GDC format, FALSE means use DCC format
@@ -449,8 +457,9 @@ convertPathToName <- function(thePath, theGDCflag)
 	if (isTRUE(theGDCflag))
 	{
 		# for GDC <disease-type>.<platform>.<institution>.<level>_batches.tsv
-		name <- paste(basename(dirname(dirname(dirname(thePath)))), # TCGA-ACC
-						basename(dirname(thePath)), # MuSEVariant...
+		name <- paste(
+		        getProjectDiseaseIdentifier(thePath, theGDCflag), # TCGA-ACC
+		        basename(dirname(dirname(dirname(dirname(thePath))))), # MuSEVariant...
 						sep=".")
 	}
 	else
@@ -467,6 +476,7 @@ convertPathToName <- function(thePath, theGDCflag)
 
 getProjectDiseaseIdentifier <- function(theFile, theGDCflag)
 {
+  message("getProjectDiseaseIdentifier")
 	# Pull the disease type out of path to form sub-directory
 	# theFile - file and path to file. Use path to get disease type
 	# theGDCflag - TRUE means use GDC format, FALSE means use DCC format
@@ -476,7 +486,7 @@ getProjectDiseaseIdentifier <- function(theFile, theGDCflag)
 	if (isTRUE(theGDCflag))
 	{
 		# GDC disease types
-		pdId <- basename(dirname(dirname(theFile)))
+		pdId <- basename(dirname(dirname(dirname(dirname(dirname(dirname(theFile)))))))
 	}
 	else
 	{

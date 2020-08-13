@@ -1,84 +1,29 @@
-#MBatchUtils Copyright ? 2018 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
 #
-#This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
+# MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
 library(MBatch)
-
-#############################################################################
-## internal
-#############################################################################
-
-buildZip <- function(theSourceDir, theZip)
-{
-  on.exit(setwd(getwd()), add=TRUE)
-  setwd(theSourceDir)
-  myFiles <- list.files(".", all.files=TRUE, recursive=TRUE, include.dirs=TRUE)
-  print(myFiles)
-  zip(theZip, myFiles)
-
-}
-
-buildInternalIndex <- function(theDataRunDir, theZipPath, theDataSetName, theDataSetLabel, theDefaultLink,
-                               theLevelLabels, theTooltipFile)
-{
-  ########
-  message("buildInternalIndex::theDataRunDir=", theDataRunDir)
-  message("buildInternalIndex::theZipPath=", theZipPath)
-  message("buildInternalIndex::theDataSetName=", theDataSetName)
-  message("buildInternalIndex::theDataSetLabel=", theDataSetLabel)
-  message("buildInternalIndex::theDefaultLink=", theDefaultLink)
-  message("buildInternalIndex::theLevelLabels=", theLevelLabels)
-  message("buildInternalIndex::theTooltipFile=", theTooltipFile)
-  ########
-  .jcall("edu/mda/bioinfo/bevindex/BEVIndex", returnSig = "V",
-         method='addIndexAndZipDataSet',
-         .jnew("java/lang/String",theDataRunDir),
-         .jnew("java/lang/String",theZipPath),
-         .jarray(as.vector(as.character(theDefaultLink))),
-         .jnew("java/lang/String",theDataSetName),
-         .jnew("java/lang/String",theDataSetLabel),
-         .jarray(as.vector(as.character(theLevelLabels))),
-         .jnew("java/lang/String",theTooltipFile))
-}
-
-getLinks <- function(theSourceDir, theDefaultLink)
-{
-  files <- list.files(theSourceDir, theDefaultLink, recursive=TRUE, include.dirs=TRUE)[1]
-  strsplit(files, .Platform$file.sep, fixed=TRUE)
-}
 
 #############################################################################
 ## exported
 #############################################################################
 
 # the SourceDir should contain a single directory, the data for which to build an archive
-buildSingleArchive <- function(theSourceDir, theArchiveDir, theDataRunDir, theExternalIndexPath,
-                               theDataSetName, theDataSetLabel,
-                         theDefaultLink = "PCA",
-                         theLevelLabels = c("Run Options", "Algorithm", "Diagram Type", "Sub-Type"),
-                         theTooltipFile=system.file("BEVIndex", "tooltip_gdc.tsv", package="MBatchUtils"))
+buildSingleArchive <- function(mbatchID, originalDataJsonFile, mbatchResultsDir, zipDir)
 {
+  # runBEVIndex(mbatchID, versionStamp, versionType, originalDataJsonFile, mbatchResultsDir, zipDir)
   ########
-  # zip file path
-  zipFile <- file.path(theArchiveDir, "ResultSet.zip")
-  # data set names
-  dataSetDirs <- basename(list.dirs(theSourceDir, recursive = FALSE)[1])
-  # get link path to theDefaultLink
-  defaultLinkVector <- getLinks(theSourceDir, theDefaultLink)
-  ########
-  message("buildSingleArchive::theSourceDir=", theSourceDir)
-  message("buildSingleArchive::theArchiveDir=", theArchiveDir)
-  message("buildSingleArchive::theDataRunDir=", theDataRunDir)
-  message("buildSingleArchive::theExternalIndexPath=", theExternalIndexPath)
-  message("buildSingleArchive::theDataSetName=", theDataSetName)
-  message("buildSingleArchive::theDataSetLabel=", theDataSetLabel)
-  message("buildSingleArchive::zipFile=", zipFile)
-  message("buildSingleArchive::dataSetDirs=", dataSetDirs)
-  message("buildSingleArchive::defaultLinkVector=", defaultLinkVector)
+  message("buildSingleArchive::mbatchID=", mbatchID)
+  message("buildSingleArchive::originalDataJsonFile=", originalDataJsonFile)
+  message("buildSingleArchive::mbatchResultsDir=", mbatchResultsDir)
+  message("buildSingleArchive::zipDir=", zipDir)
   ########
   # jinit for BEVIndex
   myJavaJars <- file.path(system.file("BEVIndex", "BEVIndex.jar", package="MBatchUtils"),
@@ -89,26 +34,11 @@ buildSingleArchive <- function(theSourceDir, theArchiveDir, theDataRunDir, theEx
                           fsep=.Platform$path.sep)
   .jinit(classpath=myJavaJars, force.init = TRUE, parameters=c("-Xms4800m", "-Djava.awt.headless=true"))
   ########
-  # build the index files
-  buildInternalIndex(theDataRunDir, zipFile, theDataSetName, theDataSetLabel, defaultLinkVector, theLevelLabels, theTooltipFile)
-  ########
-  # copy the external index
-  file.copy(file.path(theArchiveDir, "index.json"), theExternalIndexPath)
-  ########
-  # build the zip file
-  buildZip(theSourceDir, zipFile)
+  .jcall("edu/mda/bioinfo/bevindex/BEVIndex", returnSig = "V",
+         method='runBEVIndex',
+         .jnew("java/lang/String",mbatchID),
+         .jnew("java/lang/String",originalDataJsonFile),
+         .jnew("java/lang/String",mbatchResultsDir),
+         .jnew("java/lang/String",zipDir))
 }
 
-#############################################################################
-## exported
-#############################################################################
-
-# the SourceDir should contain a single directory, the data for which to build an archive
-buildRunArchives <- function(theRunDir, theExternalIndexPath, theFinalPath,
-                               theDataSetName, theDataSetLabel,
-                               theDefaultLink = "PCA",
-                               theLevelLabels = c("Data Release", "Program", "Disease", "Workflow", "Algorithm", "Diagram Type", "Sub-Type"),
-                               theTooltipFile=system.file("BEVIndex", "tooltip_gdc.tsv", package="MBatchUtils"))
-{
-
-}

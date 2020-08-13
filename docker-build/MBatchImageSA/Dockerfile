@@ -1,9 +1,9 @@
-FROM mdabcb/debian_r_java:2019-06-24-1600
+FROM mdabcb/debian_r_java:2020-07-20-1100
 
 # reminder, use {} around environmental variables, otherwise docker uses it as a literal
 
 LABEL edu.mda.bcb.name="MBatch Stand Alone" \
-      edu.mda.bcb.version="2019-10-15-1100"
+      edu.mda.bcb.version="2020-07-20-1100"
 
 # create and setup docker_rstudio
 # also, set permissions and ownerships on internal docker directories
@@ -53,3 +53,4 @@ RUN cd /home/docker_rstudio/mbatch && \
 # set working directory for future commands
 WORKDIR /home/docker_rstudio/mbatch
 CMD ["/bin/bash", "./runRstudioServer.bash"]
+

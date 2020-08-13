@@ -1,5 +1,13 @@
-#mutationBatchExtract
-
+# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+#
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
+# MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
 library(MBatchUtils)
 
@@ -17,13 +25,14 @@ if (!is.null(getTestOutputDir()))
   ########################################################
   ########################################################
   baseTestDir=getTestInputDir()
-  baseOutputDir=getTestOutputDir()
   dccMinMaf=file.path(baseTestDir, "DCCMin_MAF")
   gdcMinMaf=file.path(baseTestDir, "GDCMin_MAF")
-  dccMinMut=file.path(baseOutputDir, "DCCMin_MUT")
-  gdcMinMut=file.path(baseOutputDir, "GDCMin_MUT")
   dccMinMutCompare=file.path(baseTestDir, "DCCMin_MUT")
   gdcMinMutCompare=file.path(baseTestDir, "GDCMin_MUT")
+  ########################################################
+  baseOutputDir=getTestOutputDir()
+  dccMinMut=file.path(baseOutputDir, "DCCMin_MUT")
+  gdcMinMut=file.path(baseOutputDir, "GDCMin_MUT")
   ########################################################
   ########################################################
   unlink(dccMinMut, recursive=TRUE)
@@ -45,12 +54,12 @@ if (!is.null(getTestOutputDir()))
   print("compared1")
   compared1 <- compareTwoMatrices(correctedMatrix, compareMatrix)
   print(compared1)
-  print(file.path(gdcMinMut, "MaskedSomaticMutation", "TCGA-ACC.MuSEVariantAggregationandMasking_HG38_Total.tsv"))
-  print(file.path(gdcMinMutCompare, "TCGA-ACC", "TCGA-ACC.MuSEVariantAggregationandMasking_HG38_Total.tsv"))
+  print(file.path(gdcMinMut, "GDCMin_MAF", "GDCMin_MAF.TCGA_HG38_Total.tsv"))
+  print(file.path(gdcMinMutCompare, "TCGA-ACC", "TCGA-ACC.VarScan2VariantAggregationandMasking_HG38_Total.tsv"))
   print("correctedMatrix 1")
-  correctedMatrix <- readAsGenericMatrix(file.path(gdcMinMut, "MaskedSomaticMutation", "TCGA-ACC.MuSEVariantAggregationandMasking_HG38_Total.tsv"))
+  correctedMatrix <- readAsGenericMatrix(file.path(gdcMinMut, "GDCMin_MAF", "GDCMin_MAF.TCGA_HG38_Total.tsv"))
   print("compareMatrix 1")
-  compareMatrix <- readAsGenericMatrix(file.path(gdcMinMutCompare, "TCGA-ACC", "TCGA-ACC.MuSEVariantAggregationandMasking_HG38_Total.tsv"))
+  compareMatrix <- readAsGenericMatrix(file.path(gdcMinMutCompare, "TCGA-ACC", "TCGA-ACC.VarScan2VariantAggregationandMasking_HG38_Total.tsv"))
   print("compared2")
   compared2 <- compareTwoMatrices(correctedMatrix, compareMatrix)
   print(compared2)

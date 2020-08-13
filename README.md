@@ -8,6 +8,17 @@ The MBatch R package is designed to help assess and correct for batch effects. I
 
 Additional information can be found at http://bioinformatics.mdanderson.org/main/TCGABatchEffects:Overview
 
+|Component|Description|
+|--|--|
+|MBatch (R)|R package for basic Batch Effects|
+|MBatchUtils (R)|R package for MutBatch, running from config, and making ZIP archives|
+|BEVIndex (app)|Used by MBatchUtils to make ZIP Archives|
+|DscJava (app)|Java code for computing DSC values, used by MBatch|
+|LegendJava (app)|Java code for writing legends, used by MBatch|
+|ReadRJava (app)|Java code for reading large TSVs, used by MBatch|
+|DebianRJava (docker)|Base image with R and Java|
+|MBatchImageSA (docker)|Image with MBatch R packages and RStudio Server|
+
 # MBatch and MBatchUtils R Packages
 
 The documentation directort contains several kinds of documentation for MBatch:
@@ -22,7 +33,7 @@ Downloads and details on Standardized Data are available at http://bioinformatic
 
 ## MBatch R Package
 
-If you have the equivalent of Java 8 and R 3.4+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
+If you have the equivalent of Java 8 and R 3.6+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
 
 ```R
 # required CRAN packages
@@ -43,7 +54,7 @@ devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MB
 
 # MBatchUtils R Package
 
-If you have the equivalent of Java 8 and R 3.4+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
+If you have the equivalent of Java 8 and R 3.6+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
 
 First install MBatch, as provided above.
 

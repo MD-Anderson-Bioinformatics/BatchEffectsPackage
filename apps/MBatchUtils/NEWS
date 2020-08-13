@@ -1,9 +1,42 @@
 
 	**************************************************
 	*						 *
-	*	       0.1 SERIES NEWS			 *
+	*	       1.0 SERIES NEWS			 *
 	*						 *
 	**************************************************
+
+		CHANGES IN R VERSION 1.7.1
+
+NEW FEATURES
+
+    o	limit NGCHM and Hierarchical Clustering feature size to same as Boxplot
+
+		CHANGES IN R VERSION 1.7.0
+
+NEW FEATURES
+
+    o	new release version to match MBatch version
+
+		CHANGES IN R VERSION 1.0.2
+
+NEW FEATURES
+
+    o	update MutBatch paths
+
+		CHANGES IN R VERSION 1.0.1
+
+NEW FEATURES
+
+    o	updated for new index files
+    o	fix mutbatch run from config
+    o	added Mutations MutBatch run from Config
+    o	updated Mutations MutBatch for new path structure for GDC
+
+		CHANGES IN R VERSION 1.0.0
+
+NEW FEATURES
+
+    o	support for continuous and discrete analysis configs, and continuous correction configs.
 
 		CHANGES IN R VERSION 0.2.2
 

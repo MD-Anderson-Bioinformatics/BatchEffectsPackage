@@ -7,22 +7,22 @@ cd ../apps
 
 echo "compile BEVIndex"
 cd BEVIndex
-ant -f build.xml
+ant clean jar
 cd ..
 
 echo "compile DscJava"
 cd DscJava
-ant -f build.xml
+ant clean jar
 cd ..
 
 echo "compile LegendJava"
 cd LegendJava
-ant -f build.xml
+ant clean jar
 cd ..
 
 echo "compile ReadRJava"
 cd ReadRJava
-ant -f build.xml
+ant clean jar
 cd ..
 
 echo "list dist files"

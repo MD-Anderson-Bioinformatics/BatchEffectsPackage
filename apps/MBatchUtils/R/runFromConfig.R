@@ -1,10 +1,13 @@
-#MBatchUtils Copyright ? 2018 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
 #
-#This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
+# MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
 library(MBatch)
 
@@ -65,7 +68,11 @@ removeDuplicatesFromRows <- function(theMatrix)
 
 convertNulls <- function(theString)
 {
-  if("null"==theString)
+  if (is.na(theString))
+  {
+    theString <- NULL
+  }
+  else if("null"==theString)
   {
     theString <- NULL
   }
@@ -131,7 +138,7 @@ convertNA <- function(theData)
 }
 
 mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theShaidyMapGen, theShaidyMapGenJava,
-                                theNGCHMShaidyMem="16G", thePCAMem="4800m", theBoxplotMem="16G")
+                                theNGCHMShaidyMem="16G", thePCAMem="4800m", theBoxplotMem="16G", theRunPostFlag=FALSE)
 {
   message(mbatchUtilVersion())
   collateOrigValue<-Sys.getlocale("LC_COLLATE")
@@ -141,9 +148,72 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
   ####################################################################
   myConfig <- read.csv(theConfigFile, header=FALSE, sep="\t", as.is=TRUE, row.names=1 )
   rbnOnly <- as.logical(convertNulls(myConfig["RBN_Only",]))
+  mutBatchFlag <- as.logical(convertNulls(myConfig["mutBatchFlag",]))
+  mutationsMutbatchFlag <- as.logical(convertNulls(myConfig["mutationsMutbatchFlag",]))
   if (isTRUE(rbnOnly))
   {
     runRBNfromConfig(theConfigFile, theOutputDir)
+  }
+  else if (isTRUE(mutBatchFlag))
+  {
+    title <- myConfig["title",]
+    batchTypesForMBatch <- myConfig["batchTypesForMBatchArray",]
+    if (!is.null(batchTypesForMBatch))
+    {
+      batchTypesForMBatch <- strsplit(batchTypesForMBatch, ",")[[1]]
+    }
+    mutBatchMem <- myConfig["mutBatchMem",]
+    mutBatchThreads <- as.integer(myConfig["mutBatchThreads",])
+    mutBatchPvalueCutoff <- as.numeric(myConfig["mutBatchPvalueCutoff",])
+    mutBatchZscoreCutoff <- as.numeric(myConfig["mutBatchZscoreCutoff",])
+    message("title ", title)
+    message("mutBatchMem ", mutBatchMem)
+    message("batchTypesForMBatch ", batchTypesForMBatch)
+    message("mutBatchThreads ", mutBatchThreads)
+    message("mutBatchPvalueCutoff ", mutBatchPvalueCutoff)
+    message("mutBatchZscoreCutoff ", mutBatchZscoreCutoff)
+
+    sourceDir <-dirname(theConfigFile)
+    datFile <- file.path(sourceDir, "matrix_data.tsv")
+    batFile <- file.path(sourceDir, "batches.tsv")
+
+    mutBatchSingle(datFile, batFile, title, theOutputDir,
+                   theJavaArgs=c(paste(c("-Xms", "-Xmx"), mutBatchMem, sep=""), "-Djava.awt.headless=true"),
+                   theThreads=mutBatchThreads,
+                   thePvalueCutoff=mutBatchPvalueCutoff,
+                   theZScoreCutoff=mutBatchZscoreCutoff)
+  }
+  else if (isTRUE(mutationsMutbatchFlag))
+  {
+    batchTypesForMBatch <- myConfig["batchTypesForMBatchArray",]
+    if (!is.null(batchTypesForMBatch))
+    {
+      batchTypesForMBatch <- strsplit(batchTypesForMBatch, ",")[[1]]
+    }
+    mutBatchMem <- myConfig["mutBatchMem",]
+    mutBatchThreads <- as.integer(myConfig["mutBatchThreads",])
+    mutBatchPvalueCutoff <- as.numeric(myConfig["mutBatchPvalueCutoff",])
+    mutBatchZscoreCutoff <- as.numeric(myConfig["mutBatchZscoreCutoff",])
+    mutBatchDataBaseDir <- myConfig["mutBatchDataBaseDir",]
+    mutBatchExtractDir <- myConfig["mutBatchExtractDir",]
+    mutBatchOutputDir <- myConfig["mutBatchOutputDir",]
+    message("mutBatchMem ", mutBatchMem)
+    message("batchTypesForMBatch ", batchTypesForMBatch)
+    message("mutBatchThreads ", mutBatchThreads)
+    message("mutBatchPvalueCutoff ", mutBatchPvalueCutoff)
+    message("mutBatchZscoreCutoff ", mutBatchZscoreCutoff)
+    message("mutBatchDataBaseDir ", mutBatchDataBaseDir)
+    message("mutBatchExtractDir ", mutBatchExtractDir)
+    message("mutBatchOutputDir ", mutBatchOutputDir)
+    mutationBatchExtract(theMafDir=mutBatchDataBaseDir, theTypeCountDir=mutBatchExtractDir, theGDCflag=TRUE)
+    mutationBatchAssess(theTypeCountDir=mutBatchExtractDir,
+                        theOutputDir=mutBatchOutputDir,
+                        theJavaArgs=mutBatchMem,
+                        theThreads=mutBatchThreads,
+                        thePvalueCutoff=mutBatchPvalueCutoff,
+                        theZScoreCutoff=mutBatchZscoreCutoff,
+                        thePCAflag=FALSE,
+                        theBatchTypes=batchTypesForMBatch)
   }
   else
   {
@@ -191,16 +261,12 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
     RBN_InvariantId <- convertNulls(myConfig["RBN_InvariantId",])
     RBN_VariantId <- convertNulls(myConfig["RBN_VariantId",])
     RBN_Matched <- as.logical(convertNulls(myConfig["RBN_Matched",]))
-    RBN_InvariantRepsType <- convertNulls(myConfig["RBN_InvariantRepsType",])
-    RBN_VariantRepsType <- convertNulls(myConfig["RBN_VariantRepsType",])
     RBN_InvariantReps <- convertStringArray(convertNulls(myConfig["RBN_InvariantRepsArray",]))
     RBN_VariantReps <- convertStringArray(convertNulls(myConfig["RBN_VariantRepsArray",]))
     message("RBN_UseFirstAsInvariant ", RBN_UseFirstAsInvariant)
     message("RBN_InvariantId ", RBN_InvariantId)
     message("RBN_VariantId ", RBN_VariantId)
     message("RBN_Matched ", RBN_Matched)
-    message("RBN_InvariantRepsType ", RBN_InvariantRepsType)
-    message("RBN_VariantRepsType ", RBN_VariantRepsType)
     message("RBN_InvariantReps ", RBN_InvariantReps)
     message("RBN_VariantReps ", RBN_VariantReps)
     EBNPlus_GroupId1 <- convertNulls(myConfig["EBNPlus_GroupId1",])
@@ -423,6 +489,10 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
                             theMinBatchSize=selectedDSCMinBatchSize,
                             thePCAMem=thePCAMem,
                             theBoxplotMem=theBoxplotMem)
+    if(isTRUE(theRunPostFlag))
+    {
+      buildDSCOverviewFile(theOutputDir, theOutputDir, theOutputDir, "DSCOverview.tsv", theOutputDir)
+    }
     #############################################################################
     if (isTRUE(selectedNgchmFlag))
     {
@@ -437,10 +507,13 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
           message("myBatchType ", myBatchType)
           message("theShaidyMapGen ", theShaidyMapGen)
           message("theShaidyMapGenJava ", theShaidyMapGenJava)
-          message("dim(myOriginalData@mData) ", dim(myOriginalData@mData))
-          message("dim(myOriginalData@mBatches) ", dim(myOriginalData@mBatches))
-          buildBatchHeatMapFromHC_Structures(theMatrixData=myOriginalData@mData,
-                                       theBatchData=myOriginalData@mBatches,
+          message("dim(myMBatchData@mData) ", dim(myMBatchData@mData))
+          message("dim(myMBatchData@mBatches) ", dim(myMBatchData@mBatches))
+          message("trim to same size as hierarchical")
+          myMBatchData <- as.numericWithIssues(myMBatchData)
+          ngchmData <- mbatchTrimData(myMBatchData@mData, theMaxSize = (selectedBoxplotMaxGeneCount * ncol(myMBatchData@mData)))
+          buildBatchHeatMapFromHC_Structures(theMatrixData=ngchmData,
+                                       theBatchData=myMBatchData@mBatches,
                                        theTitle=paste(title, myBatchType, sep=" "),
                                        theOutputFile=file.path(theOutputDir, "NGCHM", paste(myBatchType, "ngchm.ngchm", sep="_")),
                                        theUDendRDataFile=rdataHC,
@@ -485,12 +558,17 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
                                     theSeed, theDSCMaxGenes, theBoxplotMaxGenes,
                                     theMinBatchSize, thePCAMem, theBoxplotMem)
 {
+  if (theBoxplotMaxGenes>5000)
+  {
+    message("Limit boxplot to at most 5000 genes");
+    theBoxplotMaxGenes <- 5000
+  }
   # reduce size
   theDataObject@mData <- mbatchTrimData(theDataObject@mData, theMaxSize)
   ####
   #### HierarchicalClustering
   ####
-  rdataHC <- callMBatch_HierarchicalClustering_Structures(theOutputDir, theDataObject, theTitle)
+  rdataHC <- callMBatch_HierarchicalClustering_Structures(theOutputDir, theDataObject, theTitle, theBoxplotMaxGenes)
   ####
   #### SupervisedClustering
   ####
@@ -512,10 +590,6 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
   pipelineMean <- function(x)
   {
     mean(x, na.rm=TRUE)
-  }
-  if (theBoxplotMaxGenes>5000)
-  {
-    theBoxplotMaxGenes <- 5000
   }
   callMBatch_BoxplotAllSamplesData_Structures(theOutputDir, theDataObject, theTitle,
                                               theMaxGeneCount=theBoxplotMaxGenes)

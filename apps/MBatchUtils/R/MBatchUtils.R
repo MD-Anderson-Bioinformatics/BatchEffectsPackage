@@ -1,14 +1,17 @@
-#MBatchUtils Copyright ? 2018 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
 #
-#This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
+# MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
 mbatchUtilVersion <- function()
 {
-  return("MBatchUtils 2019-09-04-0745")
+  return("MBatchUtils 2020-07-20-1100")
 }
 
 
@@ -79,6 +82,7 @@ compareTwoMatrices <- function(theCorrected, theCompare)
   {
     if (!(colnames(theCorrected)[myCol]==colnames(theCompare)[myCol]))
     {
+      message("FALSE mismatch 1")
       message("myCol=", myCol)
       message("colnames(theCorrected)[myCol]=", colnames(theCorrected)[myCol])
       message("colnames(theCompare)[myCol]=", colnames(theCompare)[myCol])
@@ -88,6 +92,7 @@ compareTwoMatrices <- function(theCorrected, theCompare)
     {
       if (!(rownames(theCorrected)[myRow]==rownames(theCompare)[myRow]))
       {
+        message("FALSE mismatch 2")
         message("myRow=", myRow)
         message("rownames(theCorrected)[myRow]=", rownames(theCorrected)[myRow])
         message("rownames(theCompare)[myRow]=", rownames(theCompare)[myRow])
@@ -102,16 +107,24 @@ compareTwoMatrices <- function(theCorrected, theCompare)
       #   browser();
       # }
       #message("checking myRow=", myRow, " and myCol=", myCol, " theCorrected[myRow, myCol]=", theCorrected[myRow, myCol], " theCompare[myRow, myCol]=",theCompare[myRow, myCol])
-      if (!is.finite(theCorrected[myRow, myCol])&&!is.finite(theCompare[myRow, myCol]))
+      if (!is.finite(theCorrected[myRow, myCol]) ||
+          !is.finite(theCompare[myRow, myCol]) ||
+          is.na(theCorrected[myRow, myCol]) ||
+          is.na(theCompare[myRow, myCol]))
       {
         # ignore
       }
-      else if (!(all.equal(theCorrected[myRow, myCol], theCompare[myRow, myCol])))
+      else if (!(isTRUE(all.equal(theCorrected[myRow, myCol], theCompare[myRow, myCol]))))
       {
+        message("FALSE mismatch 3")
         message("myRow=", myRow)
         message("myCol=", myCol)
+        message("theCorrected myRow name =", rownames(theCorrected)[myRow])
+        message("theCompare myRow name   =", rownames(theCompare)[myRow])
+        message("theCorrected myCol name =", colnames(theCorrected)[myCol])
+        message("theCompare myCol name   =", colnames(theCompare)[myCol])
         message("theCorrected[myRow, myCol]=", theCorrected[myRow, myCol])
-        message("theCompare[myRow, myCol]=", theCompare[myRow, myCol])
+        message("theCompare[myRow, myCol]  =", theCompare[myRow, myCol])
         return(FALSE)
       }
     }

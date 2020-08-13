@@ -1,0 +1,195 @@
+---
+title: "Using MBatchUtils: Making a Zip Archive for Batch Effects Viewer"
+author: "Tod Casasent"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+    number_sections: TRUE
+vignette: >
+  %\VignetteIndexEntry{Using MBatchUtils: Making a Zip Archive for Batch Effects Viewer}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+These instructions are aimed at people familiar with R and familiar with TCGA/GDC platforms and data types. They are intended to introduce the reader to producing a ZIP archive of an assessment, for use with the stand-alone Batch Effects Viewer. These instructions will only rarely, if ever, touch on the appropriateness of the assessment algorithm or interpretation of output.
+
+# Assessment
+
+The MBatchUtils assessment function, mbatchRunFromConfig, uses a configuration file to run assessments in MBatch. This is followed by a call to buildSingleArchive to build a ZIP archive for use by the Batch Effects Viewer stand alone application.
+
+# Input
+
+The configuration file used for this example is:
+```{r comment=''}
+  # set the paths
+  theConfigFile="/BatchEffectsPackage_data/testing_static/MBatchUtils/vignettes/MBatchConfig.tsv"
+  cat(readLines(theConfigFile), sep = '\n')
+```
+
+##sampleidBatchType	Sample
+This gives the column of the batch file that contains the sample ids.
+
+##batchTypesForMBatchArray	TSS,ShipDate
+Comma separated list of batch types, column names from batch file, to use for doing analysis.
+
+##mutBatchFlag	FALSE
+TRUE or FALSE flag telling whether or not do do "mutBatch" processing on a single dataset in Standardized Data format.
+
+##mutationsMutbatchFlag	FALSE
+TRUE or FALSE flag telling whether or not do do mutations "mutBatch" processing on multiple MAF files.
+
+##mutBatchMem	4000m
+Memory to allocate to the Java process when mutBatch processing.
+
+##mutBatchThreads	5
+Number of threads to use for mutBatch processing.
+
+##mutBatchPvalueCutoff	.00001
+P-value cutoff for mutBatch processing to find "significant" differences.
+
+##mutBatchZscoreCutoff	1.96
+Z-Score cutoff for mutBatch processing to find "significant" differences.
+
+##filterMaxValue	0
+Filtering settings for maximum number of rows times columns to use -- 0 indicates "use all".
+
+##filterLogTransformFlag	TRUE
+TRUE or FALSE flag indicating whether to perform log transform on data file one.
+
+##filterLogTransformFlag2	FALSE
+TRUE or FALSE flag indicating whether to perform log transform on data file two.
+
+##filteringBatchType	null
+Batch type (column name from batch file) to use to filter out specific batches.
+
+##filteringBatchesArray	null
+Comma delimited list of batches to remove from processing.
+
+##CDP_Flag	TRUE
+TRUE or FALSE flag indicating whether to generate the correlation density plot, usually used with EBN+.
+
+##selectedBatchToCorrect	BatchId
+When doing corrections, batch type on which to do corrections.
+
+##selectedCorrection	EB_withPara
+Correction algorithm to use and actual name of algorithm:
+EB_withPara      Empirical Bayes with Parametric Priors
+EB_withNonpara   Empirical Bayes with Non-Parametric Priors
+MP_overall       Median Polish - Overall
+MP_batch         Median Polish - By Batch
+ANOVA_adj        ANOVA Adjusted
+ANOVA_unadj      ANOVA Unadjusted
+RBN_Replicates   RBN using Replicates
+RBN_Pseudoreps   RBN using Pseudoreplicates (list of paired samples)
+EBN_Plus         EBN Plus
+
+##selectedCorrectionMinBatchSize	1
+When doing corrections, the minimum batch size to consider valid.
+
+##selectedDSCPermutations	2000
+Number of permutations to perform to generate DSC values and p-values during PCA+
+
+##selectedDSCThreads	5
+Number of threads to use to generate DSC values and p-values during PCA+
+
+##selectedDSCMinBatchSize	5
+When generating DSC values and p-values during PCA+, the minimum batch size to consider valid.
+
+##selectedDSCSeed	314
+When generating DSC values and p-values during PCA+, the random number seed to use.
+
+##selectedDSCMaxGeneCount	10000
+When generating DSC values and p-values during PCA+, the maximum number of features to use. (0 means use all.)
+
+##selectedBoxplotMaxGeneCount	5000
+For boxplot calculations, the maximum number of features to use.
+
+##selectedNgchmFlag	TRUE
+TRUE or FALSE flag indicating whether to generate an NGCHM based on the hierarchical clustering settings.
+
+##RBN_Only	FALSE
+TRUE or FALSE flag indicating whether to only run RBN correction.
+
+##RBN_UseFirstAsInvariantFlag	FALSE
+TRUE or FALSE flag indicating whether to use the first dataset as invariant.
+
+##RBN_InvariantId	null
+Group name used for labelling invariant features when combining matrixes. (Use null if RBN not being run.)
+
+##RBN_VariantId	null
+Group name used for labelling variant features when combining matrixes. (Use null if RBN not being run.)
+
+##RBN_Matched	null
+TRUE or FALSE flag, if TRUE, indicates that NAs should be added for missing replicates. (Use null if RBN not being run.)
+
+##RBN_InvariantRepsArray	null
+Comma delimited list of sample ids to use for identifying pseudo-replicates. Should match in order pairs in variant array. (Use null if RBN not being run.)
+
+##RBN_VariantRepsArray	null
+Comma delimited list of sample ids to use for identifying pseudo-replicates. Should match in order pairs in invariant array. (Use null if RBN not being run.)
+
+##EBNPlus_GroupId1	null
+The group name for data set 1 (for example, RNASeqV2). (Use null if EBN+ not being run.)
+
+##EBNPlus_GroupId2	null
+The group name for data set 2 (for example, Agilent4502). (Use null if EBN+ not being run.)
+
+##EBNPlus_Seed	null
+NULL or a seed to use. This is passed to the standard R set.seed function. (Use null if EBN+ not being run.)
+
+##EBNPlus_MinSamples	null
+Defaults to 3. Any row (gene) with less than this number of samples is dropped. (Use null if EBN+ not being run.)
+
+##title	MBatchUtils Test Run
+String to use as title in diagrams.
+
+# Output
+
+Create a ZIP file usable with the stand-alone Batch Effects Viewer, to use dynamic diagrams.
+
+# Example Call
+
+
+```{r, echo=TRUE}
+{
+  library(MBatch)
+  library(MBatchUtils)
+  
+  # set the paths
+  baseTestDir=getTestInputDir()
+  baseOutputDir=getTestOutputDir()
+  theOrigConfigFile=file.path(baseTestDir, "vignettes", "MBatchConfig.tsv")
+  theOrigGeneFile=file.path(baseTestDir, "vignettes", "matrix_data.tsv")
+  theOrigBatchFile=file.path(baseTestDir, "vignettes", "batches.tsv")
+  theOutputDir=file.path(baseOutputDir, "ZIP_Archive")
+  theOutputDirMBatch=file.path(theOutputDir, "MBatch")
+  jarDir=file.path(baseTestDir, "exe")
+  javaExe=getJava()
+  jarFile=file.path(jarDir, "ShaidyMapGen.jar")
+  theDestConfigFile=file.path(theOutputDir, "MBatchConfig.tsv")
+  theDestGeneFile=file.path(theOutputDir, "matrix_data.tsv")
+  theDestBatchFile=file.path(theOutputDir, "batches.tsv")
+  ####
+  # make sure the output dir exists and is empty
+  unlink(theOutputDir, recursive=TRUE)
+  dir.create(theOutputDir, showWarnings=FALSE, recursive=TRUE)
+  dir.create(theOutputDirMBatch, showWarnings=FALSE, recursive=TRUE)
+  file.copy(theOrigConfigFile, theDestConfigFile)
+  file.copy(theOrigGeneFile, theDestGeneFile)
+  file.copy(theOrigBatchFile, theDestBatchFile)
+  # config
+  mbatchRunFromConfig(theConfigFile=theDestConfigFile,
+                      theOutputDir=theOutputDirMBatch,
+                      theNaStrings=c("null", "NA"),
+					  theShaidyMapGen=jarFile,
+					  theShaidyMapGenJava=javaExe,
+					  theNGCHMShaidyMem="8G", 
+					  thePCAMem="4800m", 
+					  theBoxplotMem="8G",
+					  theRunPostFlag=TRUE)
+  buildSingleArchive("none", NULL, theOutputDirMBatch, theOutputDirMBatch)
+}
+```
+
