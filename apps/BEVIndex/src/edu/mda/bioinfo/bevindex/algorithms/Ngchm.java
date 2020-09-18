@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class Ngchm
 {

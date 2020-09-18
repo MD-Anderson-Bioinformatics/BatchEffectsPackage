@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class MBatchIndex
 {

@@ -39,11 +39,11 @@ import org.apache.commons.io.filefilter.RegexFileFilter;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class BEVIndex
 {
-	static public String M_VERSION = "BEVIndex 2020-07-20-1100";
+	static public String M_VERSION = "BEVIndex 2020-09-11-1000";
 	static public String M_AUTOCORRECT_NOTICE = "This dataset has been corrected using an automated system without human input. The correction does not imply the presence or absence of batch effects in the original data. The user is solely responsible for assessing batch effects (e.g. by using our assessment tools) and deciding whether or not to use the corrected data, which may or may not have mitigated some useful biological information along with any technical artifacts.";
 	
 	////////////////////////////////////////////////////////////////////////////

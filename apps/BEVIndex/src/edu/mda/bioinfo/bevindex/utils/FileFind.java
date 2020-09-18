@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class FileFind
 {

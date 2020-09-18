@@ -5,6 +5,12 @@
 	*						 *
 	**************************************************
 
+		CHANGES IN R VERSION 1.7.2
+
+NEW FEATURES
+
+    o	fix bug in runFromConfig where Discrete Analysis was ignoring requested batch types
+
 		CHANGES IN R VERSION 1.7.1
 
 NEW FEATURES

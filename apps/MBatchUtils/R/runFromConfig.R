@@ -181,7 +181,8 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
                    theJavaArgs=c(paste(c("-Xms", "-Xmx"), mutBatchMem, sep=""), "-Djava.awt.headless=true"),
                    theThreads=mutBatchThreads,
                    thePvalueCutoff=mutBatchPvalueCutoff,
-                   theZScoreCutoff=mutBatchZscoreCutoff)
+                   theZScoreCutoff=mutBatchZscoreCutoff,
+                   theBatchTypes=batchTypesForMBatch)
   }
   else if (isTRUE(mutationsMutbatchFlag))
   {

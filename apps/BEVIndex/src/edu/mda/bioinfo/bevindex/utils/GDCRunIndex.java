@@ -33,7 +33,7 @@ import javax.imageio.ImageIO;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class GDCRunIndex
 {

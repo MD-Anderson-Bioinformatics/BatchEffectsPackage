@@ -3,7 +3,7 @@ FROM debian:9
 # reminder, use {} around environmental variables, otherwise docker uses it as a literal
 
 LABEL edu.mda.bcb.name="DebianRJava" \
-      edu.mda.bcb.version="2020-07-20-1100" \
+      edu.mda.bcb.version="2020-09-11-1000" \
       edu.mda.bcb.Rversion="3.6" \
       edu.mda.bcb.Javaversion="8" \
       edu.mda.bcb.Debianversion="9"
@@ -76,8 +76,8 @@ RUN java -version && \
     Rscript -e "installed.packages()"
 
 ## build with: docker build -t debian_r_java .
-## rename/tag for push with: docker tag debian_r_java mdabcb/debian_r_java:2020-07-20-1100
+## rename/tag for push with: docker tag debian_r_java mdabcb/debian_r_java:2020-09-11-1000
 ## login to docker hub with: docker login --username=<your-username>
 ## repo may need be created on Docker Hub before pushing (depends on versions of stuff)
-## push to docker hub with: docker push mdabcb/debian_r_java:2020-07-20-1100
+## push to docker hub with: docker push mdabcb/debian_r_java:2020-09-11-1000
 

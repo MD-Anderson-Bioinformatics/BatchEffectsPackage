@@ -30,7 +30,7 @@ import java.util.TreeSet;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class BEVRunIndex
 {

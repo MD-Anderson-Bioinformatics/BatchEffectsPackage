@@ -13,7 +13,7 @@ package edu.mda.bioinfo.bevindex.gson;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class OriginalData
 {

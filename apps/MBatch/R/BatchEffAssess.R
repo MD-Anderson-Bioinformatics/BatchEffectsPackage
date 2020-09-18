@@ -14,7 +14,7 @@ library(rJava, warn.conflicts=FALSE, verbose=FALSE)
 
 getMBatchVersion<-function()
 {
-	return("MBatch Version: 2020-07-20-1100")
+	return("MBatch Version: 2020-08-31-0800")
 }
 
 mbatchWriteSuccessfulLog <- function()

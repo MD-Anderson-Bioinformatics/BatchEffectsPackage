@@ -20,7 +20,7 @@ import java.util.Scanner;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class BEVtooltips
 {

@@ -23,7 +23,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class ZipDir
 {

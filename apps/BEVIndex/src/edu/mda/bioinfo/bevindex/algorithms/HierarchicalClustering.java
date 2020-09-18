@@ -17,7 +17,7 @@ import java.io.File;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class HierarchicalClustering
 {

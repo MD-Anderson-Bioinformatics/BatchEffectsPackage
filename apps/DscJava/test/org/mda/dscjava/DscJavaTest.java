@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class DscJavaTest
 {

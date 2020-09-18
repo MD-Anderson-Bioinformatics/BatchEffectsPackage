@@ -26,7 +26,7 @@ import java.util.zip.ZipFile;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class FileFindInZip
 {

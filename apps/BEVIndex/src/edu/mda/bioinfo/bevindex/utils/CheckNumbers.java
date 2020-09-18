@@ -17,7 +17,7 @@ import java.nio.file.Paths;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class CheckNumbers
 {

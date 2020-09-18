@@ -23,12 +23,12 @@ import java.util.Arrays;
 
 /**
  *
- * @author linux
+ * @author Tod-Casasent
  */
 public class BEVIndex_old
 {
 
-	static protected String mVersion = "BEVIndex 2020-07-20-1100";
+	static protected String mVersion = "BEVIndex 2020-09-11-1000";
 	static public String [] mBEVlabels = { "Version", "Program", "Disease", "Workflow", "Data Type", "Algorithm", "Diagram Type", "Sub-Type" };
 	static public String [] mBEVcurrentDefault = { "current", "TCGA", "KIRC", "methylation", "All-original", "PCA", "BatchId", "ManyToMany", "PCAValues" };
 	static public String [] mBEVlegacyDefault = { "legacy", "TCGA", "KIRC", "methylation", "All-original", "PCA", "BatchId", "ManyToMany", "PCAValues" };

@@ -1,9 +1,9 @@
-FROM mdabcb/debian_r_java:2020-07-20-1100
+FROM mdabcb/debian_r_java:2020-09-11-1000
 
 # reminder, use {} around environmental variables, otherwise docker uses it as a literal
 
 LABEL edu.mda.bcb.name="MBatch Stand Alone" \
-      edu.mda.bcb.version="2020-07-20-1100"
+      edu.mda.bcb.version="2020-09-11-1000"
 
 # create and setup docker_rstudio
 # also, set permissions and ownerships on internal docker directories
