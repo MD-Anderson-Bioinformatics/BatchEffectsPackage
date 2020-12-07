@@ -35,7 +35,10 @@ Downloads and details on Standardized Data are available at http://bioinformatic
 
 If you have the equivalent of Java 8 and R 3.6+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
 
+These instructions have a workaround for GitHub throttling that was affecting some users, and a recent change to how Bioconductor installs work.
+
 ```R
+
 # required CRAN packages
 install.packages(c("rJava", "devtools", "Cairo", "epiR", "gtools", "mclust", "squash", "httr"), dependencies=TRUE, repos = "http://cloud.r-project.org/")
 
@@ -44,25 +47,47 @@ library(devtools)
 install_github("js229/Vennerable")
 
 # required Bioconductor packages
-source("http://bioconductor.org/biocLite.R")
-biocLite(c("limma","RBGL","graph","Biobase"), ask="a")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install(c("limma","RBGL","graph","Biobase"), ask=FALSE)
+
+# other packages
 install.packages(c("oompaBase", "ClassDiscovery", "PreProcess"), dependencies=TRUE, repos=c("http://cloud.r-project.org", "http://silicovore.com/OOMPA/"))
 
+# For MBatchUtils
+install.packages("httr", dependencies = TRUE, repos = "http://cran.r-project.org")
+install.packages("usethis", dependencies = TRUE, repos = "http://cran.r-project.org")
+install.packages("covr", dependencies = TRUE, repos = "http://cran.r-project.org")
+install.packages("rversions", dependencies = TRUE, repos = "http://cran.r-project.org")
+install.packages("shiny", dependencies = TRUE, repos = "http://cran.r-project.org")
+install.packages("devtools", dependencies = TRUE, repos = "http://cran.r-project.org")
+library(devtools)
+devtools::install_github("MD-Anderson-Bioinformatics/tsvio")
+devtools::install_github("MD-Anderson-Bioinformatics/NGCHM-R", ref="v0.12.8")
+
 ## MBatch package
-devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MBatch")
+library(devtools)
+#devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MBatch")
+# Download and uncompress https://github.com/MD-Anderson-Bioinformatics/BatchEffectsPackage/archive/2020-09-11-1000.zip
+# really only need
+# for MBatch /BatchEffectsPackage-2020-09-11-1000/apps/MBatch
+# for MBatchUtils /BatchEffectsPackage-2020-09-11-1000/apps/MBatch
+devtools::install("/extract/path/BatchEffectsPackage-2020-09-11-1000/apps/MBatch")
+
 ```
 
 # MBatchUtils R Package
 
 If you have the equivalent of Java 8 and R 3.6+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
 
-First install MBatch, as provided above.
+First install MBatch, as provided above -- including the work-around for throttling.
 
 ```R
 
 # MBatchUtils package
 library(devtools)
-devtools::install_github("MD-Anderson-Bioinformatics/MBatchPackage/apps/MBatchUtils")
+#devtools::install_github("MD-Anderson-Bioinformatics/MBatchPackage/apps/MBatchUtils")
+devtools::install("/extract/path/BatchEffectsPackage-2020-09-11-1000/apps/MBatchUtils")
 ```
 
 
