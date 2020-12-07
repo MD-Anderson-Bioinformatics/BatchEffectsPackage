@@ -18,21 +18,4 @@ The documentation directort contains several kinds of documentation for MBatch:
 
 Downloads and details on Standardized Data are available at http://bioinformatics.mdanderson.org/TCGA/databrowser/
 
-If you have the equivalent of Java 8 and R 3.4+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
-
-```R
-# required CRAN packages
-install.packages(c("rJava", "devtools", "Cairo", "epiR", "gtools", "mclust", "squash", "httr"), dependencies=TRUE, repos = "http://cloud.r-project.org/")
-
-# required GitHub package
-library(devtools)
-install_github("js229/Vennerable")
-
-# required Bioconductor packages
-source("http://bioconductor.org/biocLite.R")
-biocLite(c("limma","RBGL","graph","Biobase"), ask="a")
-install.packages(c("oompaBase", "ClassDiscovery", "PreProcess"), dependencies=TRUE, repos=c("http://cloud.r-project.org", "http://silicovore.com/OOMPA/"))
-
-# MBatch package
-devtools::install_github("MD-Anderson-Bioinformatics/MBatch/package")
-```
+Use install instructions on main repo page.
