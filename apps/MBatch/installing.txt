@@ -58,25 +58,7 @@ J("java.lang.System")$getProperty("java.version")
 **** Installing Other Required Packages (R Command Line)
 *********************************************
 
-### run the first install.packages by itself, so you can answer the question about which repository to use
-install.packages("Cairo")
-
-install.packages("epiR")
-install.packages("gtools")
-install.packages("mclust")
-install.packages("squash")
-install.packages("rJava", dependencies=TRUE)
-
-install.packages(c("oompaBase", "ClassDiscovery", "PreProcess"), repos=c(getOption("repos"), "http://silicovore.com/OOMPA/"))
-
-source("http://bioconductor.org/biocLite.R")
-biocLite("limma")
-biocLite("RBGL")
-biocLite("graph")
-
-install.packages("devtools")
-library(devtools)
-install_github("js229/Vennerable")
+Use install instructions on main repo page.
 
 ************************************
 **** Installing MBatch Linux
