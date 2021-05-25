@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -9,10 +9,8 @@
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
-library(MBatch)
-
-#SupervisedClustering_Batches_Structures(theData, theTitle, theOutputPath, theDoHeatmapFlag)
-#SupervisedClustering_Pairs_Structures(theData, theTitle, theOutputPath, theDoHeatmapFlag, theListOfBatchPairs)
+#SupervisedClustering_Batches_Structures(theData, theTitle, theOutputPath)
+#SupervisedClustering_Pairs_Structures(theData, theTitle, theOutputPath, theListOfBatchPairs)
 # theListOfBatchPairs=c("PlateId", "TSS", "BatchId", "TSS")
 #PCA_Regular_Structures(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep, theIsPcaTrendFunction=NULL, theDoCentroidsMtoMFlag=TRUE, theDoPlainMtoMFlag=FALSE, theDoCentroidsOtoMFlag=FALSE, theDoPlainOtoMFlag=FALSE, theDoDSCFlag=TRUE, theDoDscPermsFileFlag=FALSE, theDoSampleLocatorFlag=TRUE, theListOfComponentsToPlot=c(1, 2, 1, 3, 1, 4, 2, 3, 2, 4, 3, 4), theDSCPermutations=2000, theDSCThreads=1, theMinBatchSize=2, theJavaParameters="-Xms1200m", theSeed=0, theMaxGeneCount=20000)
 #PCA_DualBatch_Structures(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep, theListForDoCentroidDualBatchType, theIsPcaTrendFunction=NULL, theDoDSCFlag=TRUE, theDoDscPermsFileFlag=FALSE, theDoSampleLocatorFlag=TRUE, theListOfComponentsToPlot=c(1, 2, 1, 3, 1, 4, 2, 3, 2, 4, 3, 4), theDSCPermutations=2000, theDSCThreads=1, theMinBatchSize=2, theJavaParameters="-Xms1200m", theSeed=0, theMaxGeneCount=20000)
@@ -61,26 +59,101 @@ callMBatch_HierarchicalClustering_Structures <- function(theOutputDir, theDataOb
 ################################################################################
 ################################################################################
 
-callMBatch_SupervisedClustering <- function(theOutputDir, theGeneFile, theBatchFile, theTitle)
+callMBatch_TRINOVA_Structures <- function(theOutputDir, theDataObject, theTitle, theTRINOVAtypes, theSampleType)
 {
-  myData <- loadDataManually(theGeneFile, theBatchFile)
-  callMBatch_SupervisedClustering_Structures(theOutputDir, myData, theTitle)
+  message("callMBatch_TRINOVA_Structures")
+  # output directory
+  outdir <- file.path(theOutputDir, "TRINOVA")
+  dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
+  message("callMBatch_TRINOVA_Structures as.numericWithIssues")
+  theDataObject <- as.numericWithIssues(theDataObject)
+  if (length(theTRINOVAtypes)!=3)
+  {
+    message("WARNING: need 3 batch types for TRINOVA")
+  }
+  else
+  {
+    message("callMBatch_TRINOVA_Structures theDataObject@mBatches")
+    theDataObject@mBatches <- theDataObject@mBatches[,c(theSampleType, theTRINOVAtypes)]
+    message("call TRINOVA_Structures")
+    # here, we take all the defaults to hierarchical clustering, passing a title and an output path
+    TRINOVA_Structures(theData=theDataObject,
+                      theTitle=theTitle,
+                      theOutputPath=outdir,
+                      theBatchTypeAndValuePairsToRemove=NULL, theBatchTypeAndValuePairsToKeep=NULL,
+                      theMaxGeneCount=10000)
+  }
 }
 
-callMBatch_SupervisedClustering_Structures <- function(theOutputDir, theDataObject, theTitle)
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+callMBatch_SupervisedClustering <- function(theOutputDir, theGeneFile, theBatchFile, theTitle,
+                                            theShaidyMapGen, theNgchmWidgetJs, theShaidyMapGenJava,
+                                            theNGCHMShaidyMem, theSampleType, theNgchmFeatureMapFile)
+{
+  myData <- loadDataManually(theGeneFile, theBatchFile)
+  callMBatch_SupervisedClustering_Structures(theOutputDir, myData, theTitle, theSampleType)
+}
+
+callMBatch_SupervisedClustering_Structures <- function(theOutputDir, theDataObject, theTitle,
+                                                       theShaidyMapGen, theNgchmWidgetJs, theShaidyMapGenJava, theNGCHMShaidyMem,
+                                                       theNgchmRowType,
+                                                       theNgchmColumnType,
+                                                       theNgchmFeatureMapFile)
 {
   # output directory
 	outdir <- file.path(theOutputDir, "SupervisedClustering")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
+	message("callMBatch_SupervisedClustering_Structures")
 	# here, we call supervised clustering, passing a title and an output path,
 	# telling it to generate a heatmap and to use the data without removing any type/values
 	# and keeping any other defaults
+	message("trim to same size as hierarchical")
 	SupervisedClustering_Batches_Structures(theData=theDataObject,
 									theTitle=theTitle,
 									theOutputPath=outdir,
-									theDoHeatmapFlag=TRUE,
 									theBatchTypeAndValuePairsToRemove=NULL,
 									theBatchTypeAndValuePairsToKeep=NULL)
+	for(myBatchType in colnames(theDataObject@mBatches)[2:length(colnames(theDataObject@mBatches))])
+  {
+	  warnLevel<-getOption("warn")
+	  on.exit(options(warn=warnLevel))
+	  options(warn=-1)
+    message("title ", theTitle)
+    message("myBatchType ", myBatchType)
+    message("theShaidyMapGen ", theShaidyMapGen)
+    message("theNgchmWidgetJs ", theNgchmWidgetJs)
+    message("theShaidyMapGenJava ", theShaidyMapGenJava)
+    message("dim(myMBatchData@mBatches) ", dim(theDataObject@mBatches))
+    message("trim to same size as hierarchical")
+    matrixFile <- file.path(outdir, "Batches", paste(myBatchType, "SCMatrix.tsv", sep="_"))
+    message("matrixFile ", matrixFile)
+    # matrix from file is transposed
+    myMatrix <- readAsGenericMatrix(matrixFile)
+    message("dim(myMatrix) ", dim(myMatrix))
+    colDend <- file.path(outdir, "Batches", paste(myBatchType, "uDend.RData", sep="_"))
+    rowDend <- file.path(outdir, "Batches", paste(myBatchType, "uDend_feature.RData", sep="_"))
+    message("colDend ", colDend)
+    message("rowDend ", rowDend)
+    #c("pearson", "ward.D2"),
+    # do not use feature map, since supervised clustering is sample ids in both directions
+    buildBatchHeatMapFromHC_Structures(theMatrixData=myMatrix,
+                                       theBatchData=theDataObject@mBatches,
+                                       theTitle=paste(theTitle, myBatchType, sep=" "),
+                                       theOutputFile=file.path(outdir, "Batches", paste(myBatchType, "ngchm.ngchm", sep="_")),
+                                       theColDendRDataFile=colDend,
+                                       theRowDendRDataFile=rowDend,
+                                       theNgchmFeatureMapFile=theNgchmFeatureMapFile,
+                                       theRowType=theNgchmRowType, theColType=theNgchmColumnType,
+                                       theRowCluster=NULL,
+                                       theShaidyMapGen=theShaidyMapGen,
+                                       theNgchmWidgetJs=theNgchmWidgetJs,
+                                       theShaidyMapGenJava=theShaidyMapGenJava,
+                                       theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
+  }
 }
 
 ################################################################################
@@ -107,7 +180,6 @@ callMBatch_SupervisedClusteringPairs_Structures <- function(theOutputDir, theDat
 	SupervisedClustering_Pairs_Structures(theData=theDataObject,
 									theTitle=theTitle,
 									theOutputPath=outdir,
-									theDoHeatmapFlag=TRUE,
 									theListOfBatchPairs=c("BatchId", "PlateId", "TSS", "ShipDate"),
 									theBatchTypeAndValuePairsToRemove=NULL,
 									theBatchTypeAndValuePairsToKeep=NULL)

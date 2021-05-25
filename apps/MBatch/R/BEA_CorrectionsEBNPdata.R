@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -193,10 +193,11 @@ setMethod("asSameOrder","EBNPdata", function(Object, by="both") {
 # the IDs/names should be in the first column
 # require the IDs/names of the row are completely same, and require the columns are the same and in the same order
 # The reason to use loop is because there may be one to multiple
-setMethod("corPairIn2Set" , "EBNPdata", function(Object, method="pearson"){
-  #mat1  <-  moveColumn2Rowname(Object@mData1)
-  #mat2  <-  moveColumn2Rowname(Object@mData2)
+setMethod("corPairIn2Set" , "EBNPdata", function(Object, method="pearson")
+{
+  ## data.matrix from data.frame converts character to factor to integer in R4+
   mat1 <- data.matrix(Object@mData1)
+  ## data.matrix from data.frame converts character to factor to integer in R4+
   mat2 <- data.matrix(Object@mData2)
   numSamples <- nrow(mat1)
   pairCorMat <- data.frame(IDs=character(),R=numeric(), pvalue=numeric(),meanOfmat1=numeric(),stdOfmat1=numeric(),meanOfmat2=numeric(),stdOfmat2=numeric() , stringsAsFactors=FALSE)

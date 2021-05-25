@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -9,7 +9,7 @@
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
-library(snowfall, warn.conflicts=FALSE, verbose=FALSE)
+requireNamespace("snowfall")
 
 baseDir <-  "/tmp/parallel_tests"
 
@@ -47,12 +47,12 @@ buildList<-function(theValue, theLength)
 ################################################################################
 
 ####################################################################
-### 
+###
 ####################################################################
 
 stopifnotWithLogging<-function(msg="", ... )
 {
-	if (sum(...)!=length(c(...))) 
+	if (sum(...)!=length(c(...)))
 	{
 		message(msg)
 		stop(msg, call.=FALSE)
@@ -60,11 +60,11 @@ stopifnotWithLogging<-function(msg="", ... )
 }
 
 ####################################################################
-### 
+###
 ####################################################################
 
 setClass("PCA-PVALUE-DSC", representation(
-				mListOfGenePvalue="vector", 
+				mListOfGenePvalue="vector",
 				mListOfGeneDSC="vector",
 				mListOfGeneDB="vector",
 				mListOfGeneDW="vector",
@@ -91,9 +91,9 @@ pvalueDSC <- function(thePcaScores, theBatchIdsForSamples, thePermutations, theC
 }
 
 doDscPerms <- function(theIgnoredIndex)
-{					
+{
 	### permute the data randomly, keeping sizes of batches the same
-	permData <- t(apply(thePcaDataExcerpt, 1, function(x) 
+	permData <- t(apply(thePcaDataExcerpt, 1, function(x)
 					{
 						###message("old= ", paste(x, collapse=", "))
 						sx <- sample(x, length(x))
@@ -156,12 +156,12 @@ pvalueDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples, thePe
 			}
 			### Trace_SbPerm and Trace_SwPerm are not used
 			###message(" DSCPerm=", DSCPerm, " >= DSC=", DSC)
-			
+
 			if(!is.nan(DSCPerm))
 			{
 				if(!is.nan(DSC))
 				{
-					numPerms <- numPerms + 1 
+					numPerms <- numPerms + 1
 					if(DSCPerm >= DSC)
 					{
 						numGreater <- numGreater + 1
@@ -208,14 +208,14 @@ pvalueDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples, thePe
 }
 
 ####################################################################
-### 
+###
 ####################################################################
 
 
 setClass("PCA-DSC", representation(
-				mListOfDSCbyGene="vector", 
-				mListOfDWbyGene="vector", 
-				mListOfDBbyGene="vector", 
+				mListOfDSCbyGene="vector",
+				mListOfDWbyGene="vector",
+				mListOfDBbyGene="vector",
 				mDSC="numeric",
 				mDB="numeric",
 				mDW="numeric"))
@@ -223,7 +223,7 @@ setClass("PCA-DSC", representation(
 getDSC <- function(thePca, theBatchIdsForSamples, theFirstComponent, theSecondComponent)
 {
 	### pca@scores[sample,componentId]
-	pcaDataExcerpt <- t(thePca@scores[,((1:ncol(thePca@scores))==theFirstComponent)|((1:ncol(thePca@scores))==theSecondComponent)]) 
+	pcaDataExcerpt <- t(thePca@scores[,((1:ncol(thePca@scores))==theFirstComponent)|((1:ncol(thePca@scores))==theSecondComponent)])
 	results <- getDSCwithExcerpt(pcaDataExcerpt, theBatchIdsForSamples)
 	###message(" DSCij=", results[[1]], " Dwij=", results[[2]], " Dbij=", results[[3]])
 	return(results)
@@ -238,7 +238,7 @@ getDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples)
 			length(theBatchIdsForSamples)==length(thePcaDataExcerpt[1,]),length(theBatchIdsForSamples)==length(thePcaDataExcerpt[2,]))
 	### theBatchIdsForSamples - this is part of the @scores attribute from the pca object which now contains only the two components specified for this diagram
 	### columns are samples - rows are components
-	
+
 	### mean of across all the samples in the dataset
 	###message("mean of across all the samples in the dataset")
 	meanListAcrossSamples <- rowMeans(thePcaDataExcerpt, na.rm = TRUE)
@@ -248,7 +248,7 @@ getDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples)
 	###message("numberOfSamples=", numberOfSamples)
 	dwValue <- 0
 	dbValue <- 0
-	
+
 	###message("batch id list")
 	batchIdList <- sort(unique(sort(theBatchIdsForSamples)))
 	###message("batchIdList=", batchIdList)
@@ -274,7 +274,7 @@ getDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples)
 			### mean across samples in batch b only
 			###message("mean across samples in batch b only")
 			batchMean <- mean(valuesForBatch, na.rm = TRUE)
-			### calculate sample variance across samples 
+			### calculate sample variance across samples
 			###message("calculate sample variance across samples")
 			sampleVariance <- var(valuesForBatch, na.rm = TRUE)
 			###message("batchMean=", batchMean, "sampleVariance=", sampleVariance)
@@ -334,7 +334,7 @@ getDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples)
 }
 
 ####################################################################
-### 
+###
 ####################################################################
 
 doRTest <- function(theThreads)

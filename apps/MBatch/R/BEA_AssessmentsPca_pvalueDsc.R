@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -42,9 +42,14 @@ pvalueDSC <- function(thePca, theBatchIdsForSamples, thePermutations, theCompone
 
 doDscPerms <- function(thePcaDataExcerpt, theBatchIdsForSamples, thePermutations, theThreads)
 {
-	dscJavaObj <- .jnew("org/mda/dscjava/DscJava")
+  # package edu.mda.bcb.dscjava;
+  # public class DscJava
+  # public PcaDsc[] doDscPerms(double[] theValues, int[] theDim, String[] theBatchIds, int thePerms, int theThreads)
+	dscJavaObj <- .jnew("edu/mda/bcb/dscjava/DscJava")
 	logDebug("doDscPerms before java")
-	javaPcaDscObjList <- .jcall(dscJavaObj, "[Lorg/mda/dscjava/PcaDsc;", "doDscPerms", as.vector(thePcaDataExcerpt), dim(thePcaDataExcerpt), as.vector(theBatchIdsForSamples), as.integer(thePermutations), as.integer(theThreads))
+	javaPcaDscObjList <- .jcall(dscJavaObj, "[Ledu/mda/bcb/dscjava/PcaDsc;", "doDscPerms",
+	                            as.vector(thePcaDataExcerpt), dim(thePcaDataExcerpt), as.vector(theBatchIdsForSamples),
+	                            as.integer(thePermutations), as.integer(theThreads))
 	logDebug("doDscPerms after java")
 	resultsList <- lapply(javaPcaDscObjList, function(javaPcaDscObj)
 			{

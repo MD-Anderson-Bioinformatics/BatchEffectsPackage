@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -8,8 +8,6 @@
 #
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
-
-library(MBatch)
 
 #############################################################################
 #### utility functions
@@ -137,14 +135,24 @@ convertNA <- function(theData)
   theData
 }
 
-mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theShaidyMapGen, theShaidyMapGenJava,
+mbatchRunFromConfig <- function(theConfigFile, theDataDir,
+                                theOutputDir, theNaStrings,
+                                theShaidyMapGen,
+                                theNgchmWidgetJs,
+                                theShaidyMapGenJava,
                                 theNGCHMShaidyMem="16G", thePCAMem="4800m", theBoxplotMem="16G", theRunPostFlag=FALSE)
 {
+  # used to flag if other than full success written
+  otherNote <- FALSE
   message(mbatchUtilVersion())
   collateOrigValue<-Sys.getlocale("LC_COLLATE")
   on.exit(Sys.setlocale("LC_COLLATE",collateOrigValue), add=TRUE)
   Sys.setlocale("LC_COLLATE","C")
   message("Changing LC_COLLATE to C for duration of run")
+  ####################################################################
+  stopifnot(file.exists(theShaidyMapGen))
+  stopifnot(file.exists(theNgchmWidgetJs))
+  stopifnot(file.exists(theShaidyMapGenJava))
   ####################################################################
   myConfig <- read.csv(theConfigFile, header=FALSE, sep="\t", as.is=TRUE, row.names=1 )
   rbnOnly <- as.logical(convertNulls(myConfig["RBN_Only",]))
@@ -152,10 +160,16 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
   mutationsMutbatchFlag <- as.logical(convertNulls(myConfig["mutationsMutbatchFlag",]))
   if (isTRUE(rbnOnly))
   {
+    #
+    # RBN only
+    #
     runRBNfromConfig(theConfigFile, theOutputDir)
   }
   else if (isTRUE(mutBatchFlag))
   {
+    #
+    # MutBatch single-dataset Flag
+    #
     title <- myConfig["title",]
     batchTypesForMBatch <- myConfig["batchTypesForMBatchArray",]
     if (!is.null(batchTypesForMBatch))
@@ -173,7 +187,7 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
     message("mutBatchPvalueCutoff ", mutBatchPvalueCutoff)
     message("mutBatchZscoreCutoff ", mutBatchZscoreCutoff)
 
-    sourceDir <-dirname(theConfigFile)
+    sourceDir <- theDataDir
     datFile <- file.path(sourceDir, "matrix_data.tsv")
     batFile <- file.path(sourceDir, "batches.tsv")
 
@@ -186,6 +200,9 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
   }
   else if (isTRUE(mutationsMutbatchFlag))
   {
+    #
+    # MutBatch Mutations MAF (multi-dataset) Flag
+    #
     batchTypesForMBatch <- myConfig["batchTypesForMBatchArray",]
     if (!is.null(batchTypesForMBatch))
     {
@@ -218,9 +235,23 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
   }
   else
   {
+    #
+    # General MBatch Run
+    #
     title <- myConfig["title",]
     sampleidBatchType <- myConfig["sampleidBatchType",]
+    ngchmRowType <- myConfig["ngchmRowType",]
+    ngchmColumnType <- myConfig["ngchmColumnType",]
+    if (is.null(ngchmRowType))
+    {
+      ngchmRowType <- "scholar"
+    }
+    if (is.null(ngchmColumnType))
+    {
+      ngchmColumnType <- "bio.tcga.barcode.sample"
+    }
     batchTypesForMBatch <- myConfig["batchTypesForMBatchArray",]
+    batchTypesForTRINOVA <- myConfig["batchTypesForTRINOVA",]
     filterMaxValue <- myConfig["filterMaxValue",]
     filterLogTransformFlag <- myConfig["filterLogTransformFlag",]
     filterLogTransformFlag2 <- myConfig["filterLogTransformFlag2",]
@@ -230,6 +261,7 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
     message("title ", title)
     message("sampleidBatchType ", sampleidBatchType)
     message("batchTypesForMBatch ", batchTypesForMBatch)
+    message("batchTypesForTRINOVA ", batchTypesForTRINOVA)
     message("filterMaxValue ", filterMaxValue)
     message("filterLogTransformFlag ", filterLogTransformFlag)
     message("filterLogTransformFlag2 ", filterLogTransformFlag2)
@@ -310,6 +342,15 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
     {
       batchTypesForMBatch <- strsplit(batchTypesForMBatch, ",")[[1]]
     }
+    if (!is.null(batchTypesForTRINOVA))
+    {
+      batchTypesForTRINOVA <- strsplit(batchTypesForTRINOVA, ",")[[1]]
+      if (length(batchTypesForTRINOVA)!=3)
+      {
+        message("WARNING: TRINOVA requires three batch types")
+        batchTypesForTRINOVA <- NULL
+      }
+    }
     filterMaxValue <- as.numeric(filterMaxValue)
     filterLogTransformFlag <- as.logical(convertNulls(convertNA(filterLogTransformFlag)))
     filterLogTransformFlag2 <- as.logical(convertNulls(convertNA(filterLogTransformFlag2)))
@@ -321,12 +362,19 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
     selectedDSCMaxGeneCount <- as.numeric(selectedDSCMaxGeneCount)
     selectedBoxplotMaxGeneCount <- as.numeric(selectedBoxplotMaxGeneCount)
     ####################################################################
-    sourceDir <-dirname(theConfigFile)
-    logFile <- file.path(sourceDir, "mbatch.log")
+    logFile <- file.path(theOutputDir, "mbatch.log")
+    sourceDir <- theDataDir
     datFile <- file.path(sourceDir, "matrix_data.tsv")
     batFile <- file.path(sourceDir, "batches.tsv")
     datFile2 <- file.path(sourceDir, "matrix_data2.tsv")
     batFile2 <- file.path(sourceDir, "batches2.tsv")
+    #############################################################################
+    ngchmFeatureMapFile <- NULL
+    nmapFile <- file.path(sourceDir, "ngchm_link_map.tsv")
+    if (file.exists(nmapFile))
+    {
+      ngchmFeatureMapFile <- nmapFile
+    }
     #############################################################################
     # check directories
     message("theOutputDir=", theOutputDir)
@@ -338,6 +386,26 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
     #############################################################################
     setLogging(new("Logging", theFile=logFile))
     #############################################################################
+    message("update data to use sample")
+    {
+      # rename sample id column to Sample
+      if("Sample"!=sampleidBatchType)
+      {
+        origBatFileOne <- paste(batFile, ".bak2", sep="")
+        file.rename(batFile, origBatFileOne)
+        batchs <- readAsDataFrame(origBatFileOne)
+        names(batchs)[names(batchs)==sampleidBatchType] <- "Sample"
+        writeAsDataframe(batFile, batchs)
+        if(file.exists(datFile2))
+        {
+          origBatFileTwo <- paste(batFile2, ".bak2", sep="")
+          file.rename(batFile2, origBatFileTwo)
+          batchs <- readAsDataFrame(origBatFileTwo)
+          names(batchs)[names(batchs)==sampleidBatchType] <- "Sample"
+          writeAsDataframe(batFile2, batchs)
+        }
+      }
+    }
     message("rename data")
     origDatFile <- paste(datFile, ".bak", sep="")
     origBatFile <- paste(batFile, ".bak", sep="")
@@ -413,12 +481,6 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
       # TODO: use , theNaStrings=theNaStrings after changing pre-set values
       myMBatchData <- mbatchLoadFiles(datFile, batFile)
     }
-    # rename sample id column to Sample
-    if("Sample"!=sampleidBatchType)
-    {
-      names(myMBatchData@mBatches)[names(myMBatchData@mBatches)==sampleidBatchType] <- "Sample"
-      sampleidBatchType <- "Sample"
-    }
     newBatchTypesForMBatch <- c()
     goodBatchTypes <- names(myMBatchData@mBatches)
     for(val in batchTypesForMBatch)
@@ -457,107 +519,145 @@ mbatchRunFromConfig <- function(theConfigFile, theOutputDir, theNaStrings, theSh
                                               theEBNPlus_Seed=EBNPlus_Seed,
                                               theEBNPlus_MinSamples=EBNPlus_MinSamples)
     }
-    #### do filtering
-    batchesToRemove <- setdiff(colnames(myMBatchData@mBatches), c(sampleidBatchType, batchTypesForMBatch))
-    myMBatchData <- mbatchFilterData(theBeaData=myMBatchData,
-                                     theBatchTypeAndValuePairsToRemove=list(),
-                                     theBatchTypeAndValuePairsToKeep=list(),
-                                     theBatchTypesToRemove=batchesToRemove,
-                                     theMinIqr=0,
-                                     theMinSd=0,
-                                     theMinMad=0)
-    if (isTRUE(CDP_Flag))
+    if ((!is.null(selectedCorrection))&&(is.null(myMBatchData)))
     {
-      batchesToRemove <- setdiff(colnames(myOriginalData@mBatches), c(sampleidBatchType, batchTypesForMBatch))
-      myOriginalData <- mbatchFilterData(theBeaData=myOriginalData,
+      # correction not performed, one batch
+      # set flog for other than full success
+      otherNote <- TRUE
+      #############################################################################
+      message("Write completed note to '", file.path(theOutputDir, "MBATCH_COMPLETED.txt"), "'")
+      file.create(file.path(theOutputDir, "MBATCH_COMPLETED.txt"))
+    }
+    else
+    {
+      #### do filtering
+      # do not use sampleidBatchType, since that column has been changed to "Sample"
+      #batchesToRemove <- setdiff(colnames(myMBatchData@mBatches), c(sampleidBatchType, batchTypesForMBatch))
+      batchesToRemove <- setdiff(colnames(myMBatchData@mBatches), c("Sample", batchTypesForMBatch))
+      myMBatchData <- mbatchFilterData(theBeaData=myMBatchData,
                                        theBatchTypeAndValuePairsToRemove=list(),
                                        theBatchTypeAndValuePairsToKeep=list(),
                                        theBatchTypesToRemove=batchesToRemove,
                                        theMinIqr=0,
                                        theMinSd=0,
                                        theMinMad=0)
-    }
-    #### do assessments
-    rdataHC <- doAssessmentsFromConfig(theOutputDir=theOutputDir,
-                            theDataObject=myMBatchData,
-                            theTitle=title,
-                            thePermutations=selectedDSCPermutations,
-                            thePermutationThreads=selectedDSCThreads,
-                            theMaxSize=filterMaxValue,
-                            theSeed=selectedDSCSeed,
-                            theDSCMaxGenes=selectedDSCMaxGeneCount,
-                            theBoxplotMaxGenes=selectedBoxplotMaxGeneCount,
-                            theMinBatchSize=selectedDSCMinBatchSize,
-                            thePCAMem=thePCAMem,
-                            theBoxplotMem=theBoxplotMem)
-    if(isTRUE(theRunPostFlag))
-    {
-      buildDSCOverviewFile(theOutputDir, theOutputDir, theOutputDir, "DSCOverview.tsv", theOutputDir)
-    }
-    #############################################################################
-    if (isTRUE(selectedNgchmFlag))
-    {
-      if (!is.null(rdataHC))
+      if (isTRUE(CDP_Flag))
       {
+        # do not use sampleidBatchType, since that column has been changed to "Sample"
+        #batchesToRemove <- setdiff(colnames(myOriginalData@mBatches), c(sampleidBatchType, batchTypesForMBatch))
+        batchesToRemove <- setdiff(colnames(myOriginalData@mBatches), c("Sample", batchTypesForMBatch))
+        myOriginalData <- mbatchFilterData(theBeaData=myOriginalData,
+                                         theBatchTypeAndValuePairsToRemove=list(),
+                                         theBatchTypeAndValuePairsToKeep=list(),
+                                         theBatchTypesToRemove=batchesToRemove,
+                                         theMinIqr=0,
+                                         theMinSd=0,
+                                         theMinMad=0)
+      }
+      #### do assessments
+      # do not use sampleidBatchType, since that column has been changed to "Sample"
+      rdataHC <- doAssessmentsFromConfig(theOutputDir=theOutputDir,
+                              theDataObject=myMBatchData,
+                              theTitle=title,
+                              thePermutations=selectedDSCPermutations,
+                              thePermutationThreads=selectedDSCThreads,
+                              theMaxSize=filterMaxValue,
+                              theSeed=selectedDSCSeed,
+                              theDSCMaxGenes=selectedDSCMaxGeneCount,
+                              theBoxplotMaxGenes=selectedBoxplotMaxGeneCount,
+                              theMinBatchSize=selectedDSCMinBatchSize,
+                              thePCAMem=thePCAMem,
+                              theBoxplotMem=theBoxplotMem,
+                              theTRINOVAtypes=batchTypesForTRINOVA,
+                              theNgchmRowType=ngchmRowType,
+                              theNgchmColumnType =ngchmColumnType,
+                              theShaidyMapGen=theShaidyMapGen,
+                              theNgchmWidgetJs=theNgchmWidgetJs,
+                              theShaidyMapGenJava=theShaidyMapGenJava,
+                              theNGCHMShaidyMem=theNGCHMShaidyMem,
+                              theNgchmFeatureMapFile=ngchmFeatureMapFile)
+      if(isTRUE(theRunPostFlag))
+      {
+        buildDSCOverviewFile(theOutputDir, theOutputDir, theOutputDir, "DSCOverview.tsv", theOutputDir)
+      }
+      #############################################################################
+      if (isTRUE(selectedNgchmFlag))
+      {
+        if (!is.null(rdataHC))
+        {
+          warnLevel<-getOption("warn")
+          on.exit(options(warn=warnLevel))
+          options(warn=-1)
+          for(myBatchType in batchTypesForMBatch)
+          {
+            message("title ", title)
+            message("myBatchType ", myBatchType)
+            message("theShaidyMapGen ", theShaidyMapGen)
+            message("theShaidyMapGenJava ", theShaidyMapGenJava)
+            message("dim(myMBatchData@mData) ", dim(myMBatchData@mData))
+            message("dim(myMBatchData@mBatches) ", dim(myMBatchData@mBatches))
+            message("trim to same size as hierarchical")
+            myMBatchData <- as.numericWithIssues(myMBatchData)
+            ngchmData <- mbatchTrimData(myMBatchData@mData, theMaxSize = (selectedBoxplotMaxGeneCount * ncol(myMBatchData@mData)))
+            buildBatchHeatMapFromHC_Structures(theMatrixData=ngchmData,
+                                         theBatchData=myMBatchData@mBatches,
+                                         theTitle=paste(title, myBatchType, sep=" "),
+                                         theOutputFile=file.path(theOutputDir, "NGCHM", paste(myBatchType, "ngchm.ngchm", sep="_")),
+                                         theColDendRDataFile=rdataHC,
+                                         theRowDendRDataFile=NULL,
+                                         theNgchmFeatureMapFile=ngchmFeatureMapFile,
+                                         theRowType=ngchmRowType, theColType=ngchmColumnType,
+                                         theRowCluster=c("pearson", "ward.D2"),
+                                         theShaidyMapGen=theShaidyMapGen,
+                                         theNgchmWidgetJs=theNgchmWidgetJs,
+                                         theShaidyMapGenJava=theShaidyMapGenJava,
+                                         theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
+            }
+        }
+        else
+        {
+          message("no HC data, so skip NGCHM")
+        }
+      }
+      #############################################################################
+      if (isTRUE(CDP_Flag))
+      {
+        graphics.off()
         warnLevel<-getOption("warn")
         on.exit(options(warn=warnLevel))
         options(warn=-1)
-        for(myBatchType in batchTypesForMBatch)
+        if (!file.exists(file.path(theOutputDir, "CDP")))
         {
-          message("title ", title)
-          message("myBatchType ", myBatchType)
-          message("theShaidyMapGen ", theShaidyMapGen)
-          message("theShaidyMapGenJava ", theShaidyMapGenJava)
-          message("dim(myMBatchData@mData) ", dim(myMBatchData@mData))
-          message("dim(myMBatchData@mBatches) ", dim(myMBatchData@mBatches))
-          message("trim to same size as hierarchical")
-          myMBatchData <- as.numericWithIssues(myMBatchData)
-          ngchmData <- mbatchTrimData(myMBatchData@mData, theMaxSize = (selectedBoxplotMaxGeneCount * ncol(myMBatchData@mData)))
-          buildBatchHeatMapFromHC_Structures(theMatrixData=ngchmData,
-                                       theBatchData=myMBatchData@mBatches,
-                                       theTitle=paste(title, myBatchType, sep=" "),
-                                       theOutputFile=file.path(theOutputDir, "NGCHM", paste(myBatchType, "ngchm.ngchm", sep="_")),
-                                       theUDendRDataFile=rdataHC,
-                                       theRowType="labels", theColType="bio.tcga.barcode.sample",
-                                       theRowCluster=c("pearson", "ward.D2"),
-                                       theShaidyMapGen=theShaidyMapGen,
-                                       theShaidyMapGenJava=theShaidyMapGenJava,
-                                       theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
+          dir.create(file.path(theOutputDir, "CDP"),showWarnings = FALSE, recursive = TRUE)
         }
-      }
-      else
-      {
-        message("no HC data, so skip NGCHM")
-      }
-    }
-    #############################################################################
-    if (isTRUE(CDP_Flag))
-    {
-      graphics.off()
-      warnLevel<-getOption("warn")
-      on.exit(options(warn=warnLevel))
-      options(warn=-1)
-      if (!file.exists(file.path(theOutputDir, "CDP")))
-      {
-        dir.create(file.path(theOutputDir, "CDP"),showWarnings = FALSE, recursive = TRUE)
-      }
-      CDP_Structures(file.path(theOutputDir, "CDP", "CDP_Plot_Data1_Diagram.PNG"), myOriginalData@mData, myMBatchData@mData, "CDP Output 1")
-      if (!is.null(myOriginalData2))
-      {
-        CDP_Structures(file.path(theOutputDir, "CDP", "CDP_Plot_Data2_Diagram.PNG"), myOriginalData2@mData, myMBatchData@mData, "CDP Output 2")
+        CDP_Structures(file.path(theOutputDir, "CDP", "CDP_Plot_Data1_Diagram.PNG"), myOriginalData@mData, myMBatchData@mData, "CDP Output 1")
+        if (!is.null(myOriginalData2))
+        {
+          CDP_Structures(file.path(theOutputDir, "CDP", "CDP_Plot_Data2_Diagram.PNG"), myOriginalData2@mData, myMBatchData@mData, "CDP Output 2")
+        }
       }
     }
   }
-  #############################################################################
-  message("Write success note to '", file.path(theOutputDir, "MBATCH_SUCCESS.txt"), "'")
-  file.create(file.path(theOutputDir, "MBATCH_SUCCESS.txt"))
+  if (isFALSE(otherNote))
+  {
+    #############################################################################
+    message("Write success note to '", file.path(theOutputDir, "MBATCH_SUCCESS.txt"), "'")
+    file.create(file.path(theOutputDir, "MBATCH_SUCCESS.txt"))
+  }
 }
 
 
 doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
                                     thePermutations, thePermutationThreads, theMaxSize,
                                     theSeed, theDSCMaxGenes, theBoxplotMaxGenes,
-                                    theMinBatchSize, thePCAMem, theBoxplotMem)
+                                    theMinBatchSize, thePCAMem, theBoxplotMem,
+                                    theTRINOVAtypes,
+                                    theNgchmRowType,
+                                    theNgchmColumnType,
+                                    theShaidyMapGen,
+                                    theNgchmWidgetJs,
+                                    theShaidyMapGenJava, theNGCHMShaidyMem,
+                                    theNgchmFeatureMapFile)
 {
   if (theBoxplotMaxGenes>5000)
   {
@@ -567,14 +667,6 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
   # reduce size
   theDataObject@mData <- mbatchTrimData(theDataObject@mData, theMaxSize)
   ####
-  #### HierarchicalClustering
-  ####
-  rdataHC <- callMBatch_HierarchicalClustering_Structures(theOutputDir, theDataObject, theTitle, theBoxplotMaxGenes)
-  ####
-  #### SupervisedClustering
-  ####
-  callMBatch_SupervisedClustering_Structures(theOutputDir, theDataObject, theTitle)
-  ####
   #### PCAPlus
   ####
   callMBatch_PCA_Structures(theOutputDir, theDataObject, theTitle,
@@ -582,9 +674,34 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
                             theDSCPermutations=thePermutations,
                             theDSCThreads=thePermutationThreads,
                             theMinBatchSize=theMinBatchSize,
-                            theJavaParameters=c(paste(c("-Xms", "-Xmx"), thePCAMem, sep=""), "-Djava.awt.headless=true"),
+                            theJavaParameters=c(paste(c("-Xms", "-Xmx"), thePCAMem, sep=""), "-Djava.awt.headless=true", "-Xss8m"),
                             theSeed=theSeed,
                             theMaxGeneCount=theDSCMaxGenes)
+  ####
+  #### HierarchicalClustering
+  ####
+  rdataHC <- callMBatch_HierarchicalClustering_Structures(theOutputDir, theDataObject, theTitle, theBoxplotMaxGenes)
+  ####
+  #### TRINOVA
+  ####
+  # commented out: does not run reliably. In BEI, produces:
+  # ANOVA F-tests on an essentially perfect fit are unreliable
+  # Which claims to be a warning, but acts like an error
+  #message("call callMBatch_TRINOVA_Structures")
+  #callMBatch_TRINOVA_Structures(theOutputDir, theDataObject, theTitle, theTRINOVAtypes, theSampleType)
+  ####
+  #### SupervisedClustering
+  ####
+  message("call callMBatch_SupervisedClustering_Structures")
+  {
+    superMatrix <- mbatchTrimData(theDataObject@mData, theMaxSize = (theBoxplotMaxGenes * ncol(theDataObject@mData)))
+    mySuperData<-new("BEA_DATA", superMatrix, theDataObject@mBatches, data.frame())
+    callMBatch_SupervisedClustering_Structures(theOutputDir, mySuperData, theTitle,
+                                               theShaidyMapGen, theNgchmWidgetJs, theShaidyMapGenJava, theNGCHMShaidyMem,
+                                               theNgchmRowType,
+                                               theNgchmColumnType,
+                                               theNgchmFeatureMapFile)
+  }
   ####
   #### BoxPlot
   ###
@@ -603,6 +720,9 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
   {
     writeAsDataframe(file.path(theOutputDir, "BatchData.tsv"), theDataObject@mBatches)
   }
+  ####
+  #### write success
+  ###
   message("Processing success")
   mbatchWriteSuccessfulLog()
   rdataHC

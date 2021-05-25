@@ -1,4 +1,4 @@
-# MBatch and MBatchUtils R Packages and MBatch Stand-Alone Docker Image with RStudio
+# MBatch and MBatchUtils R Packages and MBatch Stand-Alone Docker Image
 
 This is for educational and research purposes only. 
 
@@ -17,13 +17,38 @@ Additional information can be found at http://bioinformatics.mdanderson.org/main
 |LegendJava (app)|Java code for writing legends, used by MBatch|
 |ReadRJava (app)|Java code for reading large TSVs, used by MBatch|
 |DebianRJava (docker)|Base image with R and Java|
-|MBatchImageSA (docker)|Image with MBatch R packages and RStudio Server|
+|MBatchImageSA (docker)|Image with MBatch R packages|
+
+# MBatch Stand-Alone Docker Image
+
+Download the docker-compose.yml file at the root of this repository. This file is setup for use on Linux.
+
+Make the following directories.
+
+ - /MBatchSA/mbatch
+ - /MBatchSA/website
+
+Permissions or ownership of the directories may need to be changed or matched to the Docker image user 2002.
+
+In the directory with the docker-compose.yml file run:
+
+	docker-compose -f docker-compose.yml up --no-build -d
+
+You can stop it with:
+
+	docker-compose -f docker-compose.yml down
+
+To connect on the command line as the default user (2002) use:
+
+	docker exec -t -i mbatchsa_cont_extr /bin/bash
+
+See documentation at https://github.com/MD-Anderson-Bioinformatics/BatchEffectsPackage/blob/master/docs/MBatchImageSA/MBISA_01_InstallExtImageLinux.pdf for details.
 
 # MBatch and MBatchUtils R Packages
 
 The documentation directort contains several kinds of documentation for MBatch:
 
- * Files that start MBatch_01 are install documentations. Current instructions are for Linux (Debian 9.1). We expect to provide Windows and OS X instructions in late 2017/early 2018.
+ * Files that start MBatch_01 are install documentations.
  * Files that start MBatch_02 are additional details about the test files in the package.
  * Files that start MBatch_03 are detail the file formats used by MBatch and the associated "Standardized Data" files.
  * Files that start MBatch_04 are documentation of assessment algorithms/plots.
@@ -33,73 +58,36 @@ Downloads and details on Standardized Data are available at http://bioinformatic
 
 ## MBatch R Package
 
-If you have the equivalent of Java 8 and R 3.6+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
-
-These instructions have a workaround for GitHub throttling that was affecting some users, and a recent change to how Bioconductor installs work.
+If you have the equivalent of Java 8 and R 4+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
 
 ```R
-
 # required CRAN packages
-install.packages(c("rJava", "devtools", "Cairo", "epiR", "gtools", "mclust", "squash", "httr"), dependencies=TRUE, repos = "http://cloud.r-project.org/")
-
-# required GitHub package
-library(devtools)
-install_github("js229/Vennerable")
+install.packages(c("rJava", "devtools", "Cairo", "epiR", "gtools", "mclust", "squash", "httr", "eulerr"), dependencies=TRUE, repos = "http://cloud.r-project.org/")
 
 # required Bioconductor packages
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install(c("limma","RBGL","graph","Biobase"), ask=FALSE)
-
-# other packages
+source("http://bioconductor.org/biocLite.R")
+biocLite(c("limma","RBGL","graph","Biobase"), ask="a")
 install.packages(c("oompaBase", "ClassDiscovery", "PreProcess"), dependencies=TRUE, repos=c("http://cloud.r-project.org", "http://silicovore.com/OOMPA/"))
 
-# For MBatchUtils
-install.packages("httr", dependencies = TRUE, repos = "http://cran.r-project.org")
-install.packages("usethis", dependencies = TRUE, repos = "http://cran.r-project.org")
-install.packages("covr", dependencies = TRUE, repos = "http://cran.r-project.org")
-install.packages("rversions", dependencies = TRUE, repos = "http://cran.r-project.org")
-install.packages("shiny", dependencies = TRUE, repos = "http://cran.r-project.org")
-install.packages("devtools", dependencies = TRUE, repos = "http://cran.r-project.org")
-library(devtools)
-devtools::install_github("MD-Anderson-Bioinformatics/tsvio")
-devtools::install_github("MD-Anderson-Bioinformatics/NGCHM-R", ref="v0.12.8")
-
 ## MBatch package
-library(devtools)
-#devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MBatch")
-# Download and uncompress https://github.com/MD-Anderson-Bioinformatics/BatchEffectsPackage/archive/2020-09-11-1000.zip
-# really only need
-# for MBatch /BatchEffectsPackage-2020-09-11-1000/apps/MBatch
-# for MBatchUtils /BatchEffectsPackage-2020-09-11-1000/apps/MBatch
-devtools::install("/extract/path/BatchEffectsPackage-2020-09-11-1000/apps/MBatch")
-
+devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MBatch")
 ```
 
 # MBatchUtils R Package
 
-If you have the equivalent of Java 8 and R 3.6+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
+If you have the equivalent of Java 8 and R 4+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
 
-First install MBatch, as provided above -- including the work-around for throttling.
+First install MBatch, as provided above.
 
 ```R
 
 # MBatchUtils package
 library(devtools)
-#devtools::install_github("MD-Anderson-Bioinformatics/MBatchPackage/apps/MBatchUtils")
-devtools::install("/extract/path/BatchEffectsPackage-2020-09-11-1000/apps/MBatchUtils")
+devtools::install_github("MD-Anderson-Bioinformatics/MBatchPackage/apps/MBatchUtils")
 ```
 
+**For educational and research purposes only.**
 
-# MBatch Stand-Alone Docker Image with RStudio
+**Funding** 
+This work was supported in part by U.S. National Cancer Institute (NCI) grant: Weinstein, Mills, Akbani. Batch effects in molecular profiling data on cancers: detection, quantification, interpretation, and correction, 5U24CA210949
 
-The docker-compose.yml file provided with this release provides access to the Docker Hub image for MBatch, which includes RStudio. Connecting via 8080 using the username/password docker_rstudio/docker_rstudio allows access.
-
-The docker-compose file uses the default host directories /MBatchSA/mbatch and /MBatchSA/website.
-The docker-compose file can be started with: docker-compose -f docker-compose.yml start
-
-Using "docker-compose -f docker-compose.yml start" will let you watch a "top" running in the guest Debian system.
-
-Stop the container using: docker-compose -f docker-compose.yml down
-
-Additional documentation in the yml file and coming soon.

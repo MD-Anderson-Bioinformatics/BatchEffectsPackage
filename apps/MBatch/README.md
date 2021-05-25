@@ -18,4 +18,5 @@ The documentation directort contains several kinds of documentation for MBatch:
 
 Downloads and details on Standardized Data are available at http://bioinformatics.mdanderson.org/TCGA/databrowser/
 
-Use install instructions on main repo page.
+See main README.MD on install instructions.
+

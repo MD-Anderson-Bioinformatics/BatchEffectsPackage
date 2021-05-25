@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -11,7 +11,7 @@
 
 mbatchUtilVersion <- function()
 {
-  return("MBatchUtils 2020-08-31-0800")
+  return("MBatchUtils BEA_VERSION_TIMESTAMP")
 }
 
 
@@ -174,10 +174,6 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile,
   mbatchStr <- mbatchLoadStructures(mymatrix, batchs)
   mymatrix <- mbatchStr@mData
   batchs <- mbatchStr@mBatches
-  #############################################
-  # filter to reduce size
-  #############################################
-  mymatrix <- mbatchTrimData(mymatrix, theSize)
   #####################################################################################################################
   ### remove any samples with given batch types and values
   if (length(theBatchTypeAndValuePairsToRemove)>0)
@@ -209,6 +205,10 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile,
     mymatrix <- log2(mymatrix+qt)
   }
   #############################################
+  # filter to reduce size
+  #############################################
+  mymatrix <- mbatchTrimData(mymatrix, theSize)
+  #############################################
   # write to files
   #############################################
   #writeAsMatrix(theOutputMatrixFile, mymatrix)
@@ -216,6 +216,28 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile,
   writeAsDataframe(theOutputBatchFile, batchs)
 }
 
+bidirectionalCentering <- function(theMatrix, theType=(function(x){median(x, na.rm=TRUE)}), theSampleFeatureFlag=TRUE)
+{
+  if (isTRUE(theSampleFeatureFlag))
+  {
+    sampleVals = apply(theMatrix, 2, theType)
+    theMatrix = scale(theMatrix, center=sampleVals, scale=FALSE)
+    theMatrix = t(theMatrix)
+    featureVals = apply(theMatrix, 2, theType)
+    theMatrix = scale(theMatrix, center=featureVals, scale=FALSE)
+    theMatrix = t(theMatrix)
+  }
+  else
+  {
+    theMatrix = t(theMatrix)
+    featureVals = apply(theMatrix, 2, theType)
+    theMatrix = scale(theMatrix, center=featureVals, scale=FALSE)
+    theMatrix = t(theMatrix)
+    sampleVals = apply(theMatrix, 2, theType)
+    theMatrix = scale(theMatrix, center=sampleVals, scale=FALSE)
+  }
+  theMatrix
+}
 
 ####################################################################
 ###

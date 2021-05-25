@@ -33,8 +33,7 @@ Returns TRUE if the save succeeded.
 #function (theFile, theDataframe, thePar = "-Xmx2000m",
 #theIncludeRowNamesFlag = FALSE)
 #{
-#    myClass1 <- system.file("ReadRJava", "ReadRJava.jar", package = "MBatch")
-#    myJavaJars <- file.path(myClass1, fsep = .Platform$path.sep)
+#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
 #    logDebug("writeAsDataframe - thePar ", thePar)
 #    logDebug("writeAsDataframe - theFile ", theFile)
 #    myCols <- as.vector(colnames(theDataframe))
@@ -47,16 +46,16 @@ Returns TRUE if the save succeeded.
 #    logDebug("writeAsDataframe - length(myCols) ", length(myCols))
 #    logDebug("writeAsDataframe - length(myRows) ", length(myRows))
 #    logDebug("writeAsDataframe - Calling .jinit ", myJavaJars)
-#    .jinit(classpath = myJavaJars, force.init = TRUE, parameters = thePar)
+#    .jinit(classpath = myJavaJars, force.init = TRUE, parameters = updateJavaParameters(thePar))
 #    logDebug("writeAsDataframe - .jinit complete")
 #    logDebug("writeAsDataframe before java")
 #    if (is.null(myRows)) {
-#        success <- .jcall("org/mda/readrjava/ReadRJava", returnSig = "Z",
+#        success <- .jcall("edu/mda/bcb/readrjava/ReadRJava", returnSig = "Z",
 #            method = "writeStringData_Column", .jnew("java/lang/String",
 #                theFile), .jcastToArray(myCols), .jcastToArray(myData))
 #    }
 #    else {
-#        success <- .jcall("org/mda/readrjava/ReadRJava", returnSig = "Z",
+#        success <- .jcall("edu/mda/bcb/readrjava/ReadRJava", returnSig = "Z",
 #            method = "writeStringData_All", .jnew("java/lang/String",
 #                theFile), .jcastToArray(myCols), .jcastToArray(myRows),
 #            .jcastToArray(myData))

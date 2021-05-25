@@ -1,14 +1,15 @@
 #!/bin/bash
 
-echo "Clear build and dist files"
-rm -r ../apps/*/build/*
-rm -r ../apps/*/dist/*
+echo "START 00_clear"
+set -e
+BASE_DIR=$1
+
+echo "Clear build and target files"
+rm -rf ${BASE_DIR}/apps/*/build/*
+rm -rf ${BASE_DIR}/apps/*/target/*
 
 echo "Clear test output data"
-rm -r ../data/testing_dynamic/*/*
+rm -rf ${BASE_DIR}/data/testing_dynamic/*/*
 
-echo "ls build and dist files"
-ls ../apps/*/build
-ls ../apps/*/dist
+echo "FINISHED 00_clear"
 
-echo "done"

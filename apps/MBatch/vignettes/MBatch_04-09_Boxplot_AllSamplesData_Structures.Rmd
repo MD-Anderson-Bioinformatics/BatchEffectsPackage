@@ -85,12 +85,16 @@ After the output is an explanation of files and directories created.
 
 ```{r, echo=TRUE}
 {
-  library(MBatch)
-  
+  require(MBatch)
+
+  inputDir <- getTestInputDir()
+  outputDir <- getTestOutputDir()
+  compareDir <- getTestCompareDir()
+
   # set the paths
-  theGeneFile="/bea_testing/MATRIX_DATA/matrix_data-Tumor.tsv"
-  theBatchFile="/bea_testing/MATRIX_DATA/batches-Tumor.tsv"
-  theOutputDir="/bea_testing/output/Boxplot_AllSamplesData_Structures"
+  theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
+  theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
+  theOutputDir=file.path(outputDir, "Boxplot_AllSamplesData_Structures")
   theRandomSeed=314
   
   # make sure the output dir exists and is empty
@@ -111,7 +115,7 @@ After the output is an explanation of files and directories created.
 The above code creates the following subdirectories and files. The subdirectories correspond to the run type were requested.
 
 ```bash
-/bea_testing/output/Boxplot_AllSamplesData_Structures$ ls -l
+/output/Boxplot_AllSamplesData_Structures$ ls -l
 total 44
 drwxr-xr-x 2 linux linux 40960 Jun 19 11:41 AllSample-RLE
 ```
@@ -119,7 +123,7 @@ drwxr-xr-x 2 linux linux 40960 Jun 19 11:41 AllSample-RLE
 Looking at the "AllSample-RLE" subdirectory, it contains the diagram and legend files, and data usable with dynamic displays.
 
 ```bash
-/bea_testing/output/Boxplot_AllSamplesData_Structures/AllSample-Data$ ls -l
+/output/Boxplot_AllSamplesData_Structures/AllSample-Data$ ls -l
 total 6228
 -rw-r--r-- 1 linux linux   3873 Jun 19 15:12 BoxPlot_AllSample-Data_Annotations-BatchId.tsv
 -rw-r--r-- 1 linux linux   3873 Jun 19 15:13 BoxPlot_AllSample-Data_Annotations-PlateId.tsv
@@ -208,4 +212,4 @@ TCGA-OR-A5J3-01A-11D-A29J-05	7	-0.32982819164709853	520.0	-0.19185967737525045	6
 
 Here is a diagram generated from this code.
 
-![Boxplot All Samples Data Output](/bea_testing/output/Boxplot_AllSamplesData_Structures/AllSample-Data/BoxPlot_AllSample-Data_Diagram-TSS.png)
+`r sprintf("![Boxplot All Samples Data Output](%s)", file.path(theOutputDir, "AllSample-Data", "BoxPlot_AllSample-Data_Diagram-TSS.png"))`

@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -9,7 +9,7 @@
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
-library(rJava)
+requireNamespace("rJava")
 
 baseDir <-  "/tmp/parallel_tests"
 
@@ -31,12 +31,12 @@ buildList<-function(theValue, theLength)
 ################################################################################
 
 ####################################################################
-### 
+###
 ####################################################################
 
 stopifnotWithLogging<-function(msg="", ... )
 {
-	if (sum(...)!=length(c(...))) 
+	if (sum(...)!=length(c(...)))
 	{
 		message(msg)
 		stop(msg, call.=FALSE)
@@ -44,11 +44,11 @@ stopifnotWithLogging<-function(msg="", ... )
 }
 
 ####################################################################
-### 
+###
 ####################################################################
 
 setClass("PCA-PVALUE-DSC", representation(
-				mListOfGenePvalue="vector", 
+				mListOfGenePvalue="vector",
 				mListOfGeneDSC="vector",
 				mListOfGeneDB="vector",
 				mListOfGeneDW="vector",
@@ -76,8 +76,8 @@ pvalueDSC <- function(thePcaScores, theBatchIdsForSamples, thePermutations, theC
 
 doDscPerms <- function(thePcaDataExcerpt, theBatchIdsForSamples, thePermutations, theThreads)
 {
-	dscJavaObj <- .jnew("org/mda/dscjava/DscJava")
-	javaPcaDscObjList <- .jcall(dscJavaObj, "[Lorg/mda/dscjava/PcaDsc;", "doDscPerms", as.vector(thePcaDataExcerpt), dim(thePcaDataExcerpt), as.vector(theBatchIdsForSamples), as.integer(thePermutations), as.integer(theThreads))
+	dscJavaObj <- .jnew("edu/mda/bcb/dscjava/DscJava")
+	javaPcaDscObjList <- .jcall(dscJavaObj, "[Ledu/mda/bcb/dscjava/PcaDsc;", "doDscPerms", as.vector(thePcaDataExcerpt), dim(thePcaDataExcerpt), as.vector(theBatchIdsForSamples), as.integer(thePermutations), as.integer(theThreads))
 	resultsList <- lapply(javaPcaDscObjList, function(javaPcaDscObj)
 	{
 		results <- new("PCA-DSC")
@@ -134,12 +134,12 @@ pvalueDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples, thePe
 			}
 			### Trace_SbPerm and Trace_SwPerm are not used
 			###message(" DSCPerm=", DSCPerm, " >= DSC=", DSC)
-			
+
 			if(!is.nan(DSCPerm))
 			{
 				if(!is.nan(DSC))
 				{
-					numPerms <- numPerms + 1 
+					numPerms <- numPerms + 1
 					if(DSCPerm >= DSC)
 					{
 						numGreater <- numGreater + 1
@@ -186,14 +186,14 @@ pvalueDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples, thePe
 }
 
 ####################################################################
-### 
+###
 ####################################################################
 
 
 setClass("PCA-DSC", representation(
-				mListOfDSCbyGene="vector", 
-				mListOfDWbyGene="vector", 
-				mListOfDBbyGene="vector", 
+				mListOfDSCbyGene="vector",
+				mListOfDWbyGene="vector",
+				mListOfDBbyGene="vector",
 				mDSC="numeric",
 				mDB="numeric",
 				mDW="numeric"))
@@ -201,7 +201,7 @@ setClass("PCA-DSC", representation(
 getDSC <- function(thePca, theBatchIdsForSamples, theFirstComponent, theSecondComponent)
 {
 	### pca@scores[sample,componentId]
-	pcaDataExcerpt <- t(thePca@scores[,((1:ncol(thePca@scores))==theFirstComponent)|((1:ncol(thePca@scores))==theSecondComponent)]) 
+	pcaDataExcerpt <- t(thePca@scores[,((1:ncol(thePca@scores))==theFirstComponent)|((1:ncol(thePca@scores))==theSecondComponent)])
 	results <- getDSCwithExcerpt(pcaDataExcerpt, theBatchIdsForSamples)
 	###message(" DSCij=", results[[1]], " Dwij=", results[[2]], " Dbij=", results[[3]])
 	return(results)
@@ -214,8 +214,8 @@ getDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples)
 	###message("length(thePcaDataExcerpt[2,])=",length(thePcaDataExcerpt[2,]))
 	stopifnotWithLogging("Number of batch ids should match number of samples in pca data",
 			length(theBatchIdsForSamples)==length(thePcaDataExcerpt[1,]),length(theBatchIdsForSamples)==length(thePcaDataExcerpt[2,]))
-	dscJavaObj <- .jnew("org/mda/dscjava/DscJava")
-	javaPcaDscObj <- .jcall(dscJavaObj, "Lorg/mda/dscjava/PcaDsc;", "getDSCwithExcerpt", as.vector(thePcaDataExcerpt), dim(thePcaDataExcerpt), as.vector(theBatchIdsForSamples))
+	dscJavaObj <- .jnew("edu/mda/bcb/dscjava/DscJava")
+	javaPcaDscObj <- .jcall(dscJavaObj, "Ledu/mda/bcb/dscjava/PcaDsc;", "getDSCwithExcerpt", as.vector(thePcaDataExcerpt), dim(thePcaDataExcerpt), as.vector(theBatchIdsForSamples))
 	results <- new("PCA-DSC")
 	results@mListOfDSCbyGene <-  .jcall(javaPcaDscObj, "[D", "getmListOfGeneDSC")
 	results@mListOfDWbyGene <-  .jcall(javaPcaDscObj, "[D", "getmListOfGeneDW")
@@ -231,12 +231,12 @@ getDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples)
 
 
 ####################################################################
-### 
+###
 ####################################################################
 
 doJavaTest <- function(theThreads)
 {
-	.jinit(classpath=paste(myClass1,myClass2,myClass3,sep=":"), force.init = TRUE, parameters="-Xms1200m")
+	.jinit(classpath=paste(myClass1,myClass2,myClass3,sep=":"), force.init = TRUE, parameters=updateJavaParameters("-Xms1200m"))
 	pcascores <- t(read.table(myScores, row.names=1, sep="\t", na.strings="NA", header=TRUE, stringsAsFactors=FALSE, quote="", check.names=FALSE))
 	batchInfo <- read.table(myBatches, sep="\t", na.strings="NA", header=TRUE, stringsAsFactors=FALSE, quote="", colClasses=c("character"), as.is=TRUE, check.names=FALSE)
 	indexList <- !is.na(match(batchInfo$Sample, rownames(pcascores)))
@@ -270,7 +270,7 @@ doJavaTest <- function(theThreads)
 
 matrixTest <- function()
 {
-	.jinit(classpath=paste(myClass1,myClass2,myClass3,sep=":"), force.init = TRUE, parameters="-Xms1200m")
+	.jinit(classpath=paste(myClass1,myClass2,myClass3,sep=":"), force.init = TRUE, parameters=updateJavaParameters("-Xms1200m"))
 	pcascores <- t(read.table(myScores, row.names=1, sep="\t", na.strings="NA", header=TRUE, stringsAsFactors=FALSE, quote="", check.names=FALSE))
 	batchInfo <- read.table(myBatches, sep="\t", na.strings="NA", header=TRUE, stringsAsFactors=FALSE, quote="", colClasses=c("character"), as.is=TRUE, check.names=FALSE)
 	indexList <- !is.na(match(batchInfo$Sample, rownames(pcascores)))
@@ -279,6 +279,6 @@ matrixTest <- function()
 	message(paste(pcascores[1,], collapse="\t"))
 	message("batchIdsForSamples")
 	message(paste(batchIdsForSamples, collapse="\t"))
-	dscJavaObj <- .jnew("org/mda/dscjava/DscJava")
+	dscJavaObj <- .jnew("edu/mda/bcb/dscjava/DscJava")
 	dsvValueResults <- .jcall(dscJavaObj, "V", "matrixTest", as.vector(pcascores), dim(pcascores), as.vector(batchIdsForSamples))
 }

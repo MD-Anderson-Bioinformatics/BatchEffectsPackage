@@ -53,11 +53,15 @@ The following code is adapted from the tests/EBNPlus_Correction_Structures.R fil
 
 ```{r, echo=TRUE}
 {
-  library(MBatch)
+  require(MBatch)
+
+  inputDir <- getTestInputDir()
+  outputDir <- getTestOutputDir()
+  compareDir <- getTestCompareDir()
   
   # set the paths
-  theDataFile1="/bea_testing/MATRIX_DATA/brca_rnaseq2_matrix_data.tsv"
-  theDataFile2="/bea_testing/MATRIX_DATA/brca_agi4502_matrix_data.tsv"
+  theDataFile1=file.path(inputDir, "brca_rnaseq2_matrix_data.tsv")
+  theDataFile2=file.path(inputDir, "brca_agi4502_matrix_data.tsv")
 
   # trim genes to get just gene symbols from standardized data
   trimGenes <- function(theGenes)

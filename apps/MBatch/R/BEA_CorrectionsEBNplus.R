@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -8,8 +8,6 @@
 #
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
-
-library(limma)
 
 ##  EBNplus Class
 ##  This class is for Emperical Bayes+limma+permutation adjustment of two datasets with replicates
@@ -273,6 +271,7 @@ setMethod("getData4EB", "EBNplus", function(Object)
 	printElements(rownames(data4EB)[1:100])
 	printElements(colnames(data4EB)[1:100])
 	#data4EB  <- moveColumn2Rowname(data4EB)
+	## data.matrix from data.frame converts character to factor to integer in R4+
 	####Object@data4EB  <- data.matrix(data4EB, rownames.force = TRUE)
 	Object@data4EB  <- data4EB
 	logDebug("cbinds and rbinds")
@@ -796,7 +795,9 @@ setMethod("EBadj", "EBNplus", function(Object,set)
 		whole=
 		{
 			logDebug("whole")
+		  ## data.matrix from data.frame converts character to factor to integer in R4+
 			#mat1  <- data.matrix(moveColumn2Rowname(Object@DF1))
+		  ## data.matrix from data.frame converts character to factor to integer in R4+
 			#mat2  <- data.matrix(moveColumn2Rowname(Object@DF2))
 			mat1  <- Object@mData1
 			mat2  <- Object@mData2
@@ -1011,7 +1012,9 @@ setMethod("EBadjWithoutRep", "EBNplus", function(Object, par.prior=TRUE, minSamp
   # Get data set with same genes but keep all the samples
   ##dataCom = getCom(Object, by = "row", byRow.x=1,byRow.y=1 )
   dataCom <- makeCommonRows(Object)
+  ## data.matrix from data.frame converts character to factor to integer in R4+
   #Object@mat1Train = data.matrix(moveColumn2Rowname(dataCom@DF1))
+  ## data.matrix from data.frame converts character to factor to integer in R4+
   #Object@mat2Train = data.matrix(moveColumn2Rowname(dataCom@DF2))
   Object@mat1Train = dataCom@DF1
   Object@mat2Train = dataCom@DF2

@@ -7,7 +7,6 @@ A function to perform Supervised Clustering for batch types from data in files.
 }
 \usage{
 SupervisedClustering_Batches_Structures(theData, theTitle, theOutputPath,
-theDoHeatmapFlag,
 theBatchTypeAndValuePairsToRemove = list(),
 theBatchTypeAndValuePairsToKeep = list())
 }
@@ -18,9 +17,6 @@ theBatchTypeAndValuePairsToKeep = list())
   Title to use in PNG files. }
   \item{theOutputPath}{Object of class \code{"character"}
   Directory in which to place output PNG files. }
-  \item{theDoHeatmapFlag}{Object of class \code{"logical"}
-  A flag indicating whether or not
-  to create HC heatmap, where TRUE meants to create heatmap. }
   \item{theBatchTypeAndValuePairsToRemove}{Object of class \code{"list"}
   A list of vectors containing the batch type (or * for all types)
   and the value to remove. list() indicates
@@ -52,6 +48,5 @@ theBatchTypeAndValuePairsToKeep = list())
 #	myData <- mbatchLoadFiles(myGeneDataFile, myBatchFile)
 #	###
 #	SupervisedClustering_Batches_Structures(myData, myTitle, myOutputPath,
-#list(), list(),
-# theDoHeatmapFlag=TRUE)
+#list(), list())
 }

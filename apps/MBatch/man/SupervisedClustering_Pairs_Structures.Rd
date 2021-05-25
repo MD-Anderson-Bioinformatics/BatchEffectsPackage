@@ -8,7 +8,7 @@ from data in files.
 }
 \usage{
 SupervisedClustering_Pairs_Structures(theData, theTitle, theOutputPath,
-theDoHeatmapFlag, theListOfBatchPairs,
+theListOfBatchPairs,
 theBatchTypeAndValuePairsToRemove=list(),
 theBatchTypeAndValuePairsToKeep=list()
 )
@@ -20,9 +20,6 @@ theBatchTypeAndValuePairsToKeep=list()
   Title to use in PNG files. }
   \item{theOutputPath}{Object of class \code{"character"}
   Directory in which to place output PNG files. }
-  \item{theDoHeatmapFlag}{Object of class \code{"logical"}
-  A flag indicating whether or
-  not to create HC heatmap, where TRUE meants to create heatmap. }
   \item{theListOfBatchPairs}{Object of class \code{"vector"}
   A list of strings, where pairs of strings give batch types
   to use for pairs assessment. Use c("") for empty set. }
@@ -60,6 +57,5 @@ theBatchTypeAndValuePairsToKeep=list()
 #	###
 #	SupervisedClustering_Pairs_Structures(myData, myTitle, myOutputPath, list(),
 #     list(),
-#			theDoHeatmapFlag=TRUE,
 #     theListOfBatchPairs=c("PlateId", "TSS", "BatchId", "TSS"))
 }

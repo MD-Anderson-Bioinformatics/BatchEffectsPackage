@@ -5,6 +5,18 @@
 	*						 *
 	**************************************************
 
+		CHANGES IN R VERSION 1.7.4
+
+NEW FEATURES
+
+    o	changes/update for metabolomics data support
+
+		CHANGES IN R VERSION 1.7.3
+
+NEW FEATURES
+
+    o	add generating all-in-one NGCHM HTML file to Heatmap code
+
 		CHANGES IN R VERSION 1.7.2
 
 NEW FEATURES

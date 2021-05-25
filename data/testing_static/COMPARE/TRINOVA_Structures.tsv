@@ -1,0 +1,10 @@
+keys	values
+Title	Test
+Residual	0.873
+BatchId	0.009
+TSS	0.039
+ShipDate	0.018
+BatchId - TSS	0.029
+BatchId - ShipDate	0.012
+TSS - ShipDate	0.007
+BatchId - TSS - ShipDate	0.012

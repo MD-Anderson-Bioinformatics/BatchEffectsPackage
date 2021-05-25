@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -9,12 +9,9 @@
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
-library(gtools, warn.conflicts=FALSE, verbose=FALSE)
-library(rJava, warn.conflicts=FALSE, verbose=FALSE)
-
 getMBatchVersion<-function()
 {
-	return("MBatch Version: 2020-08-31-0800")
+	return("MBatch Version: BEA_VERSION_TIMESTAMP")
 }
 
 mbatchWriteSuccessfulLog <- function()
@@ -982,12 +979,9 @@ filterBasedOnGeneLimit<-function(theMatrixGeneData, theSeed, theGeneLimit)
 
 mbatchStandardLegend <- function(theTitle, theVersion, theLegendNames, theLegendColors, theLegendSymbols, theFilenamePath)
 {
-	myClass1 <- system.file("LegendJava", "jcommon-1.0.17.jar", package="MBatch")
-	myClass2 <- system.file("LegendJava", "jfreechart-1.0.14.jar", package="MBatch")
-	myClass3 <- system.file("LegendJava", "LegendJava.jar", package="MBatch")
-	myJavaJars <- file.path(myClass3, myClass1, myClass2, fsep=.Platform$path.sep)
+	myJavaJars <- getJarsFromDir(dirname(system.file("LegendJava", "LegendJava.jar", package="MBatch")))
 	logDebug("mbatchStandardLegend - Calling .jinit ", myJavaJars)
-	.jinit(classpath=myJavaJars, force.init = TRUE, parameters="-Xms4800m")
+	.jinit(classpath=myJavaJars, force.init = TRUE, parameters=updateJavaParameters("-Xms4800m"))
 	logDebug("mbatchStandardLegend - .jinit complete")
 	logDebug("mbatchStandardLegend - theTitle ", theTitle)
 	logDebug("mbatchStandardLegend - theVersion ", theVersion)
@@ -1007,7 +1001,7 @@ mbatchStandardLegend <- function(theTitle, theVersion, theLegendNames, theLegend
 	}
 	logDebug("mbatchStandardLegend - myColors ", paste(myColors, collapse=","))
 	logDebug("mbatchStandardLegend before java")
-	result <- .jcall("org/mda/legendjava/LegendJava", returnSig = "Z",
+	result <- .jcall("edu/mda/bcb/legendjava/LegendJava", returnSig = "Z",
 													method='writeLegend',
 													.jnew("java/lang/String",theTitle),
 													.jnew("java/lang/String",theVersion),
@@ -1024,18 +1018,15 @@ mbatchStandardLegend <- function(theTitle, theVersion, theLegendNames, theLegend
 
 mbatchStandardCombineLegends<-function(theTitle, theFilenamePath, theListOfFiles)
 {
-	myClass1 <- system.file("LegendJava", "jcommon-1.0.17.jar", package="MBatch")
-	myClass2 <- system.file("LegendJava", "jfreechart-1.0.14.jar", package="MBatch")
-	myClass3 <- system.file("LegendJava", "LegendJava.jar", package="MBatch")
-	myJavaJars <- file.path(myClass3, myClass1, myClass2, fsep=.Platform$path.sep)
+	myJavaJars <- getJarsFromDir(dirname(system.file("LegendJava", "LegendJava.jar", package="MBatch")))
 	logDebug("mbatchStandardCombineLegends - Calling .jinit ", myJavaJars)
-	.jinit(classpath=myJavaJars, force.init = TRUE, parameters="-Xms4800m")
+	.jinit(classpath=myJavaJars, force.init = TRUE, parameters=updateJavaParameters("-Xms4800m"))
 	logDebug("mbatchStandardCombineLegends - .jinit complete")
 	logDebug("mbatchStandardCombineLegends - theTitle ", theTitle)
 	logDebug("mbatchStandardCombineLegends - theFilenamePath ", theFilenamePath)
 	logDebug("mbatchStandardCombineLegends - theListOfFiles ", paste(theListOfFiles, collapse=", "))
 	logDebug("mbatchStandardLegend before java")
-	result <- .jcall("org/mda/legendjava/LegendJava", returnSig = "Z",
+	result <- .jcall("edu/mda/bcb/legendjava/LegendJava", returnSig = "Z",
 									 method='combineLegends',
 									 .jnew("java/lang/String",theTitle),
 									 .jarray(as.vector(as.character(theListOfFiles))),
@@ -1095,6 +1086,13 @@ compareTwoMatrices <- function(theCorrected, theCompare)
   stopifnot(correctedRows==compareRows)
   stopifnot(correctedCols==compareCols)
 
+  message("correctedMatrix")
+  print(dim(theCorrected))
+  print(theCorrected[1:min(4,correctedRows),1:min(3,correctedCols)])
+  message("compareMatrix")
+  print(dim(theCompare))
+  print(theCompare[1:min(4,compareRows),1:min(3,compareCols)])
+
   for(myCol in 1:correctedCols)
   {
     if (!(colnames(theCorrected)[myCol]==colnames(theCompare)[myCol]))
@@ -1129,6 +1127,84 @@ compareTwoMatrices <- function(theCorrected, theCompare)
     }
   }
   return(TRUE)
+}
+
+compareTwoDataframes <- function(theCorrected, theCompare)
+{
+  correctedRows <- dim(theCorrected)[1]
+  correctedCols <- dim(theCorrected)[2]
+  compareRows <- dim(theCompare)[1]
+  compareCols <- dim(theCompare)[2]
+
+  stopifnot(correctedRows==compareRows)
+  stopifnot(correctedCols==compareCols)
+
+  message("correctedDataframe")
+  print(dim(theCorrected))
+  print(theCorrected[1:min(4,correctedRows),1:min(3,correctedCols)])
+  message("compareDataframe")
+  print(dim(theCompare))
+  print(theCompare[1:min(4,compareRows),1:min(3,compareCols)])
+
+  if (isFALSE(all(theCorrected == theCompare)))
+  {
+    return(FALSE)
+  }
+
+  for(myCol in 1:correctedCols)
+  {
+    if (!(colnames(theCorrected)[myCol]==colnames(theCompare)[myCol]))
+    {
+      message("myCol=", myCol)
+      message("colnames(theCorrected)[myCol]=", colnames(theCorrected)[myCol])
+      message("colnames(theCompare)[myCol]=", colnames(theCompare)[myCol])
+      return(FALSE)
+    }
+    for(myRow in 1:correctedRows)
+    {
+      if (!(rownames(theCorrected)[myRow]==rownames(theCompare)[myRow]))
+      {
+        message("myRow=", myRow)
+        message("rownames(theCorrected)[myRow]=", rownames(theCorrected)[myRow])
+        message("rownames(theCompare)[myRow]=", rownames(theCompare)[myRow])
+        return(FALSE)
+      }
+      #message("checking myRow=", myRow, " and myCol=", myCol, " theCorrected[myRow, myCol]=", theCorrected[myRow, myCol], " theCompare[myRow, myCol]=",theCompare[myRow, myCol])
+      if (!is.finite(theCorrected[myRow, myCol])&&!is.finite(theCompare[myRow, myCol]))
+      {
+        # ignore
+      }
+      else if (!(all.equal(theCorrected[myRow, myCol], theCompare[myRow, myCol])))
+      {
+        message("myRow=", myRow)
+        message("myCol=", myCol)
+        message("theCorrected[myRow, myCol]=", theCorrected[myRow, myCol])
+        message("theCompare[myRow, myCol]=", theCompare[myRow, myCol])
+        return(FALSE)
+      }
+    }
+  }
+  return(TRUE)
+}
+
+####################################################################
+###
+####################################################################
+
+getJarsFromDir <- function(theDir)
+{
+  allJars <- dir(theDir, "*.jar", full.names=TRUE)
+  paste(allJars, collapse=.Platform$path.sep)
+}
+
+updateJavaParameters <- function(thePars)
+{
+  if (!("-Djava.awt.headless=true" %in% thePars))
+  {
+    message("Force -Djava.awt.headless=true for jinit")
+    thePars <- c(thePars, "-Djava.awt.headless=true")
+  }
+  thePars
 }
 
 ####################################################################

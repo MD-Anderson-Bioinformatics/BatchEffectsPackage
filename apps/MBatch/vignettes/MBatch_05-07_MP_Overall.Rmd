@@ -54,17 +54,16 @@ The following code is adapted from the tests/MP_Overall.R file. Data used is fro
 
 ```{r, echo=TRUE}
 {
-  library(MBatch)
+  require(MBatch)
+
+  inputDir <- getTestInputDir()
+  outputDir <- getTestOutputDir()
+  compareDir <- getTestCompareDir()
   
   # set the paths
-  invariantFile="/bea_testing/MATRIX_DATA/rbn-pseudo-iset.tsv"
-  variantFile="/bea_testing/MATRIX_DATA/rbn-pseudo-vset.tsv"
-  theOutputDir="/bea_testing/output/RBN_Pseudoreplicates"
-  theRandomSeed=314
-  
-  theGeneFile="/bea_testing/MATRIX_DATA/matrix_data-Tumor.tsv"
-  theBatchFile="/bea_testing/MATRIX_DATA/batches-Tumor.tsv"
-  theOutputDir="/bea_testing/output/MP_Overall"
+  theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
+  theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
+  theOutputDir=file.path(outputDir, "MP_Overall")
   theRandomSeed=314
   theBatchType="TSS"
   

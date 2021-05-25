@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -53,8 +53,9 @@ EB_internal<-function(theBeaData,
   }
   else if (TRUE==theWriteToFile)
   {
-    logInfo("EB_internal - no corrections, delete thePath ", myPath)
-    unlink(myPath, recursive=TRUE)
+    # do not delete directory, needed for completion flag
+    logInfo("EB_internal - no corrections")
+    results <- NULL
   }
   logInfo("EB_internal - completed")
   return(results)
@@ -119,8 +120,9 @@ MP_Internal<- function(theBeaData,
   }
   else if (TRUE==theWriteToFile)
   {
-    logInfo("MP_Internal - no corrections, delete thePath ", myPath)
-    unlink(myPath, recursive=TRUE)
+    # do not delete directory, needed for completion flag
+    logInfo("MP_Internal - no corrections")
+    results <- NULL
   }
   logInfo("MP_Internal - completed")
   return(results)
@@ -175,8 +177,9 @@ AN_Internal<- function(theBeaData,
   }
   else if (TRUE==theWriteToFile)
   {
-    logInfo("AN_Internal - no corrections, delete thePath ", myPath)
-    unlink(myPath, recursive=TRUE)
+    # do not delete directory, needed for completion flag
+    logInfo("AN_Internal - no corrections")
+    results <- NULL
   }
   logInfo("AN_Internal - completed")
   return(results)

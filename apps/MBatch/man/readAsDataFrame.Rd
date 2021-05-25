@@ -31,16 +31,15 @@ Returns the data.frame read from file.
 ## The function is currently defined as
 #function (theFile, thePar = "-Xmx2000m")
 #{
-#    myClass1 <- system.file("ReadRJava", "ReadRJava.jar", package = "MBatch")
-#    myJavaJars <- file.path(myClass1, fsep = .Platform$path.sep)
+#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
 #    logDebug("readAsDataFrame - thePar ", thePar)
 #    logDebug("readAsDataFrame - theFile ", theFile)
 #    logDebug("readAsDataFrame - Calling .jinit ", myJavaJars)
-#    .jinit(classpath = myJavaJars, force.init = TRUE, parameters = thePar)
+#    .jinit(classpath = myJavaJars, force.init = TRUE, parameters = updateJavaParameters(thePar))
 #    logDebug("readAsDataFrame - .jinit complete")
 #    logDebug("readAsDataFrame before java")
-#    objJavaFile <- .jcall("org/mda/readrjava/ReadRJava",
-#        returnSig = "Lorg/mda/readrjava/JavaFile;",
+#    objJavaFile <- .jcall("edu/mda/bcb/readrjava/ReadRJava",
+#        returnSig = "Ledu/mda/bcb/readrjava/JavaFile;",
 #        method = "loadStringData", .jnew("java/lang/String",
 #            theFile), TRUE, FALSE, TRUE)
 #    logDebug("readAsDataFrame after java")

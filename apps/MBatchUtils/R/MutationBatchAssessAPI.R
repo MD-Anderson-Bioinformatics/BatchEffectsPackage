@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -8,12 +8,6 @@
 #
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
-
-library(dunn.test)
-library(MBatch)
-library(Cairo)
-#source("GSColors.R")
-#source("MutationBatchExtractAPI.R")
 
 # used internally for marking ShipDate for MBatch
 isTrendBatch<-function(theBatchTypeName, theListOfBatchIds)
@@ -1303,7 +1297,6 @@ callMBatch_SupervisedClustering_Structures_MBA <- function(theOutputDir, theData
 	SupervisedClustering_Batches_Structures(theData=theDataObject,
 																					theTitle=theTitle,
 																					theOutputPath=outdir,
-																					theDoHeatmapFlag=TRUE,
 																					theBatchTypeAndValuePairsToRemove=NULL,
 																					theBatchTypeAndValuePairsToKeep=NULL)
 }

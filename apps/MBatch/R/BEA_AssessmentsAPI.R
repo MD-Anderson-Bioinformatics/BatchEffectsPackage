@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -26,19 +26,20 @@ HierarchicalClustering_Structures <- function(theData, theTitle, theOutputPath, 
 ### Supervised Clustering
 #############################################################################
 
-SupervisedClustering_Batches_Structures <- function(theData, theTitle, theOutputPath, theDoHeatmapFlag,
-																										theBatchTypeAndValuePairsToRemove=list(), theBatchTypeAndValuePairsToKeep=list())
+SupervisedClustering_Batches_Structures <- function(theData, theTitle, theOutputPath,
+																										theBatchTypeAndValuePairsToRemove=list(),
+																										theBatchTypeAndValuePairsToKeep=list())
 {
 	theData <- as.numericWithIssues(theData)
 	theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
 	                            theBatchTypeAndValuePairsToKeep=theBatchTypeAndValuePairsToKeep)
 	theTitle <- breakIntoTitle(theTitle)
 	createBatchEffectsOutput_SupervisedClustering_batches(theData@mData, theData@mBatches,
-	                                                      theHeatmapFlag=theDoHeatmapFlag, theTitle=theTitle,
+	                                                      theTitle=theTitle,
 	                                                      theOutputPath=theOutputPath)
 }
 
-SupervisedClustering_Pairs_Structures <- function(theData, theTitle, theOutputPath, theDoHeatmapFlag, theListOfBatchPairs,
+SupervisedClustering_Pairs_Structures <- function(theData, theTitle, theOutputPath, theListOfBatchPairs,
 																									theBatchTypeAndValuePairsToRemove=list(), theBatchTypeAndValuePairsToKeep=list())
 {
   theData <- as.numericWithIssues(theData)
@@ -46,7 +47,7 @@ SupervisedClustering_Pairs_Structures <- function(theData, theTitle, theOutputPa
                               theBatchTypeAndValuePairsToKeep=theBatchTypeAndValuePairsToKeep)
   theTitle <- breakIntoTitle(theTitle)
   createBatchEffectsOutput_SupervisedClustering_pairs(theData@mData, theData@mBatches,
-                                                      theHeatmapFlag=theDoHeatmapFlag, thePairList=theListOfBatchPairs,
+                                                      thePairList=theListOfBatchPairs,
                                                       theTitle=theTitle, theOutputPath=theOutputPath)}
 
 #############################################################################
@@ -159,10 +160,23 @@ Boxplot_Group_Structures <- function(theData, theTitle, theOutputPath,
 }
 
 #############################################################################
-### MANOVA
+### TRINOVA
 #############################################################################
 
-# left out as too early a product to use here
+TRINOVA_Structures<-function(theData, theTitle, theOutputPath,
+                            theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
+                            theMaxGeneCount=20000)
+{
+  theData <- as.numericWithIssues(theData)
+  theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
+                              theBatchTypeAndValuePairsToKeep=theBatchTypeAndValuePairsToKeep)
+  theData@mData <- mbatchTrimData(theData@mData, theMaxSize=(theMaxGeneCount*ncol(theData@mData)))
+  theTitle <- breakIntoTitle(theTitle)
+  createBatchEffectsOutput_TRINOVA(theData@mData, theData@mBatches, theTitle, theOutputPath)
+}
+
+#############################################################################
+#############################################################################
 
 as.numericWithIssues<-function(theData)
 {

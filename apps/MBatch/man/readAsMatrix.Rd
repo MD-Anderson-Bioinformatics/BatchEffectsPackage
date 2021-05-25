@@ -30,16 +30,15 @@ The matrix read in.
 ## The function is currently defined as
 #function (theFile, thePar = "-Xmx2000m")
 #{
-#    myClass1 <- system.file("ReadRJava", "ReadRJava.jar", package = "MBatch")
-#    myJavaJars <- file.path(myClass1, fsep = .Platform$path.sep)
+#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
 #    logDebug("readAsMatrix - thePar ", thePar)
 #    logDebug("readAsMatrix - theFile ", theFile)
 #    logDebug("readAsMatrix - Calling .jinit ", myJavaJars)
-#    .jinit(classpath = myJavaJars, force.init = TRUE, parameters = thePar)
+#    .jinit(classpath = myJavaJars, force.init = TRUE, parameters = updateJavaParameters(thePar))
 #    logDebug("readAsMatrix - .jinit complete")
 #    logDebug("readAsMatrix before java")
-#    objJavaFile <- .jcall("org/mda/readrjava/ReadRJava",
-#        returnSig = "Lorg/mda/readrjava/JavaFile;",
+#    objJavaFile <- .jcall("edu/mda/bcb/readrjava/ReadRJava",
+#        returnSig = "Ledu/mda/bcb/readrjava/JavaFile;",
 #        method = "loadDoubleData", .jnew("java/lang/String",
 #            theFile), TRUE, TRUE, TRUE)
 #    logDebug("readAsMatrix after java")

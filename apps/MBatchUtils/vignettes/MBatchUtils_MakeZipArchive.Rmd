@@ -23,8 +23,11 @@ The MBatchUtils assessment function, mbatchRunFromConfig, uses a configuration f
 
 The configuration file used for this example is:
 ```{r comment=''}
+  require(MBatch)
+  require(MBatchUtils)
   # set the paths
-  theConfigFile="/BatchEffectsPackage_data/testing_static/MBatchUtils/vignettes/MBatchConfig.tsv"
+  inputDir <- getTestInputDir()
+  theConfigFile=file.path(inputDir, "vignettes", "MBatchConfig.tsv")
   cat(readLines(theConfigFile), sep = '\n')
 ```
 
@@ -154,9 +157,9 @@ Create a ZIP file usable with the stand-alone Batch Effects Viewer, to use dynam
 
 ```{r, echo=TRUE}
 {
-  library(MBatch)
-  library(MBatchUtils)
-  
+  require(MBatch)
+  require(MBatchUtils)
+
   # set the paths
   baseTestDir=getTestInputDir()
   baseOutputDir=getTestOutputDir()
@@ -164,32 +167,44 @@ Create a ZIP file usable with the stand-alone Batch Effects Viewer, to use dynam
   theOrigGeneFile=file.path(baseTestDir, "vignettes", "matrix_data.tsv")
   theOrigBatchFile=file.path(baseTestDir, "vignettes", "batches.tsv")
   theOutputDir=file.path(baseOutputDir, "ZIP_Archive")
-  theOutputDirMBatch=file.path(theOutputDir, "MBatch")
+  theOutputDirMBatch=file.path(theOutputDir, "ZIP-RESULTS")
+  theOutputDirData=file.path(theOutputDir, "ZIP-DATA")
   jarDir=file.path(baseTestDir, "exe")
   javaExe=getJava()
   jarFile=file.path(jarDir, "ShaidyMapGen.jar")
-  theDestConfigFile=file.path(theOutputDir, "MBatchConfig.tsv")
-  theDestGeneFile=file.path(theOutputDir, "matrix_data.tsv")
-  theDestBatchFile=file.path(theOutputDir, "batches.tsv")
+  jsFile=file.path(jarDir, "ngchmWidget-min.js")
+  theDestConfigFile=file.path(theOutputDirMBatch, "MBatchConfig.tsv")
+  theDestGeneFile=file.path(theOutputDirData, "matrix_data.tsv")
+  theDestBatchFile=file.path(theOutputDirData, "batches.tsv")
   ####
   # make sure the output dir exists and is empty
   unlink(theOutputDir, recursive=TRUE)
   dir.create(theOutputDir, showWarnings=FALSE, recursive=TRUE)
   dir.create(theOutputDirMBatch, showWarnings=FALSE, recursive=TRUE)
+  dir.create(theOutputDirData, showWarnings=FALSE, recursive=TRUE)
+  # copy files to ZIP-RESULTS and ZIP-DATA
   file.copy(theOrigConfigFile, theDestConfigFile)
   file.copy(theOrigGeneFile, theDestGeneFile)
   file.copy(theOrigBatchFile, theDestBatchFile)
   # config
-  mbatchRunFromConfig(theConfigFile=theDestConfigFile,
-                      theOutputDir=theOutputDirMBatch,
-                      theNaStrings=c("null", "NA"),
-					  theShaidyMapGen=jarFile,
-					  theShaidyMapGenJava=javaExe,
-					  theNGCHMShaidyMem="8G", 
-					  thePCAMem="4800m", 
-					  theBoxplotMem="8G",
-					  theRunPostFlag=TRUE)
-  buildSingleArchive("none", NULL, theOutputDirMBatch, theOutputDirMBatch)
+  mbatchRunFromConfig(
+    theConfigFile = theDestConfigFile,
+    theDataDir = theOutputDirData,
+    theOutputDir = theOutputDirMBatch,
+    theNaStrings = c("null", "NA"),
+    theShaidyMapGen = jarFile,
+    theNgchmWidgetJs = jsFile,
+    theShaidyMapGenJava = javaExe,
+    theNGCHMShaidyMem = "8G",
+    thePCAMem = "4800m",
+    theBoxplotMem = "8G",
+    theRunPostFlag = TRUE
+  )
+  theMbatchID <- "none"
+  theResultDir <- theOutputDirMBatch
+  theDataDir <- theOutputDirData
+  theZipDir <- theOutputDir
+  buildSingleArchive(theMbatchID, theResultDir, theDataDir, theZipDir)
 }
 ```
 

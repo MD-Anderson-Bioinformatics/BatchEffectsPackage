@@ -27,8 +27,7 @@ Returns TRUE if the save succeeded.
 ## The function is currently defined as
 #function (theFile, theMatrix, thePar = "-Xmx2000m")
 #{
-#    myClass1 <- system.file("ReadRJava", "ReadRJava.jar", package = "MBatch")
-#    myJavaJars <- file.path(myClass1, fsep = .Platform$path.sep)
+#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
 #    logDebug("writeAsMatrix - thePar ", thePar)
 #    logDebug("writeAsMatrix - theFile ", theFile)
 #    myCols <- as.vector(colnames(theMatrix))
@@ -41,16 +40,16 @@ Returns TRUE if the save succeeded.
 #    logDebug("writeAsMatrix - length(myCols) ", length(myCols))
 #    logDebug("writeAsMatrix - length(myRows) ", length(myRows))
 #    logDebug("writeAsMatrix - Calling .jinit ", myJavaJars)
-#    .jinit(classpath = myJavaJars, force.init = TRUE, parameters = thePar)
+#    .jinit(classpath = myJavaJars, force.init = TRUE, parameters = updateJavaParameters(thePar))
 #    logDebug("writeAsMatrix - .jinit complete")
 #    logDebug("writeAsMatrix before java")
 #    if (is.null(myRows)) {
-#        success <- .jcall("org/mda/readrjava/ReadRJava", returnSig = "Z",
+#        success <- .jcall("edu/mda/bcb/readrjava/ReadRJava", returnSig = "Z",
 #            method = "writeDoubleData_Column", .jnew("java/lang/String",
 #                theFile), .jarray(myCols), .jarray(myData))
 #    }
 #    else {
-#        success <- .jcall("org/mda/readrjava/ReadRJava", returnSig = "Z",
+#        success <- .jcall("edu/mda/bcb/readrjava/ReadRJava", returnSig = "Z",
 #            method = "writeDoubleData_All", .jnew("java/lang/String",
 #                theFile), .jarray(myCols), .jarray(myRows), .jarray(myData))
 #    }

@@ -1,6 +1,6 @@
 importFrom("grDevices", "col2rgb", "colorRampPalette", "dev.off", "dev.set", "rainbow", "rgb", "pdf")
 importFrom("graphics", "abline", "arrows", "axis", "box", "boxplot", "frame", "layout", "lines", "mtext", "par", "plot.new", "points", "rect", "segments", "text", "title", "hist", "image", "plot", "legend")
-importFrom("stats", "IQR", "as.dendrogram", "as.dist", "cor", "cor.test", "density", "dist", "dnorm", "hclust", "lm", "mad", "median", "medpolish", "order.dendrogram", "qqline", "qqnorm", "qqplot", "quantile", "reorder", "rgamma", "sd", "var", "fivenum")
+importFrom("stats", "IQR", "as.dendrogram", "as.dist", "cor", "cor.test", "density", "dist", "dnorm", "hclust", "lm", "mad", "median", "medpolish", "order.dendrogram", "qqline", "qqnorm", "qqplot", "quantile", "reorder", "rgamma", "sd", "var", "fivenum", "manova")
 importFrom("utils", "URLencode", "dump.frames", "glob2rx", "installed.packages", "packageDescription", "read.csv", "sessionInfo", "write.table")
 importFrom("epiR", "epi.ccc")
 importFrom("methods", "callNextMethod", "new", "show")
@@ -9,10 +9,10 @@ importFrom("Cairo", "CairoPNG")
 importFrom("rJava", ".jnew", ".jcall", ".jinit", ".jarray", ".jcastToArray")
 importFrom("gtools", "even", "odd")
 importFrom("squash", "dendromat")
+importFrom("eulerr", "euler")
 importFrom("parallel", "makePSOCKcluster", "stopCluster", "parLapply")
 
 importFrom("ClassDiscovery", "distanceMatrix", "SamplePCA")
-importFrom("Vennerable", "Venn")
 
 # Utility classes
 exportClasses(BEA_DATA)
@@ -20,6 +20,7 @@ exportClasses(Logging)
 
 # utility functions
 export(compareTwoMatrices)
+export(compareTwoDataframes)
 export(mbatchLoadStructures)
 export(mbatchLoadFiles)
 export(mbatchFilterData)
@@ -36,6 +37,7 @@ export(readAsGenericMatrix)
 export(readAsGenericDataframe)
 export(mbatchWriteSuccessfulLog)
 export(as.numericWithIssues)
+export(updateJavaParameters)
 
 # Assessments
 export(SupervisedClustering_Pairs_Structures)
@@ -49,6 +51,7 @@ export(Boxplot_AllSamplesData_Structures)
 export(CDP_Plot)
 export(CDP_Files)
 export(CDP_Structures)
+export(TRINOVA_Structures)
 
 # Corrections
 export(EBNPlus_Correction_Files)

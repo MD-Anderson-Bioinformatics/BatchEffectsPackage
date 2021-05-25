@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -12,11 +12,8 @@
 ###########################################################################################
 ###########################################################################################
 
-library(squash)
-library(ClassDiscovery)
-
 createBatchEffectsOutput_SupervisedClustering_batches<-function(theMatrixGeneData, theDataframeBatchData,
-																																theHeatmapFlag, theTitle, theOutputPath)
+																																theTitle, theOutputPath)
 {
 	myOutputPath <- file.path(theOutputPath, "Batches")
 	checkCreateDir(myOutputPath)
@@ -30,14 +27,13 @@ createBatchEffectsOutput_SupervisedClustering_batches<-function(theMatrixGeneDat
 		title <- paste(theTitle, "SupervisedClust", batchTypeName, sep=" ")
 		diagramFilename = createDirPlusFilename(myOutputPath, "SupervisedClust_Diagram-", batchTypeName, ".png")
 		legendFilename = createDirPlusFilename(myOutputPath, "SupervisedClust_Legend-", batchTypeName, ".png")
-		makeBiasClust(theMatrixGeneData, theDataframeBatchData, batchTypeName, color, title,
-									diagramFilename, Heat=theHeatmapFlag)
+		makeBiasClust(theMatrixGeneData, theDataframeBatchData, batchTypeName, color, title, diagramFilename)
 		supervisedClustLegend(color, batchIdsForSamples, sort(unique(batchIdsForSamples)), batchTypeName, legendFilename)
 	}
 }
 
 createBatchEffectsOutput_SupervisedClustering_pairs<-function(theMatrixGeneData, theDataframeBatchData,
-																															theHeatmapFlag, thePairList, theTitle, theOutputPath)
+																															thePairList, theTitle, theOutputPath)
 {
 	for(indexA in seq(1, length(thePairList), 2))
 	{
@@ -58,7 +54,7 @@ createBatchEffectsOutput_SupervisedClustering_pairs<-function(theMatrixGeneData,
 		legendFilenameA = createDirPlusFilename(myOutputPath, "SupervisedClust_Legend", "-", batchTypeNameA,".png")
 		legendFilenameB = createDirPlusFilename(myOutputPath, "SupervisedClust_Legend", "-", batchTypeNameB,".png")
 		success <- makeBiasClust(theMatrixGeneData, theDataframeBatchData, batchTypeNameA, color, title,
-									diagramFilename, More=batchTypeNameB, Heat=theHeatmapFlag)
+									diagramFilename, theMore=batchTypeNameB)
 		supervisedClustLegend(color, batchIdsForSamplesA, sort(unique(batchIdsForSamplesA)), batchTypeNameA, legendFilenameA)
 		supervisedClustLegend(color, batchIdsForSamplesB, sort(unique(batchIdsForSamplesB)), batchTypeNameB, legendFilenameB)
 	}
@@ -68,7 +64,7 @@ createBatchEffectsOutput_SupervisedClustering_pairs<-function(theMatrixGeneData,
 ###########################################################################################
 
 #This function is for biasedcluster algorithms
-bias.clust<-function(Dat, cat)
+biasedClusterFunction<-function(Dat, cat)
 {
 	stopifnotWithLogging("Samples should be same length in data and cat", ncol(Dat)==length(cat))
 	cat<-factor(cat, exclude=NULL)
@@ -138,72 +134,73 @@ udataCalc <- function(dat, Mad)
 	return(U.data)
 }
 
-makeBiasClust<-function(dat, si, By, theColors, theTitle, theDiagramFilename, Heat=TRUE, More=NULL)
+makeBiasClust<-function(theMatrix, theBatches, theBatchType, theColors, theTitle,
+                        theDiagramFilename, theMore=NULL)
 {
 	logInfo("makeBiasClust - starting")
-	CairoPNG(filename=theDiagramFilename, width = 6000, height = 6000, pointsize=24, bg = "transparent")
+	CairoPNG(filename=theDiagramFilename, width = 1000, height = 1000, pointsize=24, bg = "transparent")
 	on.exit(dev.off(), add = TRUE)
-	stopifnotWithLogging("Samples should be same length in data and batch info", ncol(dat)==nrow(si))
-	stopifnotWithLogging("Batch types requested should be in list of batch types", By %in% colnames(si))
-	keep.sample<-colSums(!is.na(dat))!=0
-	dat<-dat[,keep.sample]
-	si<-si[keep.sample,]
-	More<-intersect(More, colnames(si))
-	si<-si[,c(By,More), drop=FALSE]
-	Mad<-apply(dat, 1, mad)
-	U.data <- udataCalc(dat, Mad)
-	logInfo("makeBiasClust - data frame")
-	tumor.si<-data.frame(si, stringsAsFactors=FALSE, check.names=FALSE)
+	stopifnotWithLogging("Samples should be same length in data and batch info", ncol(theMatrix)==nrow(theBatches))
+	stopifnotWithLogging("Batch types requested should be in list of batch types", theBatchType %in% colnames(theBatches))
+	##
+	## select samples with data and no NAs
+	##
+	keepSamples <- colSums(!is.na(theMatrix))!=0
+	theMatrix <- theMatrix[,keepSamples]
+	theBatches <- theBatches[keepSamples,]
+	##
+	## add second batch type (theMore) to batches to use
+	##
+	theMore <- intersect(theMore, colnames(theBatches))
+	theBatches <- theBatches[,c(theBatchType, theMore), drop=FALSE]
+	##
+	## get "interesting" in term of batch effects data
+	##
+	madValues <- apply(theMatrix, 1, mad)
+	interestingData <- udataCalc(theMatrix, madValues)
+	##
+	## get batch infor for selected batch types
+	##
+	selectedBatches <- data.frame(theBatches, stringsAsFactors=FALSE, check.names=FALSE)
 	#prepare matrix for side color matrix
 	###Do biased hierarchical clustering
-	logInfo("makeBiasClust - U.dend1 <- bias.clust")
-	if (!is.null(U.data))
+	logInfo("makeBiasClust - biasedDend <- biasedClusterFunction")
+	if (!is.null(interestingData))
 	{
-		U.dend1 <- bias.clust(U.data, factor(tumor.si[,By]))
-		Colors=theColors
-		if (!is.null(U.dend1))
+		biasedDend <- biasedClusterFunction(interestingData, factor(selectedBatches[,theBatchType]))
+		featureDend <- hierClust_calc(t(interestingData))
+		if (!is.null(biasedDend))
 		{
-			mat<-matrix(character(0), nrow(si),0)
-			#to match the colors with the first coloum by converting to factors
-			temp.si<-match.cols(si)
-			for(ii in colnames(si))
+			############################################
+			preFilename <- theBatchType
+			if (length(theMore)>0)
 			{
-				mat <- cbind(mat, Colors[as.numeric(temp.si[, ii])])
+			  preFilename <- paste(theBatchType, theMore, sep="-")
 			}
-			colnames(mat)<-colnames(si)
-			if(Heat==FALSE)
-			{
-				dendromat(U.dend1, mat, labCol=colnames(si),labRow="")
-			}
-			else
-			{
-				cp<-cumsum(table(factor(tumor.si[,By], levels=unique(tumor.si[U.dend1$order, By]))))
-				mat.cor<-cor(U.data)
-				mat.cor<-scale.trunc(mat.cor, scal=FALSE)
-				heatmap.plus.mod(mat.cor[rev(U.dend1$order),],
-												 Rowv=NA,
-												 Colv=as.dendrogram(U.dend1),
-												 scale="none",
-												 ColSideColors=mat,
-												 labRow =NA,
-												 labCol = NA,
-												 Colsep=cp,
-												 main=theTitle)
-			#	col=jetColors(64),
-			}
+			############################################
+			writeHCDataTSVs(biasedDend, dirname(theDiagramFilename),
+			                paste(preFilename, "HCData.tsv", sep="_"),
+			                paste(preFilename, "HCOrder.tsv", sep="_"),
+			                paste(preFilename, "uDend.RData", sep="_"))
+			writeHCDataTSVs(featureDend, dirname(theDiagramFilename),
+			                paste(preFilename, "HCData_feature.tsv", sep="_"),
+			                paste(preFilename, "HCOrder_feature.tsv", sep="_"),
+			                paste(preFilename, "uDend_feature.RData", sep="_"))
+			writeSCmatrix(interestingData, dirname(theDiagramFilename),
+			              paste(preFilename, "SCMatrix.tsv", sep="_"),
+			              theTitle,
+			              paste(preFilename, "title.tsv", sep="_"))
+			############################################
+			heatmap(interestingData, Rowv = as.dendrogram(featureDend), Colv = as.dendrogram(biasedDend))
 		}
 		else
 		{
-			plot(c(0,0),
-							cex=0.2, axes=FALSE,
-							main = breakIntoTitle(paste("Unable to calculate--too many NAs, Infinities or NaNs in data - ", theTitle, sep="")))
+		  openAndWriteIssuesLogFileSC(dirname(theDiagramFilename))
 		}
 	}
 	else
 	{
-		plot(c(0,0),
-				 cex=0.2, axes=FALSE,
-				 main = paste("Unable to calculate--too many NAs, Infinities or NaNs in data - ", theTitle, sep=""))
+	  openAndWriteIssuesLogFileSC(dirname(theDiagramFilename))
 	}
 }
 
@@ -612,6 +609,24 @@ supervisedClustLegend<-function(theBatchIdColors, theBatchIdsForSamples, theSort
 	#leg end("top", legend=sortedBatch, title=theTitle, title.col="black",
 	#			 text.col=as.vector(theBatchIdColors), col=as.vector(theBatchIdColors),
 	#			 lty=1, cex=0.70)
+}
+
+###########################################################################################
+###########################################################################################
+
+openAndWriteIssuesLogFileSC<-function(theOutputDir)
+{
+  myFile <- file(file.path(theOutputDir, "error.log"), "w+")
+  on.exit(close(myFile))
+  cat("Clustering not possible\n", file=myFile, append=TRUE)
+}
+
+writeSCmatrix<-function(theMatrix, theOutdir, theMatrixFile, theTitle, theTitleFile)
+{
+  writeAsMatrix(file.path(theOutdir, theMatrixFile), theMatrix)
+  myFile <- file(file.path(theOutdir, theTitleFile), "w+")
+  on.exit(close(myFile))
+  cat(theTitle, file=myFile)
 }
 
 ###########################################################################################

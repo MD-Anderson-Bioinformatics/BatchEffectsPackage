@@ -1,20 +1,20 @@
 Package: MBatch
 Title: MD Anderson Batch Assessment Tools (MBatch) Package
-Version: 1.7.1
-Date: 2020-08-31
+Version: 1.7.4
+Date: 2021-04-21
 Author: Rehan Akbani <rakbani@mdanderson.org>,
 				Tod Casasent <tdcasasent@mdanderson.org>,
 				Bradley Broom <bbroom@mdanderson.org>,
 				John Weinstein <jweinstein@mdanderson.org>
 Maintainer: Rehan Akbani <rakbani@mdanderson.org>
-Depends: R (>= 3.6.0)
+Depends: R (>= 4.0.2)
 Imports: Cairo, cluster, mclust, oompaBase, PreProcess, ClassDiscovery, squash, 
-    gtools, methods, rJava, parallel, Vennerable, limma, stats, epiR
+    gtools, methods, rJava, parallel, eulerr, stats, epiR
 Suggests: batchcorr,
     knitr,
     rmarkdown
 Description: An R package, MBatch, for assessment of batch effects in high throughput data such as microarray data. It includes R implementations of several conventional methods such as principal component analysis, clustering analysis , also includes novel correlation of correlation based methods such as CZR, CZN, CZNS, CZNL, and CZS. This package is mainly to deal with data with multiple batches and multiple batch effect sources such as data from The Cancer Genome Atlas (TCGA). Some novel visulization methods such as PCA plot with centroid are also included in this package. It also requires Java 8 for DSC computations.
 License: GPL (>=2)
 Encoding: UTF-8
-URL: https://github.com/MD-Anderson-Bioinformatics/MBatch
+URL: https://github.com/MD-Anderson-Bioinformatics
 VignetteBuilder: knitr

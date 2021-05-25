@@ -30,7 +30,7 @@ Graphical output is a heatmap of the correlation values, topped by a covariate b
 # Usage
 
 SupervisedClustering_Pairs_Structures(theData, theTitle, theOutputPath,
-theDoHeatmapFlag, theListOfBatchPairs,
+theListOfBatchPairs,
 theBatchTypeAndValuePairsToRemove=list(),
 theBatchTypeAndValuePairsToKeep=list() )
 
@@ -56,9 +56,6 @@ A string title to use in PNG files.
 ##theOutputPath
 String giving directory in which to place output PNG files.
 
-##theDoHeatmapFlag	
-A flag indicating whether or not to create HC heatmap, where TRUE meants to create heatmap.
-
 ##theListOfBatchPairs	
 A vector of strings, where pairs of strings give batch types to use for pairs
 assessment.
@@ -81,12 +78,16 @@ After the output is an explanation of files and directories created.
 
 ```{r, echo=TRUE}
 {
-  library(MBatch)
-  
+  require(MBatch)
+
+  inputDir <- getTestInputDir()
+  outputDir <- getTestOutputDir()
+  compareDir <- getTestCompareDir()
+
   # set the paths
-  theGeneFile="/bea_testing/MATRIX_DATA/matrix_data-Tumor.tsv"
-  theBatchFile="/bea_testing/MATRIX_DATA/batches-Tumor.tsv"
-  theOutputDir="/bea_testing/output/SupervisedClustering_Pairs_Structures"
+  theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
+  theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
+  theOutputDir=file.path(outputDir, "SupervisedClustering_Pairs_Structures")
   theRandomSeed=314
   
   # make sure the output dir exists and is empty
@@ -101,7 +102,6 @@ After the output is an explanation of files and directories created.
   SupervisedClustering_Pairs_Structures(theData=myData, 
     theTitle="Test Data Title", 
     theOutputPath=theOutputDir,
-    theDoHeatmapFlag=TRUE, 
     theListOfBatchPairs=c("PlateId", "TSS", "BatchId", "TSS"),
     theBatchTypeAndValuePairsToRemove=list(),
     theBatchTypeAndValuePairsToKeep=list() )
@@ -113,7 +113,7 @@ After the output is an explanation of files and directories created.
 The above code creates the following subdirectories and files. The subdirectories correspond to the Batch Type Pairs on which assessments were requested.
 
 ```bash
-/bea_testing/output/SupervisedClustering_Pairs_Structures$ ls -l
+/output/SupervisedClustering_Pairs_Structures$ ls -l
 total 8
 drwxr-xr-x 2 linux linux 4096 Jun 14 12:56 BatchId-TSS
 drwxr-xr-x 2 linux linux 4096 Jun 14 12:56 PlateId-TSS
@@ -123,7 +123,7 @@ Looking at the "BatchId-TSS" subdirectory, it contains the following diagram and
 This algorithm does not currently generate data usable with dynamic displays.
 
 ```bash
-/bea_testing/output/SupervisedClustering_Pairs_Structures/BatchId-TSS$ ls -l
+/output/SupervisedClustering_Pairs_Structures/BatchId-TSS$ ls -l
 total 276
 -rw-r--r-- 1 linux linux 261168 Jun 19 09:58 SupervisedClust_Diagram.png
 -rw-r--r-- 1 linux linux   2701 Jun 19 09:58 SupervisedClust_Legend-BatchId.png
@@ -132,4 +132,4 @@ total 276
 
 Here is the diagram generated from this code.
 
-![SupervisedClustering_Pairs_Structures Output](/bea_testing/output/SupervisedClustering_Pairs_Structures/BatchId-TSS/SupervisedClust_Diagram.png)
+`r sprintf("![SupervisedClustering_Pairs_Structures Output](%s)", file.path(theOutputDir, "BatchId-TSS", "SupervisedClust_Diagram.png"))`

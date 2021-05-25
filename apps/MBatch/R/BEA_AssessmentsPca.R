@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -8,13 +8,6 @@
 #
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
-
-library(Cairo, warn.conflicts=FALSE, verbose=FALSE)
-library(gtools, warn.conflicts=FALSE, verbose=FALSE)
-library(oompaBase, warn.conflicts=FALSE, verbose=FALSE)
-library(PreProcess, warn.conflicts=FALSE, verbose=FALSE)
-library(ClassDiscovery, warn.conflicts=FALSE, verbose=FALSE)
-library(rJava, warn.conflicts=FALSE, verbose=FALSE)
 
 ####################################################################
 ### top level functions
@@ -370,13 +363,10 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 
 initJavaForPca <- function(theJavaParameters="-Xms2400m")
 {
-  myClass1 <- system.file("DscJava", "DscJava.jar", package="MBatch")
-  myClass2 <- system.file("DscJava", "commons-lang3-3.1.jar", package="MBatch")
-  myClass3 <- system.file("DscJava", "commons-math3-3.3.jar", package="MBatch")
-  myJavaJars <- file.path(myClass1, myClass2, myClass3, fsep=.Platform$path.sep)
+  myJavaJars <- getJarsFromDir(dirname(system.file("DscJava", "DscJava.jar", package="MBatch")))
   logDebug("Calling .jinit for PCA")
   logDebug(c("classpath=",myJavaJars,"parameters=", theJavaParameters))
-  .jinit(classpath=myJavaJars, force.init = TRUE, parameters=theJavaParameters)
+  .jinit(classpath=myJavaJars, force.init = TRUE, parameters=updateJavaParameters(theJavaParameters))
 }
 
 syncBatchIdsAndPcaResults<-function(theBatchIdsForSamples, thePcaSamples, theOriginalSamples)

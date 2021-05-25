@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -11,20 +11,17 @@
 
 ################################################################################
 
-library(rJava, warn.conflicts=FALSE, verbose=FALSE)
-
 ## JavaFile loadData(String theFile, boolean theCols, boolean theRows, boolean theData)
 readAsMatrix <- function(theFile, thePar="-Xmx2000m")
 {
-	myClass1 <- system.file("ReadRJava", "ReadRJava.jar", package="MBatch")
-	myJavaJars <- file.path(myClass1, fsep=.Platform$path.sep)
+	myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
 	logDebug("readAsMatrix - thePar ", thePar)
 	logDebug("readAsMatrix - theFile ", theFile)
 	logDebug("readAsMatrix - Calling .jinit ", myJavaJars)
-	.jinit(classpath=myJavaJars, force.init = TRUE, parameters = thePar)
+	.jinit(classpath=myJavaJars, force.init = TRUE, parameters = updateJavaParameters(thePar))
 	logDebug("readAsMatrix - .jinit complete")
 	logDebug("readAsMatrix before java")
-	objJavaFile <- .jcall("org/mda/readrjava/ReadRJava", returnSig="Lorg/mda/readrjava/JavaFile;",
+	objJavaFile <- .jcall("edu/mda/bcb/readrjava/ReadRJava", returnSig="Ledu/mda/bcb/readrjava/JavaFile;",
 												method="loadDoubleData",
 												.jnew("java/lang/String",theFile),
 												TRUE, TRUE, TRUE)
@@ -42,15 +39,14 @@ readAsMatrix <- function(theFile, thePar="-Xmx2000m")
 ## JavaFile loadData(String theFile)
 readAsDataFrame <- function(theFile, thePar="-Xmx2000m", theUnknownString="Unknown")
 {
-	myClass1 <- system.file("ReadRJava", "ReadRJava.jar", package="MBatch")
-	myJavaJars <- file.path(myClass1, fsep=.Platform$path.sep)
+	myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
 	logDebug("readAsDataFrame - thePar ", thePar)
 	logDebug("readAsDataFrame - theFile ", theFile)
 	logDebug("readAsDataFrame - Calling .jinit ", myJavaJars)
-	.jinit(classpath=myJavaJars, force.init = TRUE, parameters = thePar)
+	.jinit(classpath=myJavaJars, force.init = TRUE, parameters = updateJavaParameters(thePar))
 	logDebug("readAsDataFrame - .jinit complete")
 	logDebug("readAsDataFrame before java")
-	objJavaFile <- .jcall("org/mda/readrjava/ReadRJava", returnSig="Lorg/mda/readrjava/JavaFile;",
+	objJavaFile <- .jcall("edu/mda/bcb/readrjava/ReadRJava", returnSig="Ledu/mda/bcb/readrjava/JavaFile;",
 												method="loadStringData",
 												.jnew("java/lang/String",theFile))
 	logDebug("readAsDataFrame after java")
@@ -73,8 +69,7 @@ readAsDataFrame <- function(theFile, thePar="-Xmx2000m", theUnknownString="Unkno
 ## boolean writeDoubleData(String theFile, String [] theCols, String [] theRows, double [] theData)
 writeAsMatrix <- function(theFile, theMatrix, thePar="-Xmx2000m")
 {
-	myClass1 <- system.file("ReadRJava", "ReadRJava.jar", package="MBatch")
-	myJavaJars <- file.path(myClass1, fsep=.Platform$path.sep)
+  myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
 	logDebug("writeAsMatrix - thePar ", thePar)
 	logDebug("writeAsMatrix - theFile ", theFile)
 	myCols <- as.vector(colnames(theMatrix))
@@ -88,12 +83,12 @@ writeAsMatrix <- function(theFile, theMatrix, thePar="-Xmx2000m")
 	logDebug("writeAsMatrix - length(myCols) ", length(myCols))
 	logDebug("writeAsMatrix - length(myRows) ", length(myRows))
 	logDebug("writeAsMatrix - Calling .jinit ", myJavaJars)
-	.jinit(classpath=myJavaJars, force.init = TRUE, parameters = thePar)
+	.jinit(classpath=myJavaJars, force.init = TRUE, parameters = updateJavaParameters(thePar))
 	logDebug("writeAsMatrix - .jinit complete")
 	logDebug("writeAsMatrix before java")
 	if (is.null(myRows))
 	{
-		success <- .jcall("org/mda/readrjava/ReadRJava", returnSig="Z",
+		success <- .jcall("edu/mda/bcb/readrjava/ReadRJava", returnSig="Z",
 											method="writeDoubleData_Column",
 											.jnew("java/lang/String",theFile),
 											.jarray(myCols),
@@ -101,7 +96,7 @@ writeAsMatrix <- function(theFile, theMatrix, thePar="-Xmx2000m")
 	}
 	else
 	{
-		success <- .jcall("org/mda/readrjava/ReadRJava", returnSig="Z",
+		success <- .jcall("edu/mda/bcb/readrjava/ReadRJava", returnSig="Z",
 											method="writeDoubleData_All",
 											.jnew("java/lang/String",theFile),
 											.jarray(myCols),
@@ -116,8 +111,7 @@ writeAsMatrix <- function(theFile, theMatrix, thePar="-Xmx2000m")
 ## boolean writeStringData(String theFile, String [] theCols, String [] theRows, String [] theData)
 writeAsDataframe <- function(theFile, theDataframe, thePar="-Xmx2000m", theIncludeRowNamesFlag=FALSE)
 {
-	myClass1 <- system.file("ReadRJava", "ReadRJava.jar", package="MBatch")
-	myJavaJars <- file.path(myClass1, fsep=.Platform$path.sep)
+  myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
 	logDebug("writeAsDataframe - thePar ", thePar)
 	logDebug("writeAsDataframe - theFile ", theFile)
 	myCols <- as.vector(colnames(theDataframe))
@@ -131,12 +125,12 @@ writeAsDataframe <- function(theFile, theDataframe, thePar="-Xmx2000m", theInclu
 	logDebug("writeAsDataframe - length(myCols) ", length(myCols))
 	logDebug("writeAsDataframe - length(myRows) ", length(myRows))
 	logDebug("writeAsDataframe - Calling .jinit ", myJavaJars)
-	.jinit(classpath=myJavaJars, force.init = TRUE, parameters = thePar)
+	.jinit(classpath=myJavaJars, force.init = TRUE, parameters = updateJavaParameters(thePar))
 	logDebug("writeAsDataframe - .jinit complete")
 	logDebug("writeAsDataframe before java")
 	if (is.null(myRows))
 	{
-		success <- .jcall("org/mda/readrjava/ReadRJava", returnSig="Z",
+		success <- .jcall("edu/mda/bcb/readrjava/ReadRJava", returnSig="Z",
 										method="writeStringData_Column",
 										.jnew("java/lang/String",theFile),
 										.jcastToArray(myCols),
@@ -144,7 +138,7 @@ writeAsDataframe <- function(theFile, theDataframe, thePar="-Xmx2000m", theInclu
 	}
 	else
 	{
-		success <- .jcall("org/mda/readrjava/ReadRJava", returnSig="Z",
+		success <- .jcall("edu/mda/bcb/readrjava/ReadRJava", returnSig="Z",
 											method="writeStringData_All",
 											.jnew("java/lang/String",theFile),
 											.jcastToArray(myCols),

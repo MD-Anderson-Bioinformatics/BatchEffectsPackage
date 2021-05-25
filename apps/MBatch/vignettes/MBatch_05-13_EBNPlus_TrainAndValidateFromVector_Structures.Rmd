@@ -90,11 +90,15 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
 
 ```{r, echo=TRUE}
 {
-library(MBatch)
+  require(MBatch)
+
+  inputDir <- getTestInputDir()
+  outputDir <- getTestOutputDir()
+  compareDir <- getTestCompareDir()
   
-  theDataFile1="/bea_testing/MATRIX_DATA/brca_rnaseq2_matrix_data.tsv"
-  theDataFile2="/bea_testing/MATRIX_DATA/brca_agi4502_matrix_data.tsv"
-  theOutputDir="/bea_testing/output/EBNPlus_TrainAndValidateReplicates_Structures"
+  theDataFile1=file.path(inputDir, "brca_rnaseq2_matrix_data.tsv")
+  theDataFile2=file.path(inputDir, "brca_agi4502_matrix_data.tsv")
+  theOutputDir=file.path(outputDir, "EBNPlus_TrainAndValidateReplicates_Structures")
   theBatchId1="RNASeqV2"
   theBatchId2="Agilent4502"
   theRandomSeed=314
@@ -258,6 +262,5 @@ If Validation Ratio is 0, the validation set values will be 0 x 0 matrices, but 
 
 This also generates the prior plots output file like this one.
 
-![Prior Plots File](/bea_testing/output/EBNPlus_TrainAndValidateReplicates_Structures/priorplots.PNG)
 
-
+`r sprintf("![Prior Plots File](%s)", file.path(theOutputDir, "priorplots.PNG"))`

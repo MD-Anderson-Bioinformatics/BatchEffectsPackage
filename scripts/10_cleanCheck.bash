@@ -1,15 +1,33 @@
 #!/bin/bash
 
+# not done during CI
+echo "START 10_cleanCheck"
+set -e
+BASE_DIR=$1
+
 echo "move to app dir"
-cd ../apps
+cd ${BASE_DIR}/apps
 
 echo "remove .Rcheck directories"
-rm -r *.Rcheck
+rm -rf *.Rcheck
 
 echo "remove R packages"
-rm *.tar.gz
+rm -f *.tar.gz
 
-echo "lsit apps directory"
-ls -l
+echo "remove Docker installations data"
+rm -rf ${BASE_DIR}/docker-build/MBatchImage/installations/*
 
-echo "done"
+echo "remove JAR files in R packages"
+rm -rf ${BASE_DIR}/apps/MBatch/inst/DscJava/*
+rm -rf ${BASE_DIR}/apps/MBatch/inst/LegendJava/*
+rm -rf ${BASE_DIR}/apps/MBatch/inst/ReadRJava/*
+rm -rf ${BASE_DIR}/apps/MBatchUtils/inst/BEVIndex/*
+
+echo "list apps directory"
+ls -lh ${BASE_DIR}/apps
+
+echo "list installations directory"
+ls -lh ${BASE_DIR}/docker-build/MBatchImage/installations
+
+echo "FINISHED 10_cleanCheck"
+

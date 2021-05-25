@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -9,9 +9,7 @@
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
-library(MBatch)
-
-
+require(MBatch)
 
 inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
@@ -32,20 +30,6 @@ resolveDuplicates <- function(theNames)
   make.unique(theNames)
 }
 
-foobar <- function(theFile)
-{
-  # read RPPA data as a dataframe
-  # column rppaDF[,1] contains row names that may contain duplicates
-  rppaDF <- readAsGenericDataframe(theFile)
-  # resolve duplicates in row names here
-  myRownames <- rownames(rppaDF)
-  myRownames <- resolveDuplicates(myRownames)
-  # convert to matrix
-  rownames(rppaDF) <- myRownames
-  myMatrix <- data.matrix(rppaDF)
-  t(myMatrix)
-}
-
 readRPPAdataAsMatrix_WithTab <- function(theFile)
 {
   # read RPPA data as a dataframe
@@ -54,8 +38,10 @@ readRPPAdataAsMatrix_WithTab <- function(theFile)
   # resolve duplicates in row names here
   myRownames <- rppaDF[,1]
   myRownames <- resolveDuplicates(myRownames)
+  # convert to numeric, since in R4+ data.matrix converts character(string) to factor, and then to integer
+  numDF <- as.data.frame(lapply(rppaDF[,-1], as.numeric))
   # convert to matrix
-  myMatrix <- data.matrix(rppaDF[,-1])
+  myMatrix <- data.matrix(numDF)
   rownames(myMatrix) <- myRownames
   t(myMatrix)
 }
@@ -71,8 +57,11 @@ readRPPAdataAsMatrix_NoInitialTab <- function(theFile)
   # resolve duplicates in row names here
   myRownames <- rppaDF[,1]
   myRownames <- resolveDuplicates(myRownames)
+  # convert to numeric, since in R4+ data.matrix converts character(string) to factor, and then to integer
+  numDF <- as.data.frame(lapply(rppaDF[,-1], as.numeric))
   # convert to matrix
-  myMatrix <- data.matrix(rppaDF[,-1])
+  ## data.matrix from data.frame converts character to factor to integer in R4+
+  myMatrix <- data.matrix(numDF)
   rownames(myMatrix) <- myRownames
   t(myMatrix)
 }
@@ -92,9 +81,17 @@ if (!is.null(inputDir))
   dir.create(theOutputDir, showWarnings=FALSE, recursive=TRUE)
 
   message("Reading invariant file")
+  message(invariantFile)
   invMatrix = readRPPAdataAsMatrix_WithTab(invariantFile)
+  message("invMatrix")
+  print(dim(invMatrix))
+  print(invMatrix[1:4,1:3])
   message("Reading variant file")
+  message(variantFile)
   varMatrix = readRPPAdataAsMatrix_WithTab(variantFile)
+  message("varMatrix")
+  print(dim(varMatrix))
+  print(varMatrix[1:4,1:3])
   invPseudo <- c("BN", "BO", "BP", "BQ", "BR", "BS")
   varPseudo <- c("AN", "AO", "AP", "AQ", "AR", "AS")
   filename <- RBN_Pseudoreplicates(theInvariantMatrix=invMatrix,

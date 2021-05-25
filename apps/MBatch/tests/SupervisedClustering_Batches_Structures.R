@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -9,7 +9,7 @@
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
-library(MBatch)
+require(MBatch)
 
 inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
@@ -18,6 +18,7 @@ compareDir <- getTestCompareDir()
 theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
 theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
 theOutputDir=file.path(outputDir, "SupervisedClustering_Batches_Structures")
+message(theOutputDir)
 theRandomSeed=314
 theBatchType="TSS"
 
@@ -41,8 +42,7 @@ if (!is.null(inputDir))
   # here, we take most defaults
   SupervisedClustering_Batches_Structures(theData=myData,
                                         theTitle="Test Supervised Clustering",
-                                        theOutputPath=theOutputDir,
-                                        theDoHeatmapFlag=TRUE)
+                                        theOutputPath=theOutputDir)
   message("No comparable output--no error means 'OK' for now.")
   TRUE
 } else {

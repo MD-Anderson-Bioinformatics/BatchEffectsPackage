@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -43,8 +43,9 @@ createBatchEffectsOutput_BoxPlot_AllSampleRLE<-function(theMatrixGeneData, theDa
     thePngFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Diagram-", batchTypeName, ".png", sep=""))
     title <- paste(theTitle, "AllSample-RLE", batchTypeName, sep=" ")
     boxplotLabels <- buildBoxplotLabels(theDataframeBatchData, batchTypeName)
-    #
-    calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels, median(theMatrixGeneData, na.rm=TRUE))
+    # do not pass media
+    #calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels, median(theMatrixGeneData, na.rm=TRUE))
+    calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels)
   }
   TRUE
 }
@@ -142,17 +143,16 @@ createBatchEffectsOutput_BoxPlot_Group<-function(theMatrixGeneData, theDataframe
 ###########################################################################################
 
 calcAndWriteBoxplot <- function(theData, theTitle, theBoxDataFile, thePngFile, theHistogramFile,
-                                theAnnotationsFile, theBoxplotLabels, theMedian=0)
+                                theAnnotationsFile, theBoxplotLabels)
 {
   #logDebug("theBoxplotLabels=", theBoxplotLabels)
   logDebug("calcAndWriteBoxplot - theBoxDataFile=", theBoxDataFile)
-  logDebug("calcAndWriteBoxplot - theMedian=", theMedian)
   logDebug("calcAndWriteBoxplot - dim(theData)[1]=", dim(theData)[1])
   logDebug("calcAndWriteBoxplot - dim(theData)[2]=", dim(theData)[2])
   checkCreateDir(dirname(theBoxDataFile))
   tryCatch({
     logDebug("calcAndWriteBoxplot - before calcAndWriteBoxDataFile")
-    calcAndWriteBoxDataFile(theData, theBoxDataFile, thePngFile, theBoxplotLabels, theTitle, theMedian)
+    calcAndWriteBoxDataFile(theData, theBoxDataFile, thePngFile, theBoxplotLabels, theTitle)
     logDebug("calcAndWriteBoxplot - after calcAndWriteBoxDataFile")
   },error=function(myError)
   {
@@ -161,7 +161,7 @@ calcAndWriteBoxplot <- function(theData, theTitle, theBoxDataFile, thePngFile, t
   })
   tryCatch({
     logDebug("calcAndWriteBoxplot - before calcAndWriteHistogramFile")
-    calcAndWriteHistogramFile(theData, theHistogramFile, theMedian)
+    calcAndWriteHistogramFile(theData, theHistogramFile)
     logDebug("calcAndWriteBoxplot - after calcAndWriteHistogramFile")
   },error=function(myError)
   {
@@ -197,7 +197,7 @@ getColorsForBoxplot <- function(theBoxplotLabels)
   colors[batchLevels]
 }
 
-calcAndWriteBoxDataFile <- function(theData, theFile, thePngFile, theBoxplotLabels, theTitle, theMedian=0)
+calcAndWriteBoxDataFile <- function(theData, theFile, thePngFile, theBoxplotLabels, theTitle)
 {
   logDebug("calcAndWriteBoxDataFile theFile=", theFile)
   logDebug("calcAndWriteBoxDataFile thePngFile=", thePngFile)
@@ -207,7 +207,9 @@ calcAndWriteBoxDataFile <- function(theData, theFile, thePngFile, theBoxplotLabe
   cat("Id	LowerOutMax	LowerOutMin	LowerNotch	LowerWhisker	LowerHinge	Median	UpperHinge	UpperWhisker	UpperNotch	UpperOutMin	UpperOutMax", "\n", file=theFile, sep="", append=FALSE)
   for(i in 1:ncol(theData))
   {
-    boxNumbers <- fivenum(as.vector(unlist(theData[,i]-theMedian)), na.rm=TRUE)
+    # do not subtract median of entire matrix
+    # boxNumbers <- fivenum(as.vector(unlist(theData[,i]-theMedian)), na.rm=TRUE)
+    boxNumbers <- fivenum(as.vector(unlist(theData[,i])), na.rm=TRUE)
     listOfFivenumResults[[length(listOfFivenumResults)+1]] <- boxNumbers
     cat(paste(
       colnames(theData)[i], # Id
@@ -248,16 +250,19 @@ calcAndWriteBoxDataFile <- function(theData, theFile, thePngFile, theBoxplotLabe
 ###########################################################################################
 ###########################################################################################
 
-calcAndWriteHistogramFile <- function(theData, theFile, theMedian=0)
+calcAndWriteHistogramFile <- function(theData, theFile)
 {
   logDebug("calcAndWriteHistogramFile ", theFile)
   # count number of breaks
   maxBins <- 0
   for(i in 1:ncol(theData))
   {
-    myH <- hist(theData[,i]-theMedian, plot=FALSE)
+    # do not subtract median of entire matrix
+    # myH <- hist(theData[,i]-theMedian, plot=FALSE)
+    myH <- hist(theData[,i], plot=FALSE)
     tmpBins <- length(myH$mids)
-    if (tmpBins<maxBins)
+    # use gt, not lt, to get max bin size
+    if (tmpBins>maxBins)
     {
       maxBins <- tmpBins
     }
@@ -265,7 +270,7 @@ calcAndWriteHistogramFile <- function(theData, theFile, theMedian=0)
   ######################################
   # theHistogramFile entry	size	x0	y0	x1	y1  ...	xN	yN
   cat("entry	size", file=theFile, sep="", append=FALSE)
-  for (i in 0:maxBins-1)
+  for (i in 0:(maxBins-1))
   {
     cat(paste("\tx", i, "\ty", i, sep=""), file=theFile, sep="", append=TRUE)
   }
@@ -273,10 +278,12 @@ calcAndWriteHistogramFile <- function(theData, theFile, theMedian=0)
   # and then the values
   for(i in 1:ncol(theData))
   {
-    myH <- hist(theData[,i]-theMedian, plot=FALSE)
+    # do not subtract median of entire matrix
+    #myH <- hist(theData[,i]-theMedian, plot=FALSE)
+    myH <- hist(theData[,i], plot=FALSE)
     cat(paste(
       colnames(theData)[i], # entry
-      sum(myH$counts),      # size
+      length(myH$counts),      # size
       paste(myH$density, myH$mids, sep="\t", collapse="\t"),
       sep="\t"), "\n", sep="", file=theFile, append=TRUE)
   }

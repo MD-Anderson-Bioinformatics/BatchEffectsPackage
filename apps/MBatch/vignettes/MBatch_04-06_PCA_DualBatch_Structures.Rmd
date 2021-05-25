@@ -149,12 +149,16 @@ After the output is an explanation of files and directories created.
 
 ```{r, echo=TRUE}
 {
-  library(MBatch)
-  
+  require(MBatch)
+
+  inputDir <- getTestInputDir()
+  outputDir <- getTestOutputDir()
+  compareDir <- getTestCompareDir()
+
   # set the paths
-  theGeneFile="/bea_testing/MATRIX_DATA/matrix_data-Tumor.tsv"
-  theBatchFile="/bea_testing/MATRIX_DATA/batches-Tumor.tsv"
-  theOutputDir="/bea_testing/output/PCA_DualBatch_Structures"
+  theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
+  theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
+  theOutputDir=file.path(outputDir, "PCA_DualBatch_Structures")
   theRandomSeed=314
   
   # make sure the output dir exists and is empty
@@ -187,7 +191,7 @@ After the output is an explanation of files and directories created.
 The above code creates the following subdirectories and files. The RData and DSCOverview.tsv files are used internally. The subdirectories correspond to the Batch Types Pairs on which the PCA-Plus assessment was performed.
 
 ```bash
-/bea_testing/output/PCA_DualBatch_Structures$ ls -l
+/output/PCA_DualBatch_Structures$ ls -l
 total 16
 -rw-r--r-- 1 linux linux   77 Jun 14 09:34 ALL__CompListDSC.RData
 drwxr-xr-x 3 linux linux 4096 Jun 14 09:34 BatchIdwithTSS
@@ -211,7 +215,7 @@ ANY_Weights.txt has PCA components as the headers, and features (such as, genes 
 PCAValues.tsv This has an initial header row, a row for FVE, and then rows giving sample ids and PCA values.
 
 ```bash
-/bea_testing/output/PCA_DualBatch_Structures/BatchIdwithTSS/DualBatch$ ls -l
+/output/PCA_DualBatch_Structures/BatchIdwithTSS/DualBatch$ ls -l
 total 2120
 -rw-r--r-- 1 linux linux     383 Jun 14 09:34 ANY_Comp1_Comp2_DSC.txt
 -rw-r--r-- 1 linux linux     267 Jun 14 09:34 ANY_Comp1_Comp2_DSC.txt__CompDSC.RData
@@ -230,7 +234,7 @@ drwxr-xr-x 2 linux linux    4096 Jun 14 09:34 PCA-Plus
 The PCA-Plus directory contains the different PCA-Plus PNG files and legends.
 
 ```bash
-/bea_testing/output/PCA_DualBatch_Structures/BatchIdwithTSS/DualBatch/PCA-Plus$ ls -l
+/output/PCA_DualBatch_Structures/BatchIdwithTSS/DualBatch/PCA-Plus$ ls -l
 total 436
 -rw-r--r-- 1 linux linux 120980 Jun 14 09:34 BatchIdwithTSS_Comp1_Comp2_Diagram.png
 -rw-r--r-- 1 linux linux  51860 Jun 14 09:34 BatchIdwithTSS_Comp1_Comp2_Legend-ALL.png
@@ -246,4 +250,4 @@ total 436
 
 Here is a diagram generated from this code.
 
-![PCAPlus Output](/bea_testing/output/PCA_DualBatch_Structures/BatchIdwithTSS/DualBatch/PCA-Plus/BatchIdwithTSS_Comp1_Comp2_Diagram.png)
+`r sprintf("![PCAPlus Output](%s)", file.path(theOutputDir, "BatchIdwithTSS", "DualBatch", "PCA-Plus", "BatchIdwithTSS_Comp1_Comp2_Diagram.png"))`

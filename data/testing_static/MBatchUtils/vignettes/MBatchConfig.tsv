@@ -1,5 +1,6 @@
 sampleidBatchType	Sample
-batchTypesForMBatchArray	TSS,ShipDate
+batchTypesForMBatchArray	BatchId,TSS,ShipDate
+batchTypesForTRINOVA	BatchId,TSS,ShipDate
 mutBatchFlag	FALSE
 mutationsMutbatchFlag	FALSE
 mutBatchMem	4000m

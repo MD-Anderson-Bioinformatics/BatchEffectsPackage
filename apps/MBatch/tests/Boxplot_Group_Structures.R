@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -9,7 +9,7 @@
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
-library(MBatch)
+require(MBatch)
 
 inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
@@ -19,6 +19,9 @@ theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
 theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
 theOutputDir=file.path(outputDir, "Boxplot_Group_Structures")
 theCompareFile=file.path(compareDir, "Boxplot_Group_Structures.tsv")
+theCompareFileAnn=file.path(compareDir, "BoxPlot_Group-Mean_Annotations-TSS.tsv")
+theCompareFileBox=file.path(compareDir, "BoxPlot_Group-Mean_BoxData-TSS.tsv")
+theCompareFileHis=file.path(compareDir, "BoxPlot_Group-Mean_Histogram-TSS.tsv")
 theRandomSeed=314
 #myRandomSeed <- 314
 #myTestSeed <- 42
@@ -49,19 +52,23 @@ if (!is.null(inputDir))
                            theListOfGroupBoxFunction=list(function(x) {mean(x)}),
                            theListOfGroupBoxLabels=list("Mean"),
                            theMaxGeneCount=10000)
-  correctedMatrix <- readAsDataFrame(file.path(theOutputDir, "Group-Mean", "BoxPlot_Group-Mean_BoxData-BatchId.tsv"))
-  compareMatrix <- readAsDataFrame(theCompareFile)
-  message("correctedMatrix dim")
-  print(dim(correctedMatrix))
-  message("compareMatrix dim")
-  print(dim(compareMatrix))
-  message("correctedMatrix content")
-  print(correctedMatrix[1:4,1:3])
-  message("compareMatrix content")
-  print(compareMatrix[1:4,1:3])
-  compared <- compareTwoMatrices(correctedMatrix, compareMatrix)
-  print(compared)
-  compared
+  ########################
+  correctedDataframe <- readAsGenericDataframe(file.path(theOutputDir, "Group-Mean", "BoxPlot_Group-Mean_BoxData-TSS.tsv"))
+  compareDataframe <- readAsGenericDataframe(theCompareFileBox)
+  comparedBox <- compareTwoDataframes(correctedDataframe, compareDataframe)
+  ########################
+  correctedDataframe <- readAsGenericDataframe(file.path(theOutputDir, "Group-Mean", "BoxPlot_Group-Mean_Annotations-TSS.tsv"))
+  compareDataframe <- readAsGenericDataframe(theCompareFileAnn)
+  comparedAnn <- compareTwoDataframes(correctedDataframe, compareDataframe)
+  ########################
+  correctedDataframe <- readAsGenericDataframe(file.path(theOutputDir, "Group-Mean", "BoxPlot_Group-Mean_Histogram-TSS.tsv"))
+  compareDataframe <- readAsGenericDataframe(theCompareFileHis)
+  comparedHis <- compareTwoDataframes(correctedDataframe, compareDataframe)
+  ########################
+  message("comparedBox=", comparedBox)
+  message("comparedAnn=", comparedAnn)
+  message("comparedHis=", comparedHis)
+  (comparedBox&&comparedAnn&&comparedHis)
 } else {
   message("No test data. Skip test.")
   TRUE

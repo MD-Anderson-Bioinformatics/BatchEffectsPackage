@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -8,12 +8,6 @@
 #
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
-
-library(Cairo, warn.conflicts=FALSE, verbose=FALSE)
-library(gtools, warn.conflicts=FALSE, verbose=FALSE)
-library(mclust, warn.conflicts=FALSE, verbose=FALSE)
-library(ClassDiscovery, warn.conflicts=FALSE, verbose=FALSE)
-library(squash, warn.conflicts=FALSE, verbose=FALSE)
 
 ####################################################################
 ####################################################################
@@ -27,10 +21,11 @@ createBatchEffectsOutput_hierclust<-function(theMatrixGeneData, theDataframeBatc
 	Sys.setlocale("LC_COLLATE","C")
 	logDebug("Changing LC_COLLATE to C for duration of run")
 	checkPackageSettings()
-	uDend<-hierClust_calc(theMatrixGeneData, theDataframeBatchData)
+	stopifnotWithLogging("The number of columns of gene data must equal the number of rows of batch data.", ncol(theMatrixGeneData)==nrow(theDataframeBatchData))
+	uDendSamples <- hierClust_calc(theMatrixGeneData)
 	hierClustOutputDir <- checkCreateDir(theHierClustOutputDir, theHierClustFileBase)
 	rdataFile <- NULL
-	if (is.null(uDend))
+	if (is.null(uDendSamples))
 	{
 		filename<-makeHCFileName_PNG(hierClustOutputDir, "Diagram")
 		writeStringToImage(filename, paste("Unable to calculate--too many NAs, Infinities or NaNs in data - ", theTitle, sep=""))
@@ -40,9 +35,9 @@ createBatchEffectsOutput_hierclust<-function(theMatrixGeneData, theDataframeBatc
 		### logDebug("RData output here, write uDend and theDataframeBatchData ", outputFile)
 		### RData output here, write uDend and theDataframeBatchData
 		### D3 Hierarchical Clustering output here
-	  rdataFile <-writeHCDataTSVs(uDend, hierClustOutputDir, "HCData.tsv", "HCOrder.tsv")
+	  rdataFile <-writeHCDataTSVs(uDendSamples, hierClustOutputDir, "HCData.tsv", "HCOrder.tsv")
 		#logDebug("createBatchEffectsOutput_hierclust: theHierClustOutputDir=",theHierClustOutputDir, "theTitle=", theTitle, "theHierClustFileBase=", theHierClustFileBase)
-		hierClust_draw(uDend, theDataframeBatchData, theTitle, hierClustOutputDir, theHierClustFileBase)
+		hierClust_draw(uDendSamples, theDataframeBatchData, theTitle, hierClustOutputDir, theHierClustFileBase)
 	}
 	rdataFile
 }
@@ -74,7 +69,7 @@ hierClust_draw<-function(theUdend, theDataframeBatchData, theTitle,
 	return(NULL)
 }
 
-hierClust_calc<-function(theMatrixGeneData, theDataframeBatchData)
+hierClust_calc<-function(theMatrixGeneData)
 {
 	logDebug("hierclust_calc")
 	collateOrigValue<-Sys.getlocale("LC_COLLATE")
@@ -82,9 +77,6 @@ hierClust_calc<-function(theMatrixGeneData, theDataframeBatchData)
 	Sys.setlocale("LC_COLLATE","C")
 	logDebug("Changing LC_COLLATE to C for duration of run")
 	checkPackageSettings()
-	### code assumes that theMatrixGeneData and theDataframeBatchData contain
-	### the same samples and the same number of samples and in the same order
-	stopifnotWithLogging("The number of columns of gene data must equal the number of rows of batch data.", ncol(theMatrixGeneData)==nrow(theDataframeBatchData))
 	###Do hierarchical clustering
 	# do not need to check for NaN, as NaN is an NA
 	if (is.null(theMatrixGeneData))
@@ -305,9 +297,9 @@ makeHCFileName_PNG<-function(theDir, theDiagramOrLegend, theLegendType="")
 ####################################################################
 ####################################################################
 
-writeHCDataTSVs<-function(uDend, theHierClustOutputDir, theOutputHCDataFileName, theOutputHCOrderFileName, theOutputHCSampleFileName)
+writeHCDataTSVs<-function(uDend, theHierClustOutputDir, theOutputHCDataFileName, theOutputHCOrderFileName, theUdendRData="uDend.RData")
 {
-  rdataFile <- file.path(theHierClustOutputDir,"uDend.RData")
+  rdataFile <- file.path(theHierClustOutputDir,theUdendRData)
 	data<-cbind(uDend$merge, uDend$height, deparse.level=0)
 	colnames(data)<-c("A", "B", "Height")
 	###Write out the data as a Tab separated file to the specified location

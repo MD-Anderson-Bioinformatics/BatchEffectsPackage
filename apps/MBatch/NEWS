@@ -5,6 +5,24 @@
 	*						 *
 	**************************************************
 
+		CHANGES IN R VERSION 1.7.4
+
+NEW FEATURES
+
+    o updates to support metabolomics data
+
+		CHANGES IN R VERSION 1.7.3
+
+NEW FEATURES
+
+    o Fix issue in boxplot (do not use median for matrix)
+
+		CHANGES IN R VERSION 1.7.2
+
+NEW FEATURES
+
+    o Fix issue writing boxplot histogram headers
+
 		CHANGES IN R VERSION 1.6.0
 
 NEW FEATURES
@@ -295,7 +313,7 @@ NEW FEATURES
 
 NEW FEATURES
 
-    o	MANOVA: visualization (Vennerable for testing of output)
+    o	MANOVA: visualization
 
 		CHANGES IN R VERSION 1.1.49
 
@@ -625,12 +643,6 @@ NEW FEATURES
     o	BEA-315 EB: correct "priors" phrasing
     o	BEA-316 PCA: add check that dual batch types exist
     o	BEA-317 SuperClust: Add NA/NaN/Inf Check Before hclust call
-
-		CHANGES IN R VERSION 1.1.8
-
-NEW FEATURES
-
-    o	Uses VennMaster http://www.informatik.uni-ulm.de/ni/staff/HKestler/vennm/doc.html under a Creative Commons Attribution-Noncommercial 3.0 License http://creativecommons.org/licenses/by-nc/3.0/ .
 
 		CHANGES IN R VERSION 1.1.6
 
