@@ -60,6 +60,9 @@ Downloads and details on Standardized Data are available at http://bioinformatic
 
 If you have the equivalent of Java 8 and R 4+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
 
+NOTE: the install_github call sometimes fails due to the size of the repository and GitHub's throttling code.
+You can download the source and install using devtools::install_local.
+
 ```R
 # required CRAN packages
 install.packages(c("rJava", "devtools", "Cairo", "epiR", "gtools", "mclust", "squash", "httr", "eulerr"), dependencies=TRUE, repos = "http://cloud.r-project.org/")
@@ -77,13 +80,16 @@ devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MB
 
 If you have the equivalent of Java 8 and R 4+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
 
+NOTE: the install_github call sometimes fails due to the size of the repository and GitHub's throttling code.
+You can download the source and install using devtools::install_local.
+
 First install MBatch, as provided above.
 
 ```R
 
 # MBatchUtils package
 library(devtools)
-devtools::install_github("MD-Anderson-Bioinformatics/MBatchPackage/apps/MBatchUtils")
+devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MBatchUtils")
 ```
 
 **For educational and research purposes only.**
