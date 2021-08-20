@@ -15,10 +15,10 @@ inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
 compareDir <- getTestCompareDir()
 
-theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
-theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
-theOutputDir=file.path(outputDir, "PCA_DualBatch_Structures")
-theCompareFile=file.path(compareDir, "PCA_DualBatch_Structures.tsv")
+theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
+theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
+theOutputDir=cleanFilePath(outputDir, "PCA_DualBatch_Structures")
+theCompareFile=cleanFilePath(compareDir, "PCA_DualBatch_Structures.tsv")
 theRandomSeed=314
 #myRandomSeed <- 314
 #myTestSeed <- 42
@@ -60,7 +60,7 @@ if (!is.null(inputDir))
                            theJavaParameters=c("-Xms2000m", "-Djava.awt.headless=true"),
                            theSeed=theRandomSeed,
                            theMaxGeneCount=10000)
-  correctedMatrix <- readAsGenericMatrix(file.path(theOutputDir, "BatchIdwithPlateId", "DualBatch", "PCAValues.tsv"))
+  correctedMatrix <- readAsGenericMatrix(cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "BatchIdwithPlateId"), "DualBatch"), "PCAValues.tsv"))
   compareMatrix <- readAsGenericMatrix(theCompareFile)
   message("correctedMatrix")
   print(dim(correctedMatrix))

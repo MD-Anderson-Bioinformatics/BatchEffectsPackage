@@ -79,128 +79,150 @@ CDP_Plot <- function(theFilePath, theData1, theData2,
   #logInfo("CDP_Plot theData2PairedReplicates=", paste(theData2PairedReplicates, collapse=", ", sep=","))
   logInfo("CDP_Plot theData1UnmatchedReplicates=", length(theData1UnmatchedReplicates))
   logInfo("CDP_Plot theData2UnmatchedReplicates=", length(theData2UnmatchedReplicates))
-  theSubTitle <- breakIntoTitle(theSubTitle)
-  # make rows the same
-  theData1 <- theData1[rownames(theData1)[rownames(theData1) %in% rownames(theData2)],]
-  theData2 <- theData2[rownames(theData1)[rownames(theData1) %in% rownames(theData2)],]
-  set.seed(theSeed)
-  pairedCorr <- calculateCDP_correllation(theData1, theData2, theData1PairedReplicates, theData2PairedReplicates, theMethod, theUse)
-  unmatchedCorr <- calculateCDP_correllation(theData1, theData2, theData1UnmatchedReplicates, theData2UnmatchedReplicates, theMethod, theUse)
-  logInfo("CDP_Plot pairedCorr=", length(pairedCorr))
-  #print(pairedCorr)
-  logInfo("CDP_Plot unmatchedCorr=", length(unmatchedCorr))
-  #print(unmatchedCorr)
-  pairedHist <- NULL
-  if(!is.null(pairedCorr))
-  {
-    if(!is.null(theBinWidth))
+  tryCatch({
+    theSubTitle <- breakIntoTitle(theSubTitle)
+    # make rows the same
+    theData1 <- theData1[rownames(theData1)[rownames(theData1) %in% rownames(theData2)],]
+    theData2 <- theData2[rownames(theData1)[rownames(theData1) %in% rownames(theData2)],]
+    set.seed(theSeed)
+    pairedCorr <- calculateCDP_correllation(theData1, theData2, theData1PairedReplicates, theData2PairedReplicates, theMethod, theUse)
+    unmatchedCorr <- calculateCDP_correllation(theData1, theData2, theData1UnmatchedReplicates, theData2UnmatchedReplicates, theMethod, theUse)
+    logInfo("CDP_Plot pairedCorr=", length(pairedCorr))
+    #print(pairedCorr)
+    logInfo("CDP_Plot unmatchedCorr=", length(unmatchedCorr))
+    #print(unmatchedCorr)
+    pairedHist <- NULL
+    if(!is.null(pairedCorr))
     {
-      pairedHist <- hist(pairedCorr, plot=FALSE, breaks=seq(from=-1, to=1, by=theBinWidth))
+      if(!is.null(theBinWidth))
+      {
+        pairedHist <- hist(pairedCorr, plot=FALSE, breaks=seq(from=-1, to=1, by=theBinWidth))
+      }
+      else
+      {
+        pairedHist <- hist(pairedCorr, plot=FALSE)
+      }
+    }
+    unmatchedHist <- NULL
+    if(!is.null(unmatchedCorr))
+    {
+      if(!is.null(theBinWidth))
+      {
+        unmatchedHist <- hist(unmatchedCorr, plot=FALSE, breaks=seq(from=-1, to=1, by=theBinWidth))
+      }
+      else
+      {
+        unmatchedHist <- hist(unmatchedCorr, plot=FALSE)
+      }
+    }
+    pairedDensity <- calculateCDP_density(pairedCorr)
+    unmatchedDensity <- calculateCDP_density(unmatchedCorr)
+    logInfo("CDP_Plot pairedDensity$x=", length(pairedDensity$x))
+    logInfo("CDP_Plot pairedDensity$y=", length(pairedDensity$y))
+    logInfo("CDP_Plot pairedDensity$bw=", pairedDensity$bw)
+    logInfo("CDP_Plot unmatchedDensity$x=", length(unmatchedDensity$x))
+    logInfo("CDP_Plot unmatchedDensity$y=", length(unmatchedDensity$y))
+    logInfo("CDP_Plot unmatchedDensity$bw=", unmatchedDensity$bw)
+    xRange <- c(max(-1, min(c(pairedDensity$x,unmatchedDensity$x))), min(1, max(c(pairedDensity$x,unmatchedDensity$x))))
+    logInfo("CDP_Plot xRange=", xRange)
+    #xRange <- c(-1, 1)
+    # plot!
+    pdf(NULL)
+    CairoPNG(filename=theFilePath, width = 480, height = 480 )
+    on.exit(dev.off())
+    on.exit(par("oma"), add=TRUE)
+    par(oma=c(3,0,0,0))
+    myAnn <- TRUE
+    myAxes <- TRUE
+    if ((TRUE==theHistPlot)&&(!is.null(pairedHist)))
+    {
+      plot(pairedHist, ann=myAnn, col=rgb(0,0,1,1/4), border=rgb(0,0,1,1/4),  axes=myAxes, xlim=xRange,
+           main=paste("Correlation Density Plots\n",theSubTitle),
+           xlab=convertCDPsubtitle(theMethod), ylab="Density")
+      par(new=TRUE)
+      myAnn <- FALSE
+      myAxes <- FALSE
+    }
+    if ((TRUE==theHistPlot)&&(!is.null(unmatchedHist)))
+    {
+      plot(unmatchedHist, ann=myAnn, col=rgb(1,0,0,1/4), border=rgb(1,0,0,1/4), axes=myAxes, xlim=xRange,
+           main=paste("Correlation Density Plots\n",theSubTitle),
+           xlab=convertCDPsubtitle(theMethod), ylab="Density")
+      par(new=TRUE)
+      myAnn <- FALSE
+      myAxes <- FALSE
+    }
+    if ((TRUE==theLinePlot)&&(!is.null(pairedDensity)))
+    {
+      plot(pairedDensity, type='l', ann=myAnn, col=rgb(0,0,1), axes=myAxes, xlim=xRange,
+           main=paste("Correlation Density Plots\n",theSubTitle),
+           xlab=convertCDPsubtitle(theMethod), ylab="Density")
+      par(new=TRUE)
+      myAnn <- FALSE
+      myAxes <- FALSE
+    }
+    if ((TRUE==theLinePlot)&&(!is.null(unmatchedDensity)))
+    {
+      plot(unmatchedDensity, type='l', ann=myAnn, col=rgb(1,0,0), axes=myAxes, xlim=xRange,
+           main=paste("Correlation Density Plots\n",theSubTitle),
+           xlab=convertCDPsubtitle(theMethod), ylab="Density")
+      par(new=TRUE)
+      myAnn <- FALSE
+      myAxes <- FALSE
+    }
+    par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0))
+    plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+    nPaired <- 0
+    if (is.null(theData1PairedReplicates))
+    {
+      nPaired <- 0
+    }
+    else if (is.null(theData2PairedReplicates))
+    {
+      nPaired <- 0
     }
     else
     {
-      pairedHist <- hist(pairedCorr, plot=FALSE)
+      nPaired <- length(unique(sort(c(theData1PairedReplicates, theData2PairedReplicates))))
     }
-  }
-  unmatchedHist <- NULL
-  if(!is.null(unmatchedCorr))
-  {
-    if(!is.null(theBinWidth))
+    nUnmatched <- 0
+    if (is.null(theData1UnmatchedReplicates))
     {
-      unmatchedHist <- hist(unmatchedCorr, plot=FALSE, breaks=seq(from=-1, to=1, by=theBinWidth))
+      nUnmatched <- 0
+    }
+    else if (is.null(theData2UnmatchedReplicates))
+    {
+      nUnmatched <- 0
     }
     else
     {
-      unmatchedHist <- hist(unmatchedCorr, plot=FALSE)
+      nUnmatched <- length(unique(sort(c(theData1UnmatchedReplicates, theData2UnmatchedReplicates))))
     }
-  }
-  pairedDensity <- calculateCDP_density(pairedCorr)
-  unmatchedDensity <- calculateCDP_density(unmatchedCorr)
-  logInfo("CDP_Plot pairedDensity$x=", length(pairedDensity$x))
-  logInfo("CDP_Plot pairedDensity$y=", length(pairedDensity$y))
-  logInfo("CDP_Plot pairedDensity$bw=", pairedDensity$bw)
-  logInfo("CDP_Plot unmatchedDensity$x=", length(unmatchedDensity$x))
-  logInfo("CDP_Plot unmatchedDensity$y=", length(unmatchedDensity$y))
-  logInfo("CDP_Plot unmatchedDensity$bw=", unmatchedDensity$bw)
-  # plot!
-  pdf(NULL)
-  CairoPNG(filename=theFilePath, width = 480, height = 480 )
-  on.exit(dev.off())
-  on.exit(par("oma"), add=TRUE)
-  par(oma=c(3,0,0,0))
-  xRange <- c(max(-1, min(c(pairedDensity$x,unmatchedDensity$x))), min(1, max(c(pairedDensity$x,unmatchedDensity$x))))
-  #xRange <- c(-1, 1)
-  myAnn <- TRUE
-  myAxes <- TRUE
-  if ((TRUE==theHistPlot)&&(!is.null(pairedHist)))
+    legend("bottom",
+           c(paste("Paired (n = ", nPaired, ")", sep="", collapse=""),
+             paste("Unpaired (n = ", nUnmatched, ")", sep="", collapse="")),
+           lty=1, col=c(rgb(0,0,1),rgb(1,0,0)), bty='n',
+           xpd = TRUE)
+  },
+  warning=function(e)
   {
-    plot(pairedHist, ann=myAnn, col=rgb(0,0,1,1/4), border=rgb(0,0,1,1/4),  axes=myAxes, xlim=xRange,
-         main=paste("Correlation Density Plots\n",theSubTitle),
-         xlab=convertCDPsubtitle(theMethod), ylab="Density")
-    par(new=TRUE)
-    myAnn <- FALSE
-    myAxes <- FALSE
-  }
-  if ((TRUE==theHistPlot)&&(!is.null(unmatchedHist)))
+    logWarn("1 Unable to calculate CDP--too many NAs, Infinities or NaNs in data")
+    unlink(theFilePath)
+    openAndWriteIssuesLogFileCDP(dirname(theFilePath))
+  },
+  error=function(e)
   {
-    plot(unmatchedHist, ann=myAnn, col=rgb(1,0,0,1/4), border=rgb(1,0,0,1/4), axes=myAxes, xlim=xRange,
-         main=paste("Correlation Density Plots\n",theSubTitle),
-         xlab=convertCDPsubtitle(theMethod), ylab="Density")
-    par(new=TRUE)
-    myAnn <- FALSE
-    myAxes <- FALSE
-  }
-  if ((TRUE==theLinePlot)&&(!is.null(pairedDensity)))
-  {
-    plot(pairedDensity, type='l', ann=myAnn, col=rgb(0,0,1), axes=myAxes, xlim=xRange,
-         main=paste("Correlation Density Plots\n",theSubTitle),
-         xlab=convertCDPsubtitle(theMethod), ylab="Density")
-    par(new=TRUE)
-    myAnn <- FALSE
-    myAxes <- FALSE
-  }
-  if ((TRUE==theLinePlot)&&(!is.null(unmatchedDensity)))
-  {
-    plot(unmatchedDensity, type='l', ann=myAnn, col=rgb(1,0,0), axes=myAxes, xlim=xRange,
-         main=paste("Correlation Density Plots\n",theSubTitle),
-         xlab=convertCDPsubtitle(theMethod), ylab="Density")
-    par(new=TRUE)
-    myAnn <- FALSE
-    myAxes <- FALSE
-  }
-  par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0))
-  plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-  nPaired <- 0
-  if (is.null(theData1PairedReplicates))
-  {
-    nPaired <- 0
-  }
-  else if (is.null(theData2PairedReplicates))
-  {
-    nPaired <- 0
-  }
-  else
-  {
-    nPaired <- length(unique(sort(c(theData1PairedReplicates, theData2PairedReplicates))))
-  }
-  nUnmatched <- 0
-  if (is.null(theData1UnmatchedReplicates))
-  {
-    nUnmatched <- 0
-  }
-  else if (is.null(theData2UnmatchedReplicates))
-  {
-    nUnmatched <- 0
-  }
-  else
-  {
-    nUnmatched <- length(unique(sort(c(theData1UnmatchedReplicates, theData2UnmatchedReplicates))))
-  }
-  legend("bottom",
-         c(paste("Paired (n = ", nPaired, ")", sep="", collapse=""),
-           paste("Unpaired (n = ", nUnmatched, ")", sep="", collapse="")),
-         lty=1, col=c(rgb(0,0,1),rgb(1,0,0)), bty='n',
-         xpd = TRUE)
+    logWarn("2 Unable to calculate CDP--too many NAs, Infinities or NaNs in data")
+    unlink(theFilePath)
+    openAndWriteIssuesLogFileCDP(dirname(theFilePath))
+  })
+}
+
+openAndWriteIssuesLogFileCDP<-function(theOutputDir)
+{
+  myFile <- file(cleanFilePath(theOutputDir, "error.log"), "w+")
+  on.exit(close(myFile))
+  cat("Correlation not possible\n", file=myFile, append=TRUE)
 }
 
 CDP_Structures <- function(theFilePath, theData1, theData2, theSubTitle, theUnmatchedCount=1000,

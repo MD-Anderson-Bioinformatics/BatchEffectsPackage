@@ -60,7 +60,7 @@ Integer defaulting to 1. Number of threads to use for calculating priors.
 Output path for any files.
 
 ## theWriteToFile
-TRUE to write the corrected data to file and return the file pathname instead of the corrected matrix.
+TRUE to write the corrected data to file and return the cleanFilePathname instead of the corrected matrix.
 
 # Example Call
 
@@ -75,9 +75,9 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
   compareDir <- getTestCompareDir()
   
   # set the paths
-  theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
-  theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
-  theOutputDir=file.path(outputDir, "EB_withNonParametricPriors")
+  theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
+  theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
+  theOutputDir=cleanFilePath(outputDir, "EB_withNonParametricPriors")
   theRandomSeed=314
   theBatchType="TSS"
   

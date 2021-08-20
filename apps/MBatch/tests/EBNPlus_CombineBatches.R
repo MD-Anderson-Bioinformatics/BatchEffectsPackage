@@ -15,10 +15,10 @@ inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
 compareDir <- getTestCompareDir()
 
-theBatchFile=file.path(inputDir, "brca_rnaseq2_batches.tsv")
-theBatchFile2=file.path(inputDir, "brca_agi4502_batches.tsv")
-theOutputDir=file.path(outputDir, "ebnplus", "EBNPlus_CombineBatches")
-theCompareFile=file.path(compareDir, "EBNPlus_CombineBatches.tsv")
+theBatchFile=cleanFilePath(inputDir, "brca_rnaseq2_batches.tsv")
+theBatchFile2=cleanFilePath(inputDir, "brca_agi4502_batches.tsv")
+theOutputDir=cleanFilePath(cleanFilePath(outputDir, "ebnplus"), "EBNPlus_CombineBatches")
+theCompareFile=cleanFilePath(compareDir, "EBNPlus_CombineBatches.tsv")
 theBatchId1="RNASeqV2"
 theBatchId2="Agilent4502"
 
@@ -26,9 +26,9 @@ if (!is.null(inputDir))
 {
   unlink(theOutputDir, recursive=TRUE)
   dir.create(theOutputDir, showWarnings=FALSE, recursive=TRUE)
-  dataBatches <- EBNPlus_CombineBatches(readAsDataFrame(theBatchFile), readAsDataFrame(theBatchFile2), theBatchId1, theBatchId2)
-  writeAsDataframe(file.path(theOutputDir, "BatchData.tsv"), dataBatches)
-  compareDF <- readAsDataFrame(theCompareFile)
+  dataBatches <- EBNPlus_CombineBatches(readAsGenericDataframe(theBatchFile), readAsGenericDataframe(theBatchFile2), theBatchId1, theBatchId2)
+  writeAsGenericDataframe(cleanFilePath(theOutputDir, "BatchData.tsv"), dataBatches)
+  compareDF <- readAsGenericDataframe(theCompareFile)
   print(all(dataBatches==compareDF, na.rm=TRUE))
   (all(dataBatches==compareDF, na.rm=TRUE))
 } else {

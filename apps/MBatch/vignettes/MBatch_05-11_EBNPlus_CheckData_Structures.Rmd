@@ -60,8 +60,8 @@ The following code is adapted from the tests/EBNPlus_Correction_Structures.R fil
   compareDir <- getTestCompareDir()
   
   # set the paths
-  theDataFile1=file.path(inputDir, "brca_rnaseq2_matrix_data.tsv")
-  theDataFile2=file.path(inputDir, "brca_agi4502_matrix_data.tsv")
+  theDataFile1=cleanFilePath(inputDir, "brca_rnaseq2_matrix_data.tsv")
+  theDataFile2=cleanFilePath(inputDir, "brca_agi4502_matrix_data.tsv")
 
   # trim genes to get just gene symbols from standardized data
   trimGenes <- function(theGenes)

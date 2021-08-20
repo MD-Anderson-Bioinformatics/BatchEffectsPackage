@@ -34,7 +34,7 @@ public class LegendJava
 		String path = args[0];
 		try
 		{
-			String title = "my batch type id or other very long title my batch type id or other very long title my batch type id or other very long title";
+			String title = "aaaaaa bbbbbb cccccc ddddddd/eeeeee/fffffff/ggggggg/hhhhhhh iiiiii jjjjjj kkkkkk llllll mmmmmmm nnnnnn";
 			String version = "Version 00.11.22";
 			String[] legendNames =
 			{
@@ -134,8 +134,12 @@ public class LegendJava
 	public static ArrayList<String> wrapText(String theText, int theWidth)
 	{
 		ArrayList<String> results = new ArrayList<>();
-		int lineHeight = getTextHeight();
-		String[] arr = theText.split(" ");
+		//int lineHeight = getTextHeight();
+		String[] arr = theText.split(" |/");
+		for(String token : arr)
+		{
+			System.out.println("token=" + token);
+		}
 		int nIndex = 0;
 		while (nIndex < arr.length)
 		{
@@ -152,7 +156,7 @@ public class LegendJava
 
 	public static String getVersion()
 	{
-		return "LegendJava 2013_05_03_0823";
+		return "LegendJava BEA_VERSION_TIMESTAMP";
 	}
 
 	public static boolean combineLegends(String theTitle, String [] theListOfFiles, String theFilenamePath)
@@ -201,6 +205,10 @@ public class LegendJava
 			int paddingImages = 25;
 			int imageWidth = numCols * (paddingImages + maxWidth + paddingImages);
 			ArrayList<String> titleNames = LegendJava.wrapText(theTitle, imageWidth - paddingLine - paddingLine);
+			for (String ttln : titleNames)
+			{
+				System.out.println("ttln=" + ttln);
+			}
 			int lineHeight = LegendJava.getTextHeight();
 			int titleHeight = lineHeight + paddingLine + ((lineHeight + paddingLine)*titleNames.size());
 			int imageHeight  = titleHeight + (numRows * (paddingImages + maxHeight + paddingImages));
@@ -305,8 +313,12 @@ public class LegendJava
 				}
 			}
 			int legendWidth = padding + symbolSize + padding + maxTextWidth + padding;
+			System.out.println("theTitle=" + theTitle);
 			ArrayList<String> titleNames = LegendJava.wrapText(theTitle, legendWidth - padding - padding);
-			
+			for (String ttln : titleNames)
+			{
+				System.out.println("ttln=" + ttln);
+			}
 			for (String titleName : titleNames)
 			{
 				if (LegendJava.getTextWidth(titleName) > legendWidth)

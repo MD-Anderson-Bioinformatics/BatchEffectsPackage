@@ -48,6 +48,10 @@ public class DropdownEntry implements Comparable<DropdownEntry>
 	// Supervised Clustering diagram_type=supclu
 	// use failover/static attributes above: public String sc_diagram_image;
 	// use failover/static attributes above: public String sc_legend_image;
+	// umap
+	public String umap_batches;
+	public String umap_samples;
+	public String umap_umapdat;
 
 	@Override
 	public int compareTo(DropdownEntry o)

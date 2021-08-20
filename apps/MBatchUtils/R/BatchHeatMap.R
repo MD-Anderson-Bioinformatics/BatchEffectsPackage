@@ -20,7 +20,7 @@ buildBatchHeatMap_Files <- function(theMatrixFile, theBatchFile, theTitle, theOu
   message(theMatrixFile)
   matData <- readAsGenericMatrix(theMatrixFile)
   message(theBatchFile)
-  dfData <- readAsDataFrame(theBatchFile)
+  dfData <- readAsGenericDataframe(theBatchFile)
   buildBatchHeatMap_Structures(matData, dfData, theTitle, theOutputFile, theSortByType,
                                theRowType, theColType,
                                theRowCluster, theColCluster,
@@ -104,7 +104,8 @@ buildBatchHeatMap_Structures <- function(theMatrixData, theBatchData, theTitle, 
       names(myData) <- as.vector(unlist(theBatchData["Sample"]))
       message("covariate length ", length(myData))
       covar <- chmNewCovariate(myCovariate, myData)
-      chm <- chmAddCovariateBar(chm, 'column', covar)
+      barvar <- chmNewCovariateBar(covar, thickness=as.integer(20))
+      chm <- chmAddCovariateBar(chm, 'column', barvar)
     }
   }
   message("chmExportToHTML")
@@ -211,7 +212,7 @@ makeGenericColorMap <- function(theMatrix)
 
 updateVectorForLinkoutFeatures <- function(theNgchmFeatureMapFile, theVector)
 {
-  mapping <- readAsDataFrame(theNgchmFeatureMapFile)
+  mapping <- readAsGenericDataframe(theNgchmFeatureMapFile)
   currentFeatures <- theVector
   newFeatures <- as.vector(unlist(mapping["linkout"]))
   names(newFeatures) <- as.vector(unlist(mapping["feature"]))
@@ -231,7 +232,7 @@ updateVectorForLinkoutFeatures <- function(theNgchmFeatureMapFile, theVector)
 
 updateDendrogramForLinkoutFeatures <- function(theNgchmFeatureMapFile, theUDend)
 {
-  mapping <- readAsDataFrame(theNgchmFeatureMapFile)
+  mapping <- readAsGenericDataframe(theNgchmFeatureMapFile)
   currentFeatures <- theUDend$labels
   newFeatures <- as.vector(unlist(mapping["linkout"]))
   names(newFeatures) <- as.vector(unlist(mapping["feature"]))
@@ -251,7 +252,7 @@ updateDendrogramForLinkoutFeatures <- function(theNgchmFeatureMapFile, theUDend)
 
 updateForLinkoutFeatures <- function(theNgchmFeatureMapFile, theMatrixData)
 {
-  mapping <- readAsDataFrame(theNgchmFeatureMapFile)
+  mapping <- readAsGenericDataframe(theNgchmFeatureMapFile)
   currentFeatures <- rownames(theMatrixData)
   newFeatures <- as.vector(unlist(mapping["linkout"]))
   names(newFeatures) <- as.vector(unlist(mapping["feature"]))
@@ -293,7 +294,11 @@ buildBatchHeatMapFromHC_Structures <- function(theMatrixData, theBatchData,
   dir.create(dirname(theOutputFile), showWarnings=FALSE, recursive=TRUE)
   message("theMatrixData size ", dim(theMatrixData)[1], " ", dim(theMatrixData)[2])
   message("theBatchData size ", dim(theBatchData)[1], " ", dim(theBatchData)[2])
+  message("original row names")
+  message(length(rownames(theMatrixData)))
+  print(rownames(theMatrixData)[1:10])
   message("compute row clusters")
+  #print(rev(rownames(theMatrixData)))
   rowClusters <- rownames(theMatrixData)
   if (is.null(theRowDendRDataFile))
   {
@@ -382,13 +387,17 @@ buildBatchHeatMapFromHC_Structures <- function(theMatrixData, theBatchData,
   message("duplicate colnames")
   message(sum(duplicated(colnames(centeredMatrixData))))
   message("centered col names")
-  message(colnames(centeredMatrixData)[1:10])
+  message(length(colnames(centeredMatrixData)))
+  print(colnames(centeredMatrixData)[1:10])
   message("centered row names")
-  message(rownames(centeredMatrixData)[1:10])
+  message(length(rownames(centeredMatrixData)))
+  print(rownames(centeredMatrixData)[1:10])
   message("original col names")
-  message(colnames(theMatrixData)[1:10])
+  print(length(colnames(theMatrixData)))
+  print(colnames(theMatrixData)[1:10])
   message("original row names")
-  message(rownames(theMatrixData)[1:10])
+  print(length(rownames(theMatrixData)))
+  print(rownames(theMatrixData)[1:10])
   layer1 <- chmNewDataLayer('bi-directional median centered', centeredMatrixData, colors=cmap1, summarizationMethod = "average")
   layer2 <- chmNewDataLayer('original', theMatrixData, colors=cmap2, summarizationMethod = "average")
   message("make CHM")
@@ -410,8 +419,10 @@ buildBatchHeatMapFromHC_Structures <- function(theMatrixData, theBatchData,
       message(length(myData))
       names(myData) <- as.vector(unlist(theBatchData["Sample"]))
       message("covariate length ", length(myData))
+      #print(myData)
       covar <- chmNewCovariate(myCovariate, myData)
-      chm <- chmAddCovariateBar(chm, 'column', covar)
+      barvar <- chmNewCovariateBar(covar, thickness=as.integer(20))
+      chm <- chmAddCovariateBar(chm, 'column', barvar)
     }
   }
   message("chmExportToHTML")

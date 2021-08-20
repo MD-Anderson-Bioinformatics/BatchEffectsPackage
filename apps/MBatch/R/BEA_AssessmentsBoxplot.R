@@ -16,13 +16,13 @@ createBatchEffectsOutput_BoxPlot_AllSampleRLE<-function(theMatrixGeneData, theDa
 																												theTitle, theOutputPath, thePngFlag)
 {
   logDebug("createBatchEffectsOutput_BoxPlot_AllSampleRLE - theOutputPath=", theOutputPath)
-  checkCreateDir(theOutputPath)
+  checkDirForCreation(theOutputPath)
   logDebug("dim(theMatrixGeneData)", dim(theMatrixGeneData))
   logDebug("length(colnames(theMatrixGeneData))", length(colnames(theMatrixGeneData)))
   logDebug("length(rownames(theMatrixGeneData))", length(rownames(theMatrixGeneData)))
   logDebug("dim(theDataframeBatchData)", dim(theDataframeBatchData))
   logDebug("length(names(theDataframeBatchData))", length(names(theDataframeBatchData)))
-  theOutputPath <- file.path(theOutputPath, "AllSample-RLE")
+  theOutputPath <- cleanFilePath(theOutputPath, "AllSample-RLE")
   for(batchTypeIndex in c(2:length(theDataframeBatchData)))
   {
     ### compile data and information for display
@@ -37,10 +37,10 @@ createBatchEffectsOutput_BoxPlot_AllSampleRLE<-function(theMatrixGeneData, theDa
     #	  labelWithBatch <- paste(labelsSorted, batchIdsSorted, sep=" / ")
     #
     # build names for output files
-    theBoxDataFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_BoxData-", batchTypeName, ".tsv", sep=""))
-    theHistogramFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Histogram-", batchTypeName, ".tsv", sep=""))
-    theAnnotationsFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Annotations-", batchTypeName, ".tsv", sep=""))
-    thePngFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Diagram-", batchTypeName, ".png", sep=""))
+    theBoxDataFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_BoxData-", batchTypeName, ".tsv", sep=""))
+    theHistogramFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Histogram-", batchTypeName, ".tsv", sep=""))
+    theAnnotationsFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Annotations-", batchTypeName, ".tsv", sep=""))
+    thePngFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Diagram-", batchTypeName, ".png", sep=""))
     title <- paste(theTitle, "AllSample-RLE", batchTypeName, sep=" ")
     boxplotLabels <- buildBoxplotLabels(theDataframeBatchData, batchTypeName)
     # do not pass media
@@ -64,23 +64,23 @@ buildBoxplotLabels <- function(theDataframeBatchData, theBatchType)
 createBatchEffectsOutput_BoxPlot_AllSampleData<-function(theMatrixGeneData, theDataframeBatchData,
 																							 theTitle, theOutputPath, thePngFlag)
 {
-	checkCreateDir(theOutputPath)
+  checkDirForCreation(theOutputPath)
 	logDebug("dim(theMatrixGeneData)", dim(theMatrixGeneData))
 	logDebug("length(colnames(theMatrixGeneData))", length(colnames(theMatrixGeneData)))
 	logDebug("length(rownames(theMatrixGeneData))", length(rownames(theMatrixGeneData)))
 	logDebug("dim(theDataframeBatchData)", dim(theDataframeBatchData))
 	logDebug("length(names(theDataframeBatchData))", length(names(theDataframeBatchData)))
-	theOutputPath <- file.path(theOutputPath, "AllSample-Data")
+	theOutputPath <- cleanFilePath(theOutputPath, "AllSample-Data")
 	for(batchTypeIndex in c(2:length(theDataframeBatchData)))
 	{
 	  ### compile data and information for display
 	  batchTypeName <- names(theDataframeBatchData)[batchTypeIndex]
 	  logDebug("batchTypeName = ", batchTypeName)
 	  # build names for output files
-	  theBoxDataFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_BoxData-", batchTypeName, ".tsv", sep=""))
-	  theHistogramFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Histogram-", batchTypeName, ".tsv", sep=""))
-	  theAnnotationsFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Annotations-", batchTypeName, ".tsv", sep=""))
-	  thePngFile <- file.path(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Diagram-", batchTypeName, ".png", sep=""))
+	  theBoxDataFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_BoxData-", batchTypeName, ".tsv", sep=""))
+	  theHistogramFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Histogram-", batchTypeName, ".tsv", sep=""))
+	  theAnnotationsFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Annotations-", batchTypeName, ".tsv", sep=""))
+	  thePngFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Diagram-", batchTypeName, ".png", sep=""))
 	  title <- paste(theTitle, "AllSample-Data", batchTypeName, sep=" ")
 	  boxplotLabels <- buildBoxplotLabels(theDataframeBatchData, batchTypeName)
 	  #
@@ -95,7 +95,7 @@ createBatchEffectsOutput_BoxPlot_Group<-function(theMatrixGeneData, theDataframe
 																								 thePngFlag)
 {
 	stopifnotWithLogging("Group box list and group box labels should be the same length", length(theListOfGroupBoxFunction)==length(theListOfGroupBoxLabels))
-	checkCreateDir(theOutputPath)
+  checkDirForCreation(theOutputPath)
 	logDebug("groupFunction")
 	logDebug("dim(theMatrixGeneData)", dim(theMatrixGeneData))
 	logDebug("length(colnames(theMatrixGeneData))", length(colnames(theMatrixGeneData)))
@@ -107,7 +107,7 @@ createBatchEffectsOutput_BoxPlot_Group<-function(theMatrixGeneData, theDataframe
 	  groupLabel <- theListOfGroupBoxLabels[[index]]
 	  logDebug("groupLabel = ", groupLabel)
 	  groupAndLabel <- paste("Group-", groupLabel, sep="")
-	  myOutputPath <- file.path(theOutputPath, groupAndLabel)
+	  myOutputPath <- cleanFilePath(theOutputPath, groupAndLabel)
 	  for(batchTypeIndex in c(2:length(theDataframeBatchData)))
 	  {
 	    ### compile data and information for display
@@ -122,10 +122,10 @@ createBatchEffectsOutput_BoxPlot_Group<-function(theMatrixGeneData, theDataframe
 	    newMatrix <- buildGroupMatrix(theMatrixGeneData, theDataframeBatchData, batchTypeName, theListOfGroupBoxFunction[[index]])
 	    ####
 	    # build names for output files
-	    theBoxDataFile <- file.path(myOutputPath, paste("BoxPlot_", groupAndLabel, "_BoxData-", batchTypeName, ".tsv", sep=""))
-	    theHistogramFile <- file.path(myOutputPath, paste("BoxPlot_", groupAndLabel, "_Histogram-", batchTypeName, ".tsv", sep=""))
-	    theAnnotationsFile <- file.path(myOutputPath, paste("BoxPlot_", groupAndLabel, "_Annotations-", batchTypeName, ".tsv", sep=""))
-	    thePngFile <- file.path(myOutputPath, paste("BoxPlot_", groupAndLabel, "_Diagram-", batchTypeName, ".png", sep=""))
+	    theBoxDataFile <- cleanFilePath(myOutputPath, paste("BoxPlot_", groupAndLabel, "_BoxData-", batchTypeName, ".tsv", sep=""))
+	    theHistogramFile <- cleanFilePath(myOutputPath, paste("BoxPlot_", groupAndLabel, "_Histogram-", batchTypeName, ".tsv", sep=""))
+	    theAnnotationsFile <- cleanFilePath(myOutputPath, paste("BoxPlot_", groupAndLabel, "_Annotations-", batchTypeName, ".tsv", sep=""))
+	    thePngFile <- cleanFilePath(myOutputPath, paste("BoxPlot_", groupAndLabel, "_Diagram-", batchTypeName, ".png", sep=""))
 	    title <- paste(theTitle, groupAndLabel, batchTypeName, sep=" ")
 	    boxplotLabels <- colnames(newMatrix)
 	    #
@@ -149,7 +149,7 @@ calcAndWriteBoxplot <- function(theData, theTitle, theBoxDataFile, thePngFile, t
   logDebug("calcAndWriteBoxplot - theBoxDataFile=", theBoxDataFile)
   logDebug("calcAndWriteBoxplot - dim(theData)[1]=", dim(theData)[1])
   logDebug("calcAndWriteBoxplot - dim(theData)[2]=", dim(theData)[2])
-  checkCreateDir(dirname(theBoxDataFile))
+  checkDirForCreation(dirname(theBoxDataFile))
   tryCatch({
     logDebug("calcAndWriteBoxplot - before calcAndWriteBoxDataFile")
     calcAndWriteBoxDataFile(theData, theBoxDataFile, thePngFile, theBoxplotLabels, theTitle)

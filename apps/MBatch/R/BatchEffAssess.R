@@ -350,8 +350,12 @@ mbatchIncludeExcludeData<-function(theBeaData,
 
 compressIntoFilename<-function(theString)
 {
-	### listing whole list of characters out looks wrong, but is locale independent
-	theString <- gsub("[^ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/\\]", "", theString)
+  #theString <- iconv(theString, from = "UTF-8", to = "ASCII", sub = "byte")
+  #theString <- gsub("><", "_", theString, fixed=TRUE)
+  #theString <- gsub("<", "_", theString, fixed=TRUE)
+  #theString <- gsub(">", "_", theString, fixed=TRUE)
+  ### listing whole list of characters out looks wrong, but is locale independent
+  theString <- gsub("[^ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/\\_]", "", theString)
 	theString <- gsub("\\", "_", theString, fixed=TRUE)
 	theString <- gsub("/", "_", theString, fixed=TRUE)
 	return(theString)
@@ -698,8 +702,8 @@ combineStringPairs<-function(theLabelList, theValueList, theSep, thePadFlag, the
 
 writeGeneralAnnotations <- function(theOutputDir, theFilename)
 {
-	checkCreateDir(file.path(theOutputDir))
-	outputFile <- file.path(theOutputDir, theFilename)
+  checkDirForCreation(theOutputDir)
+	outputFile <- cleanFilePath(theOutputDir, theFilename)
 	#####
 	version <- getMBatchVersion()
 	if (!is.null(installed.packages()[ ,"Version"]["MBatch"]))
@@ -715,8 +719,8 @@ writeGeneralAnnotations <- function(theOutputDir, theFilename)
 #trimTo5000AndWrite <- function(theMatrix, theOutputDir, theFilename)
 #{
 #	trimmedData <- mbatchTrimData(theMatrix, ncol(theMatrix)*5000)
-#	checkCreateDir(file.path(theOutputDir))
-#	outputFile <- file.path(theOutputDir, theFilename)
+#	checkDirForCreation(theOutputDir)
+#	outputFile <- cleanFilePath(theOutputDir, theFilename)
 #	writeDataToFile(trimmedData, outputFile)
 #}
 
@@ -818,7 +822,7 @@ writeSettings<-function( theObjectList=c(),
 {
 	nodename=Sys.info()['nodename']
 
-	sink(type = c("output", "message"), file=file.path(settingsOutputDir,settingsFileName))
+	sink(type = c("output", "message"), file=cleanFilePath(settingsOutputDir,settingsFileName))
 	cat("nodename:", nodename, "\n\n", sep="")
 	cat("working directory:", getwd(), "\n\n", sep="")
 	cat("MBatch Version:", getMBatchVersion(), "\n\n", sep="")
@@ -921,8 +925,8 @@ maxEpsilon<-function(theValueVector, theValue)
 writeBatchDataFiles<-function(theOutputDir, theDataframeSamplesToBatches, theFilename)
 {
 	logDebug("write writeBatchDataFiles")
-	checkCreateDir(file.path(theOutputDir))
-	outputFile <- file.path(theOutputDir, theFilename)
+  checkDirForCreation(theOutputDir)
+	outputFile <- cleanFilePath(theOutputDir, theFilename)
 	writeAsGenericDataframe(outputFile, theDataframeSamplesToBatches)
 	logDebug("finished writeBatchDataFiles")
 }
@@ -1000,6 +1004,12 @@ mbatchStandardLegend <- function(theTitle, theVersion, theLegendNames, theLegend
 		}
 	}
 	logDebug("mbatchStandardLegend - myColors ", paste(myColors, collapse=","))
+	Encoding(theTitle) <- "UTF-8"
+	Encoding(theVersion) <- "UTF-8"
+	Encoding(theFilenamePath) <- "UTF-8"
+	logDebug("mbatchStandardLegend - theTitle UTF-8 = ", theTitle)
+	logDebug("mbatchStandardLegend - theVersion UTF-8 = ", theVersion)
+	logDebug("mbatchStandardLegend - theFilenamePath UTF-8 = ", theFilenamePath)
 	logDebug("mbatchStandardLegend before java")
 	result <- .jcall("edu/mda/bcb/legendjava/LegendJava", returnSig = "Z",
 													method='writeLegend',
@@ -1025,6 +1035,10 @@ mbatchStandardCombineLegends<-function(theTitle, theFilenamePath, theListOfFiles
 	logDebug("mbatchStandardCombineLegends - theTitle ", theTitle)
 	logDebug("mbatchStandardCombineLegends - theFilenamePath ", theFilenamePath)
 	logDebug("mbatchStandardCombineLegends - theListOfFiles ", paste(theListOfFiles, collapse=", "))
+	Encoding(theTitle) <- "UTF-8"
+	Encoding(theFilenamePath) <- "UTF-8"
+	logDebug("mbatchStandardLegend - theTitle UTF-8 = ", theTitle)
+	logDebug("mbatchStandardLegend - theFilenamePath UTF-8 = ", theFilenamePath)
 	logDebug("mbatchStandardLegend before java")
 	result <- .jcall("edu/mda/bcb/legendjava/LegendJava", returnSig = "Z",
 									 method='combineLegends',

@@ -387,7 +387,7 @@ int.eprior <- function(sdat,g.hat,d.hat, theNumberOfThreads)
 	g.star <- d.star <- NULL
 	r <- nrow(sdat)
 	myCluster <- makePSOCKcluster(theNumberOfThreads)
-	#, outfile=file.path(getLogDir(), "int_eprior.log"))
+	#, outfile=cleanFilePath(getLogDir(), "int_eprior.log"))
 	on.exit(stopCluster(myCluster))
 	results <- parLapply(cl=myCluster, 1:r, parallelIntEprior, g.hat, d.hat, sdat)
 	for(mypair in results)

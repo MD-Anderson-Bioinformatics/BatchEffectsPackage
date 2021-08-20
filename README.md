@@ -8,6 +8,10 @@ The MBatch R package is designed to help assess and correct for batch effects. I
 
 Additional information can be found at http://bioinformatics.mdanderson.org/main/TCGABatchEffects:Overview
 
+Test data has been moved to a different repository, to address the issue where GitHub throttling code causes the devtools::install_github command to fail.
+Test data can be added by running downloadData.bash, which is at the root of the repo.
+The new data repo is https://github.com/MD-Anderson-Bioinformatics/BatchEffectsPackageData
+
 |Component|Description|
 |--|--|
 |MBatch (R)|R package for basic Batch Effects|
@@ -60,9 +64,6 @@ Downloads and details on Standardized Data are available at http://bioinformatic
 
 If you have the equivalent of Java 8 and R 4+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
 
-NOTE: the install_github call sometimes fails due to the size of the repository and GitHub's throttling code.
-You can download the source and install using devtools::install_local.
-
 ```R
 # required CRAN packages
 install.packages(c("rJava", "devtools", "Cairo", "epiR", "gtools", "mclust", "squash", "httr", "eulerr"), dependencies=TRUE, repos = "http://cloud.r-project.org/")
@@ -75,13 +76,12 @@ install.packages(c("oompaBase", "ClassDiscovery", "PreProcess"), dependencies=TR
 ## MBatch package
 devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MBatch")
 ```
+Test data has been moved to a different repository, to address the issue where GitHub throttling code causes the devtools::install_github command to fail.
 
 # MBatchUtils R Package
 
 If you have the equivalent of Java 8 and R 4+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
 
-NOTE: the install_github call sometimes fails due to the size of the repository and GitHub's throttling code.
-You can download the source and install using devtools::install_local.
 
 First install MBatch, as provided above.
 
@@ -91,6 +91,7 @@ First install MBatch, as provided above.
 library(devtools)
 devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MBatchUtils")
 ```
+Test data has been moved to a different repository, to address the issue where GitHub throttling code causes the devtools::install_github command to fail.
 
 **For educational and research purposes only.**
 

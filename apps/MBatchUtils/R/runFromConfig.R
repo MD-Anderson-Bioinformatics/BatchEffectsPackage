@@ -12,12 +12,6 @@
 #############################################################################
 #### utility functions
 
-# write matrix files out
-writeMatrixToFile <- function(theMatrix, theFile)
-{
-  write.table(theMatrix, file=theFile, quote=FALSE, sep="\t", col.names=NA, row.names=TRUE)
-}
-
 # trim genes to get just gene symbols from standardized data
 trimGenes <- function(theGenes)
 {
@@ -154,7 +148,7 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
   stopifnot(file.exists(theNgchmWidgetJs))
   stopifnot(file.exists(theShaidyMapGenJava))
   ####################################################################
-  myConfig <- read.csv(theConfigFile, header=FALSE, sep="\t", as.is=TRUE, row.names=1 )
+  myConfig <- read.csv(theConfigFile, header=FALSE, sep="\t", as.is=TRUE, row.names=1)
   rbnOnly <- as.logical(convertNulls(myConfig["RBN_Only",]))
   mutBatchFlag <- as.logical(convertNulls(myConfig["mutBatchFlag",]))
   mutationsMutbatchFlag <- as.logical(convertNulls(myConfig["mutationsMutbatchFlag",]))
@@ -182,14 +176,14 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     mutBatchZscoreCutoff <- as.numeric(myConfig["mutBatchZscoreCutoff",])
     message("title ", title)
     message("mutBatchMem ", mutBatchMem)
-    message("batchTypesForMBatch ", batchTypesForMBatch)
+    message("batchTypesForMBatch ", paste(batchTypesForMBatch, sep=" , "))
     message("mutBatchThreads ", mutBatchThreads)
     message("mutBatchPvalueCutoff ", mutBatchPvalueCutoff)
     message("mutBatchZscoreCutoff ", mutBatchZscoreCutoff)
 
     sourceDir <- theDataDir
-    datFile <- file.path(sourceDir, "matrix_data.tsv")
-    batFile <- file.path(sourceDir, "batches.tsv")
+    datFile <- cleanFilePath(sourceDir, "matrix_data.tsv")
+    batFile <- cleanFilePath(sourceDir, "batches.tsv")
 
     mutBatchSingle(datFile, batFile, title, theOutputDir,
                    theJavaArgs=c(paste(c("-Xms", "-Xmx"), mutBatchMem, sep=""), "-Djava.awt.headless=true"),
@@ -251,6 +245,10 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
       ngchmColumnType <- "bio.tcga.barcode.sample"
     }
     batchTypesForMBatch <- myConfig["batchTypesForMBatchArray",]
+    if (!is.null(batchTypesForMBatch))
+    {
+      batchTypesForMBatch <- strsplit(batchTypesForMBatch, ",")[[1]]
+    }
     batchTypesForTRINOVA <- myConfig["batchTypesForTRINOVA",]
     filterMaxValue <- myConfig["filterMaxValue",]
     filterLogTransformFlag <- myConfig["filterLogTransformFlag",]
@@ -260,7 +258,7 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     CDP_Flag <- as.logical(convertNulls(myConfig["CDP_Flag",]))
     message("title ", title)
     message("sampleidBatchType ", sampleidBatchType)
-    message("batchTypesForMBatch ", batchTypesForMBatch)
+    message("batchTypesForMBatch ", paste(batchTypesForMBatch, sep = " = "))
     message("batchTypesForTRINOVA ", batchTypesForTRINOVA)
     message("filterMaxValue ", filterMaxValue)
     message("filterLogTransformFlag ", filterLogTransformFlag)
@@ -338,10 +336,6 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     {
       filteringBatches <- strsplit(filteringBatches, ",")[[1]]
     }
-    if (!is.null(batchTypesForMBatch))
-    {
-      batchTypesForMBatch <- strsplit(batchTypesForMBatch, ",")[[1]]
-    }
     if (!is.null(batchTypesForTRINOVA))
     {
       batchTypesForTRINOVA <- strsplit(batchTypesForTRINOVA, ",")[[1]]
@@ -362,15 +356,15 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     selectedDSCMaxGeneCount <- as.numeric(selectedDSCMaxGeneCount)
     selectedBoxplotMaxGeneCount <- as.numeric(selectedBoxplotMaxGeneCount)
     ####################################################################
-    logFile <- file.path(theOutputDir, "mbatch.log")
+    logFile <- cleanFilePath(theOutputDir, "mbatch.log")
     sourceDir <- theDataDir
-    datFile <- file.path(sourceDir, "matrix_data.tsv")
-    batFile <- file.path(sourceDir, "batches.tsv")
-    datFile2 <- file.path(sourceDir, "matrix_data2.tsv")
-    batFile2 <- file.path(sourceDir, "batches2.tsv")
+    datFile <- cleanFilePath(sourceDir, "matrix_data.tsv")
+    batFile <- cleanFilePath(sourceDir, "batches.tsv")
+    datFile2 <- cleanFilePath(sourceDir, "matrix_data2.tsv")
+    batFile2 <- cleanFilePath(sourceDir, "batches2.tsv")
     #############################################################################
     ngchmFeatureMapFile <- NULL
-    nmapFile <- file.path(sourceDir, "ngchm_link_map.tsv")
+    nmapFile <- cleanFilePath(sourceDir, "ngchm_link_map.tsv")
     if (file.exists(nmapFile))
     {
       ngchmFeatureMapFile <- nmapFile
@@ -393,16 +387,16 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
       {
         origBatFileOne <- paste(batFile, ".bak2", sep="")
         file.rename(batFile, origBatFileOne)
-        batchs <- readAsDataFrame(origBatFileOne)
+        batchs <- readAsGenericDataframe(origBatFileOne)
         names(batchs)[names(batchs)==sampleidBatchType] <- "Sample"
-        writeAsDataframe(batFile, batchs)
+        writeAsGenericDataframe(batFile, batchs)
         if(file.exists(datFile2))
         {
           origBatFileTwo <- paste(batFile2, ".bak2", sep="")
           file.rename(batFile2, origBatFileTwo)
-          batchs <- readAsDataFrame(origBatFileTwo)
+          batchs <- readAsGenericDataframe(origBatFileTwo)
           names(batchs)[names(batchs)==sampleidBatchType] <- "Sample"
-          writeAsDataframe(batFile2, batchs)
+          writeAsGenericDataframe(batFile2, batchs)
         }
       }
     }
@@ -461,8 +455,8 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
       # EBNplus cannot use the mbatchLoadFiles function, since it filters meaningfule data
       matrix1 <- readAsGenericMatrix(datFile)
       matrix2 <- readAsGenericMatrix(datFile2)
-      df1 <- readAsDataFrame(batFile)
-      df2 <- readAsDataFrame(batFile2)
+      df1 <- readAsGenericDataframe(batFile)
+      df2 <- readAsGenericDataframe(batFile2)
       # make genes nice
       rownames(matrix1) <- trimGenes(rownames(matrix1))
       rownames(matrix2) <- trimGenes(rownames(matrix2))
@@ -525,8 +519,8 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
       # set flog for other than full success
       otherNote <- TRUE
       #############################################################################
-      message("Write completed note to '", file.path(theOutputDir, "MBATCH_COMPLETED.txt"), "'")
-      file.create(file.path(theOutputDir, "MBATCH_COMPLETED.txt"))
+      message("Write completed note to '", cleanFilePath(theOutputDir, "MBATCH_COMPLETED.txt"), "'")
+      file.create(cleanFilePath(theOutputDir, "MBATCH_COMPLETED.txt"))
     }
     else
     {
@@ -588,31 +582,29 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
           warnLevel<-getOption("warn")
           on.exit(options(warn=warnLevel))
           options(warn=-1)
-          for(myBatchType in batchTypesForMBatch)
-          {
-            message("title ", title)
-            message("myBatchType ", myBatchType)
-            message("theShaidyMapGen ", theShaidyMapGen)
-            message("theShaidyMapGenJava ", theShaidyMapGenJava)
-            message("dim(myMBatchData@mData) ", dim(myMBatchData@mData))
-            message("dim(myMBatchData@mBatches) ", dim(myMBatchData@mBatches))
-            message("trim to same size as hierarchical")
-            myMBatchData <- as.numericWithIssues(myMBatchData)
-            ngchmData <- mbatchTrimData(myMBatchData@mData, theMaxSize = (selectedBoxplotMaxGeneCount * ncol(myMBatchData@mData)))
-            buildBatchHeatMapFromHC_Structures(theMatrixData=ngchmData,
-                                         theBatchData=myMBatchData@mBatches,
-                                         theTitle=paste(title, myBatchType, sep=" "),
-                                         theOutputFile=file.path(theOutputDir, "NGCHM", paste(myBatchType, "ngchm.ngchm", sep="_")),
-                                         theColDendRDataFile=rdataHC,
-                                         theRowDendRDataFile=NULL,
-                                         theNgchmFeatureMapFile=ngchmFeatureMapFile,
-                                         theRowType=ngchmRowType, theColType=ngchmColumnType,
-                                         theRowCluster=c("pearson", "ward.D2"),
-                                         theShaidyMapGen=theShaidyMapGen,
-                                         theNgchmWidgetJs=theNgchmWidgetJs,
-                                         theShaidyMapGenJava=theShaidyMapGenJava,
-                                         theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
-            }
+          myBatchType <- "All"
+          message("title ", title)
+          message("myBatchType ", myBatchType)
+          message("theShaidyMapGen ", theShaidyMapGen)
+          message("theShaidyMapGenJava ", theShaidyMapGenJava)
+          message("dim(myMBatchData@mData) ", dim(myMBatchData@mData))
+          message("dim(myMBatchData@mBatches) ", dim(myMBatchData@mBatches))
+          message("trim to same size as hierarchical 1")
+          myMBatchData <- as.numericWithIssues(myMBatchData)
+          ngchmData <- mbatchTrimData(myMBatchData@mData, theMaxSize = (selectedBoxplotMaxGeneCount * ncol(myMBatchData@mData)))
+          buildBatchHeatMapFromHC_Structures(theMatrixData=ngchmData,
+                                       theBatchData=myMBatchData@mBatches,
+                                       theTitle=paste(title, myBatchType, sep=" "),
+                                       theOutputFile=cleanFilePath(cleanFilePath(theOutputDir, "NGCHM"), paste(myBatchType, "ngchm.ngchm", sep="_")),
+                                       theColDendRDataFile=rdataHC,
+                                       theRowDendRDataFile=NULL,
+                                       theNgchmFeatureMapFile=ngchmFeatureMapFile,
+                                       theRowType=ngchmRowType, theColType=ngchmColumnType,
+                                       theRowCluster=c("pearson", "ward.D2"),
+                                       theShaidyMapGen=theShaidyMapGen,
+                                       theNgchmWidgetJs=theNgchmWidgetJs,
+                                       theShaidyMapGenJava=theShaidyMapGenJava,
+                                       theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
         }
         else
         {
@@ -626,14 +618,14 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
         warnLevel<-getOption("warn")
         on.exit(options(warn=warnLevel))
         options(warn=-1)
-        if (!file.exists(file.path(theOutputDir, "CDP")))
+        if (!file.exists(cleanFilePath(theOutputDir, "CDP")))
         {
-          dir.create(file.path(theOutputDir, "CDP"),showWarnings = FALSE, recursive = TRUE)
+          dir.create(cleanFilePath(theOutputDir, "CDP"),showWarnings = FALSE, recursive = TRUE)
         }
-        CDP_Structures(file.path(theOutputDir, "CDP", "CDP_Plot_Data1_Diagram.PNG"), myOriginalData@mData, myMBatchData@mData, "CDP Output 1")
+        CDP_Structures(cleanFilePath(cleanFilePath(theOutputDir, "CDP"), "CDP_Plot_Data1_Diagram.PNG"), myOriginalData@mData, myMBatchData@mData, "CDP Output 1")
         if (!is.null(myOriginalData2))
         {
-          CDP_Structures(file.path(theOutputDir, "CDP", "CDP_Plot_Data2_Diagram.PNG"), myOriginalData2@mData, myMBatchData@mData, "CDP Output 2")
+          CDP_Structures(cleanFilePath(cleanFilePath(theOutputDir, "CDP"), "CDP_Plot_Data2_Diagram.PNG"), myOriginalData2@mData, myMBatchData@mData, "CDP Output 2")
         }
       }
     }
@@ -641,8 +633,8 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
   if (isFALSE(otherNote))
   {
     #############################################################################
-    message("Write success note to '", file.path(theOutputDir, "MBATCH_SUCCESS.txt"), "'")
-    file.create(file.path(theOutputDir, "MBATCH_SUCCESS.txt"))
+    message("Write success note to '", cleanFilePath(theOutputDir, "MBATCH_SUCCESS.txt"), "'")
+    file.create(cleanFilePath(theOutputDir, "MBATCH_SUCCESS.txt"))
   }
 }
 
@@ -666,6 +658,10 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
   }
   # reduce size
   theDataObject@mData <- mbatchTrimData(theDataObject@mData, theMaxSize)
+  ####
+  #### UMAP
+  ####
+  callMBatch_UMAP_Structures(theOutputDir, theDataObject, theTitle)
   ####
   #### PCAPlus
   ####
@@ -716,9 +712,9 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
   callMBatch_BoxplotGroup_Structures(theOutputDir, theDataObject, theTitle,
                                      theMaxGeneCount=theBoxplotMaxGenes,
                                      theFunction=list(pipelineMean), theFunctionName=list("Mean"))
-  if (!file.exists(file.path(theOutputDir, "BatchData.tsv")))
+  if (!file.exists(cleanFilePath(theOutputDir, "BatchData.tsv")))
   {
-    writeAsDataframe(file.path(theOutputDir, "BatchData.tsv"), theDataObject@mBatches)
+    writeAsGenericDataframe(cleanFilePath(theOutputDir, "BatchData.tsv"), theDataObject@mBatches)
   }
   ####
   #### write success
@@ -838,7 +834,7 @@ doCorrectionsFromConfig <- function(theOutputDir, theDataObject, theDataObject2,
                                           theEBNP_Data1BatchId=theRBN_InvariantId,
                                           theEBNP_Data2BatchId=theRBN_VariantId,
                                           theBarcodeTrimFunction=trimGenes, theSep="-")
-    writeAsDataframe(theFile=file.path(theOutputDir, "corrected_batches.tsv"), theDataframe=dataBatches)
+    writeAsGenericDataframe(theFile=cleanFilePath(theOutputDir, "corrected_batches.tsv"), theDataframe=dataBatches)
     if(!is.null(myCorrectedFile))
     {
       dataMatrix <- readAsGenericMatrix(myCorrectedFile)
@@ -864,7 +860,7 @@ doCorrectionsFromConfig <- function(theOutputDir, theDataObject, theDataObject2,
                                           theEBNP_Data1BatchId=theRBN_InvariantId,
                                           theEBNP_Data2BatchId=theRBN_VariantId,
                                           theBarcodeTrimFunction=trimGenes, theSep="-")
-    writeAsDataframe(theFile=file.path(theOutputDir, "corrected_batches.tsv"), theDataframe=dataBatches)
+    writeAsGenericDataframe(theFile=cleanFilePath(theOutputDir, "corrected_batches.tsv"), theDataframe=dataBatches)
     if(!is.null(myCorrectedFile))
     {
       dataMatrix <- readAsGenericMatrix(myCorrectedFile)
@@ -874,7 +870,7 @@ doCorrectionsFromConfig <- function(theOutputDir, theDataObject, theDataObject2,
   {
     #theDataObject, theDataObject2, theEBNPlus_Batch1, theEBNPlus_Batch2, theEBNPlus_GroupId1, theEBNPlus_GroupId2, theEBNPlus_Seed,
     processed <- TRUE
-    correctedFile <- file.path(theOutputDir, "ANY_Corrections-EBNPlus.tsv")
+    correctedFile <- cleanFilePath(theOutputDir, "ANY_Corrections-EBNPlus.tsv")
     print(dim(theDataObject@mData))
     print(dim(theDataObject2@mData))
     dataMatrix <- EBNPlus_Correction_Structures(theDataMatrix1=theDataObject@mData,
@@ -887,14 +883,14 @@ doCorrectionsFromConfig <- function(theOutputDir, theDataObject, theDataObject2,
                                                 theEBNP_ParametricPriorsFlag=TRUE,
                                                 theSeed=theEBNPlus_Seed,
                                                 theEBNP_MinSampleNum=theEBNPlus_MinSamples,
-                                                theEBNP_PriorPlotsFile=file.path(theOutputDir, "priorplots_Diagram.PNG"))
-    writeAsMatrix(correctedFile, dataMatrix)
+                                                theEBNP_PriorPlotsFile=cleanFilePath(theOutputDir, "priorplots_Diagram.PNG"))
+    writeAsGenericMatrix(correctedFile, dataMatrix)
     dataBatches <- EBNPlus_CombineBatches(theBeaBatches1=theDataObject@mBatches,
                                       theBeaBatches2=theDataObject2@mBatches,
                                       theEBNP_Data1BatchId=theEBNPlus_GroupId1,
                                       theEBNP_Data2BatchId=theEBNPlus_GroupId2,
                                       theBarcodeTrimFunction=trimGenes)
-    writeAsDataframe(theFile=file.path(theOutputDir, "corrected_batches.tsv"), theDataframe=dataBatches)
+    writeAsGenericDataframe(theFile=cleanFilePath(theOutputDir, "corrected_batches.tsv"), theDataframe=dataBatches)
   }
   else
   {

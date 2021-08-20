@@ -15,10 +15,10 @@ inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
 compareDir <- getTestCompareDir()
 
-theDataFile1=file.path(inputDir, "brca_rnaseq2_matrix_data.tsv")
-theDataFile2=file.path(inputDir, "brca_agi4502_matrix_data.tsv")
-theOutputDir=file.path(outputDir, "ebnplus")
-theCompareFile=file.path(compareDir, "EBNPlus_Correction_Structures.tsv.zip")
+theDataFile1=cleanFilePath(inputDir, "brca_rnaseq2_matrix_data.tsv")
+theDataFile2=cleanFilePath(inputDir, "brca_agi4502_matrix_data.tsv")
+theOutputDir=cleanFilePath(outputDir, "ebnplus")
+theCompareFile=cleanFilePath(compareDir, "EBNPlus_Correction_Structures.tsv.zip")
 theCompareFilename="EBNPlus_Correction_Structures.tsv"
 theBatchId1="RNASeqV2"
 theBatchId2="Agilent4502"
@@ -84,7 +84,7 @@ if (!is.null(inputDir))
   # if there is an error, show the calls leading up to it
   options(showErrorCalls=TRUE)
   #
-  outdir <- file.path(theOutputDir, "EBNPlus_Correction_Structures")
+  outdir <- cleanFilePath(theOutputDir, "EBNPlus_Correction_Structures")
   unlink(outdir, recursive=TRUE)
   dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
   # read the files in. This can be done however you want
@@ -102,9 +102,9 @@ if (!is.null(inputDir))
                                        theEBNP_CorrectForZero=TRUE,
                                        theEBNP_ParametricPriorsFlag=TRUE,
                                        theSeed=theRandomSeed,
-                                       theEBNP_PriorPlotsFile=file.path(outdir, "priorplots.PNG"))
-  outputFile <- file.path(outdir, "corrected.tsv")
-  writeAsMatrix(outputFile, correctedMatrix)
+                                       theEBNP_PriorPlotsFile=cleanFilePath(outdir, "priorplots.PNG"))
+  outputFile <- cleanFilePath(outdir, "corrected.tsv")
+  writeAsGenericMatrix(outputFile, correctedMatrix)
   compareMatrix <- as.matrix(read.delim(unz(theCompareFile, theCompareFilename), header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE, stringsAsFactors=FALSE, row.names=1))
   compared <- compareTwoMatrices(correctedMatrix, compareMatrix)
   print(compared)

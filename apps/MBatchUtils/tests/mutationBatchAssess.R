@@ -26,13 +26,13 @@ if (!is.null(getTestOutputDir()))
   ########################################################
   baseTestDir=getTestInputDir()
   baseOutputDir=getTestOutputDir()
-  dccMinMut=file.path(baseTestDir, "DCCMin_MUT")
-  gdcMinMut=file.path(baseTestDir, "GDCMin_MUT")
-  dccMinOut=file.path(baseOutputDir, "DCCMin_OUT")
-  gdcMinOut=file.path(baseOutputDir, "GDCMin_OUT")
+  dccMinMut=cleanFilePath(baseTestDir, "DCCMin_MUT")
+  gdcMinMut=cleanFilePath(baseTestDir, "GDCMin_MUT")
+  dccMinOut=cleanFilePath(baseOutputDir, "DCCMin_OUT")
+  gdcMinOut=cleanFilePath(baseOutputDir, "GDCMin_OUT")
 
-  dccCompare=file.path(baseTestDir, "DCCMin_OUT")
-  gdcCompare=file.path(baseTestDir, "GDCMin_OUT")
+  dccCompare=cleanFilePath(baseTestDir, "DCCMin_OUT")
+  gdcCompare=cleanFilePath(baseTestDir, "GDCMin_OUT")
   ########################################################
   ########################################################
   unlink(dccMinOut, recursive=TRUE)
@@ -55,10 +55,10 @@ if (!is.null(getTestOutputDir()))
   htmlMutationBatchEffects(gdcMinOut)
   ########################################################
   ########################################################
-  outIndex <- file.path(dccMinOut, "BatchId_FrameShiftIns", "index.html")
-  cmpIndex <- file.path(gdcCompare, "BatchId_FrameShiftIns", "index.html")
-  outCallRef <- file.path(dccMinOut, "BatchId_FrameShiftIns", "callReference.tsv")
-  cmpCallRef <- file.path(gdcCompare, "BatchId_FrameShiftIns", "callReference.tsv")
+  outIndex <- cleanFilePath(cleanFilePath(dccMinOut, "BatchId_FrameShiftIns"), "index.html")
+  cmpIndex <- cleanFilePath(cleanFilePath(gdcCompare, "BatchId_FrameShiftIns"), "index.html")
+  outCallRef <- cleanFilePath(cleanFilePath(dccMinOut, "BatchId_FrameShiftIns"), "callReference.tsv")
+  cmpCallRef <- cleanFilePath(cleanFilePath(gdcCompare, "BatchId_FrameShiftIns"), "callReference.tsv")
   (md5sum(outCallRef) == md5sum(cmpCallRef))&&(md5sum(outIndex) == md5sum(cmpIndex))
 } else {
   message("No test data. Skip test.")

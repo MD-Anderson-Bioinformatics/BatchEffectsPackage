@@ -9,7 +9,7 @@
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
-### Log a message for the developer 
+### Log a message for the developer
 logDebug<-function(...)
 {
 	logOutput(theLevelName="DEBUG", ... )
@@ -21,20 +21,20 @@ logTiming<-function(theAlgorithm, theData, theSystemTime)
 	logOutput(theLevelName="TIMING", "\t", theSystemTime[1], "\t", theSystemTime[3], "\t", theAlgorithm, "\t", theData )
 }
 
-### Log item at in a plain text info message in English that could be easily understood by a user.  
+### Log item at in a plain text info message in English that could be easily understood by a user.
 logInfo<-function(...)
 {
 	logOutput(theLevelName="INFO", ... )
 }
 
-### Log a warning message.  i.e. If an number should be within a certain range to be 
+### Log a warning message.  i.e. If an number should be within a certain range to be
 ### effective and it is outside the range, display a warning message.
 logWarn<-function(...)
 {
 	logOutput(theLevelName="WARN", ... )
 }
 
-### Log message telling the percentage of the program that has completed. 
+### Log message telling the percentage of the program that has completed.
 logPercent<-function(...)
 {
 	logOutput(theLevelName="PERCENT", ... )
@@ -79,7 +79,7 @@ logOutput<-function(theLevelName="INFO", ..., theLogFile=NULL)
 			### Write a time stamp, log.seperator, then all the other entries sent in with log.seperator between them
 			### and add a newline at the end
 			logFileName <- NULL
-			if (!is.null(theLogFile)) 
+			if (!is.null(theLogFile))
 			{
 				logFileName = theLogFile
 			}
@@ -87,9 +87,9 @@ logOutput<-function(theLevelName="INFO", ..., theLogFile=NULL)
 			{
 				logFileName <- logger@mFile
 			}
-			
-			
-			if(is.null(logFileName) || logFileName=="" || logger@mConsole == TRUE) 
+
+
+			if(is.null(logFileName) || logFileName=="" || logger@mConsole == TRUE)
 			{
 				####cat(paste(format(Sys.time(), "%Y %m %d %H:%M:%OS3"), theLevelName, Sys.info()['nodename'], paste(lapply(..., function(x) (return(paste(x, collapse=", ")))), collapse="; "), sep=logger@mSeparator), "\n" )
 				cat(paste(format(Sys.time(), "%Y %m %d %H:%M:%OS3"), theLevelName, Sys.info()['nodename'], paste(..., collapse=", "), sep=logger@mSeparator), "\n" )
@@ -120,17 +120,17 @@ stopWithLogging<-function(msg )
 
 stopifnotWithLogging<-function(msg="", ... )
 {
-	if (sum(...)!=length(c(...))) 
+	if (sum(...)!=length(c(...)))
 	{
-		stopWithLogging(msg)	
+		stopWithLogging(msg)
 	}
 }
 
 warnifnotWithLogging<-function(msg="", ... )
 {
-	if (sum(...)!=length(c(...))) 
+	if (sum(...)!=length(c(...)))
 	{
-		logWarn(msg)	
+		logWarn(msg)
 	}
 }
 
@@ -150,7 +150,7 @@ handleIssuesFunction<-function(theError, theExtraErrorFile=NULL)
 	logError(errorString)
 	if (!is.null(theExtraErrorFile))
 	{
-		checkCreateDir(dirname(theExtraErrorFile))
+	  checkDirForCreation(dirname(theExtraErrorFile))
 		cat(errorString, file=theExtraErrorFile, append=TRUE)
 		cat("\n", file=theExtraErrorFile, append=TRUE)
 	}

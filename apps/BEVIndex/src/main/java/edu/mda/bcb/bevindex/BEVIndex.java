@@ -24,6 +24,7 @@ import edu.mda.bcb.bevindex.algorithms.PCAmtm;
 import edu.mda.bcb.bevindex.algorithms.PCAotm;
 import edu.mda.bcb.bevindex.algorithms.SupervisedClustering;
 import edu.mda.bcb.bevindex.algorithms.TriNova;
+import edu.mda.bcb.bevindex.algorithms.Umap;
 import edu.mda.bcb.bevindex.gson.MBatchIndex;
 import edu.mda.bcb.bevindex.gson.MBatchIndexData;
 import edu.mda.bcb.bevindex.gson.OriginalData;
@@ -246,6 +247,9 @@ public class BEVIndex
 		// CDP diagram_type=cdp
 		CDP cdp = new CDP(new File(theResultsDir, "CDP"), mi.mbatch);
 		cdp.checkAndAddAlgorithm();
+		// UMAP diagram_type=umap
+		Umap umap = new Umap(new File(theResultsDir, "UMAP"), mi.mbatch);
+		umap.checkAndAddAlgorithm();
 		// TriNova diagram_type=tri-man
 		TriNova tm = new TriNova(new File(theResultsDir, "TRINOVA"), mi.mbatch);
 		tm.checkAndAddAlgorithm();

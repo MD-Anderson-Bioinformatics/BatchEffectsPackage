@@ -21,9 +21,8 @@ services:
             # outside access for data files outside:inside
             - /MBatchSA/mbatch:/MBATCH
             - /MBatchSA/website:/WEBSITE
-            # read-only file to set time and timezone to same in image as on server
+            # read-only file to set time to same in image as on server
             - /etc/localtime:/etc/localtime:ro
-            - /etc/timezone:/etc/timezone:ro
 #       ports:
 #            # (outside)host port:container port(inside) for RStudio
 #            - "8080:8787"

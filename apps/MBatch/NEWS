@@ -5,6 +5,12 @@
 	*						 *
 	**************************************************
 
+		CHANGES IN R VERSION 1.7.6
+
+NEW FEATURES
+
+    o significant changes to support arbitrary UTF-8 characters in batch types and batch names.
+
 		CHANGES IN R VERSION 1.7.4
 
 NEW FEATURES

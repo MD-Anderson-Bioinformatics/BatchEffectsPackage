@@ -27,7 +27,8 @@ Returns TRUE if the save succeeded.
 ## The function is currently defined as
 #function (theFile, theMatrix, thePar = "-Xmx2000m")
 #{
-#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
+#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava",
+#                               "ReadRJava.jar", package="MBatch")))
 #    logDebug("writeAsMatrix - thePar ", thePar)
 #    logDebug("writeAsMatrix - theFile ", theFile)
 #    myCols <- as.vector(colnames(theMatrix))

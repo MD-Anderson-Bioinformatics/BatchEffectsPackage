@@ -33,7 +33,8 @@ Returns TRUE if the save succeeded.
 #function (theFile, theDataframe, thePar = "-Xmx2000m",
 #theIncludeRowNamesFlag = FALSE)
 #{
-#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
+#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava",
+#                                            "ReadRJava.jar", package="MBatch")))
 #    logDebug("writeAsDataframe - thePar ", thePar)
 #    logDebug("writeAsDataframe - theFile ", theFile)
 #    myCols <- as.vector(colnames(theDataframe))

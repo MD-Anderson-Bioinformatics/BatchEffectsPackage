@@ -96,9 +96,9 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
   outputDir <- getTestOutputDir()
   compareDir <- getTestCompareDir()
   
-  theDataFile1=file.path(inputDir, "brca_rnaseq2_matrix_data.tsv")
-  theDataFile2=file.path(inputDir, "brca_agi4502_matrix_data.tsv")
-  theOutputDir=file.path(outputDir, "EBNPlus_TrainAndValidateReplicates_Structures")
+  theDataFile1=cleanFilePath(inputDir, "brca_rnaseq2_matrix_data.tsv")
+  theDataFile2=cleanFilePath(inputDir, "brca_agi4502_matrix_data.tsv")
+  theOutputDir=cleanFilePath(outputDir, "EBNPlus_TrainAndValidateReplicates_Structures")
   theBatchId1="RNASeqV2"
   theBatchId2="Agilent4502"
   theRandomSeed=314
@@ -206,7 +206,7 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
           theEBNP_TestRatio=0.3,
           theSeed=theRandomSeed,
           theTestSeed=theRandomSeed,
-          theEBNP_PriorPlotsFile=file.path(theOutputDir, "priorplots.PNG"))
+          theEBNP_PriorPlotsFile=cleanFilePath(theOutputDir, "priorplots.PNG"))
     print("TestSet1")
     printMatrix(resultsList$TestSet1)
     print("TestSet2")
@@ -263,4 +263,4 @@ If Validation Ratio is 0, the validation set values will be 0 x 0 matrices, but 
 This also generates the prior plots output file like this one.
 
 
-`r sprintf("![Prior Plots File](%s)", file.path(theOutputDir, "priorplots.PNG"))`
+`r sprintf("![Prior Plots File](%s)", cleanFilePath(theOutputDir, "priorplots.PNG"))`

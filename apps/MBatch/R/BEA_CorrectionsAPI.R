@@ -31,12 +31,12 @@ EB_internal<-function(theBeaData,
   myPath <- thePath
   priorFile <- "notused.png"
   myErrorFile <- NULL
-  #setLogging(new("Logging", theFile=file.path(myPath, "EB.log")))
+  #setLogging(new("Logging", theFile=cleanFilePath(myPath, "EB.log")))
   if (TRUE==theWriteToFile)
   {
-    checkCreateDir(myPath)
-    priorFile <- file.path(myPath, paste("ANY_Corrections-", theEbType, "_PriorPlots.png", sep=""))
-    myErrorFile <- file.path(myPath, "error.PNG")
+    checkDirForCreation(myPath)
+    priorFile <- cleanFilePath(myPath, paste("ANY_Corrections-", theEbType, "_PriorPlots.png", sep=""))
+    myErrorFile <- cleanFilePath(myPath, "error.PNG")
   }
   myTime <- system.time({
     results<-BeaEB(theBeaData@mData, theBeaData@mBatches, par.prior=thePriorFlag,
@@ -47,7 +47,7 @@ EB_internal<-function(theBeaData,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- file.path(myPath, paste("ANY_Corrections-", theEbType, ".tsv", sep=""))
+    correctFile <- cleanFilePath(myPath, paste("ANY_Corrections-", theEbType, ".tsv", sep=""))
     writeDataToFile(results, correctFile)
     results <- correctFile
   }
@@ -101,11 +101,11 @@ MP_Internal<- function(theBeaData,
   results <- NULL
   myPath <- thePath
   myErrorFile <- NULL
-  #setLogging(new("Logging", theFile=file.path(myPath, "MB.log")))
+  #setLogging(new("Logging", theFile=cleanFilePath(myPath, "MB.log")))
   if (TRUE==theWriteToFile)
   {
-    checkCreateDir(myPath)
-    myErrorFile <- file.path(myPath, "error.PNG")
+    checkDirForCreation(myPath)
+    myErrorFile <- cleanFilePath(myPath, "error.PNG")
   }
   myTime <- system.time({
     results<-BeaMP(theBeaData@mData, theBeaData@mBatches, by=theBatchType, overall=theOverallFlag, theIssuesFile=myErrorFile)
@@ -114,7 +114,7 @@ MP_Internal<- function(theBeaData,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- file.path(myPath, paste("ANY_Corrections-", theMpType, ".tsv", sep=""))
+    correctFile <- cleanFilePath(myPath, paste("ANY_Corrections-", theMpType, ".tsv", sep=""))
     writeDataToFile(results, correctFile)
     results <- correctFile
   }
@@ -158,11 +158,11 @@ AN_Internal<- function(theBeaData,
   results <- NULL
   myPath <- thePath
   myErrorFile <- NULL
-  #setLogging(new("Logging", theFile=file.path(myPath, "AN.log")))
+  #setLogging(new("Logging", theFile=cleanFilePath(myPath, "AN.log")))
   if (TRUE==theWriteToFile)
   {
-    checkCreateDir(myPath)
-    myErrorFile <- file.path(myPath, "error.PNG")
+    checkDirForCreation(myPath)
+    myErrorFile <- cleanFilePath(myPath, "error.PNG")
   }
   myTime <- system.time({
     results<-BeaAN(theBeaData@mData, theBeaData@mBatches, by=theBatchType, var.adj=theDoAdjustFlag, theIssuesFile=myErrorFile)
@@ -171,7 +171,7 @@ AN_Internal<- function(theBeaData,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- file.path(myPath, paste("ANY_Corrections-", theAnType, ".tsv", sep=""))
+    correctFile <- cleanFilePath(myPath, paste("ANY_Corrections-", theAnType, ".tsv", sep=""))
     writeDataToFile(results, correctFile)
     results <- correctFile
   }

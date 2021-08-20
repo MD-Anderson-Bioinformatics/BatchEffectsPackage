@@ -24,26 +24,26 @@ if (!is.null(getTestOutputDir()))
   ########################################################
   ########################################################
   # writes to input directory, so copy files to output
-  theOutputDirMBatch=file.path(getTestOutputDir(), "configout", "ZIP-RESULTS")
-  theOutputDirData=file.path(getTestOutputDir(), "configout", "ZIP-DATA")
-  originalData=file.path(theOutputDirData, "original")
+  theOutputDirMBatch=cleanFilePath(cleanFilePath(getTestOutputDir(), "configout"), "ZIP-RESULTS")
+  theOutputDirData=cleanFilePath(cleanFilePath(getTestOutputDir(), "configout"), "ZIP-DATA")
+  originalData=cleanFilePath(theOutputDirData, "original")
   print(theOutputDirMBatch)
   unlink(theOutputDirMBatch, recursive=TRUE)
   dir.create(theOutputDirMBatch, recursive=TRUE, showWarnings=FALSE)
   print(theOutputDirData)
   unlink(theOutputDirData, recursive=TRUE)
   dir.create(originalData, recursive=TRUE, showWarnings=FALSE)
-  file.copy(file.path(getTestInputDir(), "config", "MBatchConfig.tsv"), file.path(theOutputDirMBatch, "MBatchConfig.tsv"))
-  print(file.exists(file.path(theOutputDirMBatch, "MBatchConfig.tsv")))
-  file.copy(file.path(getTestInputDir(), "config", "matrix_data.tsv"), file.path(originalData, "matrix_data.tsv"))
-  file.copy(file.path(getTestInputDir(), "config", "batches.tsv"), file.path(originalData, "batches.tsv"))
-  configFile=file.path(theOutputDirMBatch, "MBatchConfig.tsv")
+  file.copy(cleanFilePath(cleanFilePath(getTestInputDir(), "config"), "MBatchConfig.tsv"), cleanFilePath(theOutputDirMBatch, "MBatchConfig.tsv"))
+  print(file.exists(cleanFilePath(theOutputDirMBatch, "MBatchConfig.tsv")))
+  file.copy(cleanFilePath(cleanFilePath(getTestInputDir(), "config"), "matrix_data.tsv"), cleanFilePath(originalData, "matrix_data.tsv"))
+  file.copy(cleanFilePath(cleanFilePath(getTestInputDir(), "config"), "batches.tsv"), cleanFilePath(originalData, "batches.tsv"))
+  configFile=cleanFilePath(theOutputDirMBatch, "MBatchConfig.tsv")
   ########################################################
   baseTestDir=getTestInputDir()
-  jarDir=file.path(baseTestDir, "exe")
+  jarDir=cleanFilePath(baseTestDir, "exe")
   javaExe=getJava()
-  jarFile=file.path(jarDir, "ShaidyMapGen.jar")
-  jsFile=file.path(jarDir, "ngchmWidget-min.js")
+  jarFile=cleanFilePath(jarDir, "ShaidyMapGen.jar")
+  jsFile=cleanFilePath(jarDir, "ngchmWidget-min.js")
   ########################################################
   mbatchRunFromConfig(theConfigFile=configFile,
                       theDataDir=originalData,
@@ -52,7 +52,7 @@ if (!is.null(getTestOutputDir()))
                       theShaidyMapGen = jarFile,
                       theNgchmWidgetJs = jsFile,
                       theShaidyMapGenJava = javaExe)
-  file.exists(file.path(theOutputDirMBatch, "MBATCH_SUCCESS.txt"))
+  file.exists(cleanFilePath(theOutputDirMBatch, "MBATCH_SUCCESS.txt"))
 } else {
   message("No test data. Skip test.")
   TRUE

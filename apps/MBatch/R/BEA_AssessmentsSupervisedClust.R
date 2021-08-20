@@ -15,8 +15,8 @@
 createBatchEffectsOutput_SupervisedClustering_batches<-function(theMatrixGeneData, theDataframeBatchData,
 																																theTitle, theOutputPath)
 {
-	myOutputPath <- file.path(theOutputPath, "Batches")
-	checkCreateDir(myOutputPath)
+	myOutputPath <- cleanFilePath(theOutputPath, "Batches")
+	checkDirForCreation(myOutputPath)
 	for(batchTypeIndex in c(2:length(theDataframeBatchData)))
 	{
 		### compile data and information for display
@@ -46,8 +46,8 @@ createBatchEffectsOutput_SupervisedClustering_pairs<-function(theMatrixGeneData,
 		combinedName = paste(batchTypeNameA, "-", batchTypeNameB, sep="")
 		logInfo("createBatchEffectsOutput_SupervisedClustering_pairs - batchTypeNameA = ", batchTypeNameA)
 		logInfo("createBatchEffectsOutput_SupervisedClustering_pairs - batchTypeNameB = ", batchTypeNameB)
-		myOutputPath <- file.path(theOutputPath, combinedName)
-		checkCreateDir(myOutputPath)
+		myOutputPath <- cleanFilePath(theOutputPath, combinedName)
+		checkDirForCreation(myOutputPath)
 		color <- beaRainbow(max(length(unique(batchIdsForSamplesA)),length(unique(batchIdsForSamplesB))), v=0.7)
 		title <- paste(theTitle, combinedName, sep=" ")
 		diagramFilename = createDirPlusFilename(myOutputPath, "SupervisedClust_Diagram.png")
@@ -138,8 +138,6 @@ makeBiasClust<-function(theMatrix, theBatches, theBatchType, theColors, theTitle
                         theDiagramFilename, theMore=NULL)
 {
 	logInfo("makeBiasClust - starting")
-	CairoPNG(filename=theDiagramFilename, width = 1000, height = 1000, pointsize=24, bg = "transparent")
-	on.exit(dev.off(), add = TRUE)
 	stopifnotWithLogging("Samples should be same length in data and batch info", ncol(theMatrix)==nrow(theBatches))
 	stopifnotWithLogging("Batch types requested should be in list of batch types", theBatchType %in% colnames(theBatches))
 	##
@@ -167,31 +165,58 @@ makeBiasClust<-function(theMatrix, theBatches, theBatchType, theColors, theTitle
 	logInfo("makeBiasClust - biasedDend <- biasedClusterFunction")
 	if (!is.null(interestingData))
 	{
-		biasedDend <- biasedClusterFunction(interestingData, factor(selectedBatches[,theBatchType]))
-		featureDend <- hierClust_calc(t(interestingData))
+	  biasedDend <- NULL
+	  tryCatch(
+	    {
+	      biasedDend <- biasedClusterFunction(interestingData, factor(selectedBatches[,theBatchType]))
+	    },
+	    warning=function(e)
+	    {
+	      logWarn("1 Unable to calculate biasedClusterFunction--too many NAs, Infinities or NaNs in data")
+	      biasedDend <- NULL
+	    },
+	    error=function(e)
+	    {
+	      logWarn("2 Unable to calculate biasedClusterFunction--too many NAs, Infinities or NaNs in data")
+	      biasedDend <- NULL
+	    })
+		featureDend <- NULL
 		if (!is.null(biasedDend))
 		{
-			############################################
-			preFilename <- theBatchType
-			if (length(theMore)>0)
-			{
-			  preFilename <- paste(theBatchType, theMore, sep="-")
-			}
-			############################################
-			writeHCDataTSVs(biasedDend, dirname(theDiagramFilename),
-			                paste(preFilename, "HCData.tsv", sep="_"),
-			                paste(preFilename, "HCOrder.tsv", sep="_"),
-			                paste(preFilename, "uDend.RData", sep="_"))
-			writeHCDataTSVs(featureDend, dirname(theDiagramFilename),
-			                paste(preFilename, "HCData_feature.tsv", sep="_"),
-			                paste(preFilename, "HCOrder_feature.tsv", sep="_"),
-			                paste(preFilename, "uDend_feature.RData", sep="_"))
-			writeSCmatrix(interestingData, dirname(theDiagramFilename),
-			              paste(preFilename, "SCMatrix.tsv", sep="_"),
-			              theTitle,
-			              paste(preFilename, "title.tsv", sep="_"))
-			############################################
-			heatmap(interestingData, Rowv = as.dendrogram(featureDend), Colv = as.dendrogram(biasedDend))
+		  featureDend <- hierClust_calc(t(interestingData))
+		}
+		if (!is.null(featureDend))
+		{
+  		if (!is.null(biasedDend))
+  		{
+  			############################################
+  			preFilename <- theBatchType
+  			if (length(theMore)>0)
+  			{
+  			  preFilename <- paste(theBatchType, theMore, sep="-")
+  			}
+  			############################################
+  			writeHCDataTSVs(biasedDend, dirname(theDiagramFilename),
+  			                paste(preFilename, "HCData.tsv", sep="_"),
+  			                paste(preFilename, "HCOrder.tsv", sep="_"),
+  			                paste(preFilename, "uDend.RData", sep="_"))
+  			writeHCDataTSVs(featureDend, dirname(theDiagramFilename),
+  			                paste(preFilename, "HCData_feature.tsv", sep="_"),
+  			                paste(preFilename, "HCOrder_feature.tsv", sep="_"),
+  			                paste(preFilename, "uDend_feature.RData", sep="_"))
+  			writeSCmatrix(interestingData, dirname(theDiagramFilename),
+  			              paste(preFilename, "SCMatrix.tsv", sep="_"),
+  			              theTitle,
+  			              paste(preFilename, "title.tsv", sep="_"))
+  			############################################
+  			CairoPNG(filename=theDiagramFilename, width = 1000, height = 1000, pointsize=24, bg = "transparent")
+  			on.exit(dev.off(), add = TRUE)
+  			heatmap(interestingData, Rowv = as.dendrogram(featureDend), Colv = as.dendrogram(biasedDend))
+  		}
+  		else
+  		{
+  		  openAndWriteIssuesLogFileSC(dirname(theDiagramFilename))
+  		}
 		}
 		else
 		{
@@ -616,15 +641,15 @@ supervisedClustLegend<-function(theBatchIdColors, theBatchIdsForSamples, theSort
 
 openAndWriteIssuesLogFileSC<-function(theOutputDir)
 {
-  myFile <- file(file.path(theOutputDir, "error.log"), "w+")
+  myFile <- file(cleanFilePath(theOutputDir, "error.log"), "w+")
   on.exit(close(myFile))
   cat("Clustering not possible\n", file=myFile, append=TRUE)
 }
 
 writeSCmatrix<-function(theMatrix, theOutdir, theMatrixFile, theTitle, theTitleFile)
 {
-  writeAsMatrix(file.path(theOutdir, theMatrixFile), theMatrix)
-  myFile <- file(file.path(theOutdir, theTitleFile), "w+")
+  writeAsGenericMatrix(cleanFilePath(theOutdir, theMatrixFile), theMatrix)
+  myFile <- file(cleanFilePath(theOutdir, theTitleFile), "w+")
   on.exit(close(myFile))
   cat(theTitle, file=myFile)
 }

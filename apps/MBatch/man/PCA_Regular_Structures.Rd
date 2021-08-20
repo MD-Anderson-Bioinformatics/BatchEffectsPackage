@@ -80,11 +80,11 @@ theJavaParameters="-Xms1200m", theSeed=NULL, theMaxGeneCount=20000)
 }
 \examples{
 #	#############################################################################
-#	mydir <- file.path(getwd(), "working", "PCA_Regular_Structures")
+#	mydir <- cleanFilePath(getwd(), "working", "PCA_Regular_Structures")
 #	dir.create(mydir, recursive=TRUE)
-#	setLogging(new("Logging", theFile=file.path(mydir, "mbatch.log")))
+#	setLogging(new("Logging", theFile=cleanFilePath(mydir, "mbatch.log")))
 #	## path for output
-#	myOutputPath <- file.path(mydir, "output")
+#	myOutputPath <- cleanFilePath(mydir, "output")
 #	dir.create(myOutputPath, recursive=TRUE)
 #	#############################################################################
 #	## this is the title used for the images

@@ -15,9 +15,9 @@ inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
 compareDir <- getTestCompareDir()
 
-theGeneFile1=file.path(inputDir, "CDP_allrep_data1.tsv")
-theGeneFile2=file.path(inputDir, "CDP_allrep_data2.tsv")
-theOutputDir=file.path(outputDir, "CDP_Files")
+theGeneFile1=cleanFilePath(inputDir, "CDP_allrep_data1.tsv")
+theGeneFile2=cleanFilePath(inputDir, "CDP_allrep_data2.tsv")
+theOutputDir=cleanFilePath(outputDir, "CDP_Files")
 theRandomSeed=314
 
 if (!is.null(inputDir))
@@ -36,7 +36,7 @@ if (!is.null(inputDir))
   ##############################################################################
   theUseReplicatesUnpaired <- FALSE
   theUnmatchedCount <- 1000
-  CDP_Files(file.path(theOutputDir, "CDP_Plot.png"), theGeneFile1, theGeneFile2,
+  CDP_Files(cleanFilePath(theOutputDir, "CDP_Plot.png"), theGeneFile1, theGeneFile2,
            theSubTitle="all replicates", theMethod="pearson", theUse="pairwise.complete.obs", theSeed=theRandomSeed,
            theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL)
   message("No error means test was OK.")

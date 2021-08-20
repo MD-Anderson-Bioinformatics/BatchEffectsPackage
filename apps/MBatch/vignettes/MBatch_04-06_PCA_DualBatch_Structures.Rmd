@@ -156,9 +156,9 @@ After the output is an explanation of files and directories created.
   compareDir <- getTestCompareDir()
 
   # set the paths
-  theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
-  theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
-  theOutputDir=file.path(outputDir, "PCA_DualBatch_Structures")
+  theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
+  theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
+  theOutputDir=cleanFilePath(outputDir, "PCA_DualBatch_Structures")
   theRandomSeed=314
   
   # make sure the output dir exists and is empty
@@ -250,4 +250,4 @@ total 436
 
 Here is a diagram generated from this code.
 
-`r sprintf("![PCAPlus Output](%s)", file.path(theOutputDir, "BatchIdwithTSS", "DualBatch", "PCA-Plus", "BatchIdwithTSS_Comp1_Comp2_Diagram.png"))`
+`r sprintf("![PCAPlus Output](%s)", cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "BatchIdwithTSS"), "DualBatch"), "PCA-Plus"), "BatchIdwithTSS_Comp1_Comp2_Diagram.png"))`

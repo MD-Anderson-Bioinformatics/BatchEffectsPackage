@@ -15,9 +15,9 @@ inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
 compareDir <- getTestCompareDir()
 
-theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
-theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
-theOutputDir=file.path(outputDir, "SupervisedClustering_Pairs_Structures")
+theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
+theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
+theOutputDir=cleanFilePath(outputDir, "SupervisedClustering_Pairs_Structures")
 theRandomSeed=314
 theBatchType="TSS"
 

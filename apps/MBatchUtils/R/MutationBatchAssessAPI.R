@@ -77,14 +77,14 @@ mutationBatchAssess <- function(theTypeCountDir, theOutputDir, theJavaArgs=c("-X
 		titleVector <- c()
 		# checkpoint is to complete all entries for a batch type
 		dirs <- paste(theBatchTypes, myCountType, sep="_")
-		if (!all(dir.exists(file.path(theOutputDir, dirs))))
+		if (!all(dir.exists(cleanFilePath(theOutputDir, dirs))))
 		{
 			for (myDataFile in matrixFiles)
 			{
 				# for each data file in this set of mutation type files
 				message("Do Kruskal calculations for: ", myDataFile)
 				# get the corresponding batch file (see MutationBatchExtractAPI.R for naming conventions)
-				myBatchFile <- file.path(dirname(myDataFile), gsub(x=basename(myDataFile), pattern=paste("HG.*", myCountType, sep=""), replacement="batches"))
+				myBatchFile <- cleanFilePath(dirname(myDataFile), gsub(x=basename(myDataFile), pattern=paste("HG.*", myCountType, sep=""), replacement="batches"))
 				# build the title based on file names
 				myTitle <- gsub(x=basename(myDataFile), pattern=paste("_", myCountType, ".tsv", sep=""), fixed=TRUE, replacement="")
 				# get vector of p-values (and possible Dunn's batch values) for this data (see resultList description for details)
@@ -99,7 +99,7 @@ mutationBatchAssess <- function(theTypeCountDir, theOutputDir, theJavaArgs=c("-X
 			batchFiles <- list.files(theTypeCountDir, pattern=".*_batches.tsv", full.names=TRUE, recursive=TRUE)
 			for (myBatchType in theBatchTypes)
 			{
-				if(!dir.exists(file.path(theOutputDir, paste(myBatchType, myCountType, sep="_"))))
+				if(!dir.exists(cleanFilePath(theOutputDir, paste(myBatchType, myCountType, sep="_"))))
 				{
 					# for each batch type
 					message("Do Kruskal output for: ", myBatchType)
@@ -109,12 +109,12 @@ mutationBatchAssess <- function(theTypeCountDir, theOutputDir, theJavaArgs=c("-X
 					# collect the batch names found as significant by a Dunn's test
 					collectBatches <- collectLoggedBatches(resultList, myBatchType)
 					# subdir named for batch type and count type
-					outdir <- file.path(theOutputDir, paste(myBatchType, "_", myCountType, sep=""))
+					outdir <- cleanFilePath(theOutputDir, paste(myBatchType, "_", myCountType, sep=""))
 					# make sure sub-dir exists
 					dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 					# output for Kruval - name the file "FullMutCounts_<batch-type>_<mutation-type>_Diagram.PNG"
-					outfile <- file.path(outdir, paste("FullMutCounts_", myBatchType, "_", myCountType, "_Diagram.PNG", sep=""))
-					outfileTSV <- file.path(outdir, paste("FullMutCounts_", myBatchType, "_", myCountType, ".tsv", sep=""))
+					outfile <- cleanFilePath(outdir, paste("FullMutCounts_", myBatchType, "_", myCountType, "_Diagram.PNG", sep=""))
+					outfileTSV <- cleanFilePath(outdir, paste("FullMutCounts_", myBatchType, "_", myCountType, ".tsv", sep=""))
 					# add names from title vector to logged p-values
 					names(loggedPvalues) <- titleVector
 					# if Dunn's test returned batch names, put them into parens to put in diagram otherwise, put an empty string
@@ -133,7 +133,7 @@ mutationBatchAssess <- function(theTypeCountDir, theOutputDir, theJavaArgs=c("-X
 						batchFilesSB  <- batchFiles[grepl(paste(".*", paste(mySBdiseases, collapse="|", sep="") ,".*", sep=""), batchFiles)]
 						message("Do combined dotplots for: ", myBatchType, " and ", myCountType)
 						# new subdir based on batch type and mutation type
-						outdirSandB <- file.path(theOutputDir, paste(myBatchType, "_", myCountType, sep=""))
+						outdirSandB <- cleanFilePath(theOutputDir, paste(myBatchType, "_", myCountType, sep=""))
 						# make/ensure subdir exists
 						dir.create(outdirSandB, showWarnings=FALSE, recursive=TRUE)
 						# collect output for reference
@@ -164,7 +164,7 @@ mutationBatchAssess <- function(theTypeCountDir, theOutputDir, theJavaArgs=c("-X
 
 writeReferenceOutput <- function(theLines, theOutdir)
 {
-	filename <- file.path(theOutdir, "callReference.tsv")
+	filename <- cleanFilePath(theOutdir, "callReference.tsv")
 	writeLines(c("MutationType\tBatchType\tMutationFile\tBatches", theLines), con=filename)
 }
 
@@ -217,7 +217,7 @@ writeStripchartsAndMBatch <- function(theOutdir, theMatrixFiles, theBatchType, t
 				#for (myMatrix in matrixFiles)
 				#{
 					# make output directory based on matrix file name
-					#myOutdir <- file.path(theOutdir, gsub(x=basename(myMatrix), pattern=".tsv", replacement="", fixed=TRUE))
+					#myOutdir <- cleanFilePath(theOutdir, gsub(x=basename(myMatrix), pattern=".tsv", replacement="", fixed=TRUE))
 					# make output direcotry
 					#dir.create(myOutdir, showWarnings=FALSE, recursive=TRUE)
 					# call and plot MBatch data
@@ -269,7 +269,7 @@ writeMutationSamplesDotPlot <- function(theOutdir, theMatrixFiles, theAllBatches
 																				theBatchType, theCountType, theDisease, theMax, theZscoreFlag=FALSE)
 {
 	message("writeMutationSamplesDotPlot")
-	outfile <- file.path(theOutdir, paste("FullMutCounts_", theBatchType, "_", theCountType, "_", theDisease, "_MutDots_Diagram.PNG", sep=""))
+	outfile <- cleanFilePath(theOutdir, paste("FullMutCounts_", theBatchType, "_", theCountType, "_", theDisease, "_MutDots_Diagram.PNG", sep=""))
 	message("write ", basename(outfile))
 	symbol <- 0
 	# build matrix of values
@@ -387,10 +387,10 @@ writeMutationBoxplot_Wide <- function(theOutdir, theMatrixFiles, theAllBatchesDa
 	{
 		filePost <- "ZScore"
 	}
-	outfile <- file.path(theOutdir, paste("WideBoxplot_", theBatchType, "_", theCountType, "_", theDisease, "_", filePost, "_Diagram.PNG", sep=""))
+	outfile <- cleanFilePath(theOutdir, paste("WideBoxplot_", theBatchType, "_", theCountType, "_", theDisease, "_", filePost, "_Diagram.PNG", sep=""))
 	message("write ", basename(outfile))
 	##TODO: maybe write out TSV file?
-	outfileTSV <- file.path(theOutdir, paste("WideBoxplot_", theBatchType, "_", theCountType, "_", theDisease, "_", filePost, ".tsv", sep=""))
+	outfileTSV <- cleanFilePath(theOutdir, paste("WideBoxplot_", theBatchType, "_", theCountType, "_", theDisease, "_", filePost, ".tsv", sep=""))
 	message("write ", basename(outfileTSV))
 	##############################################################################
 	# build list of values to plot, where each element of list is combination of a batch and a data file
@@ -522,9 +522,9 @@ writeMutationBoxplot_Narrow <- function(theOutdir, theMatrixFiles, theAllBatches
 		#subFileName <- gsub(x=subFileName, pattern=paste("_", theCountType), replacement="", fixed=TRUE)
 		# only applies to GDC, but won't hurt DCC
 		subFileName <- gsub(x=subFileName, pattern="AggregationandMasking", replacement="", fixed=TRUE)
-		outfile <- file.path(theOutdir, paste("NarrowBoxplot_", theBatchType, "_", theCountType, "_", theDisease, "_", filePost,
+		outfile <- cleanFilePath(theOutdir, paste("NarrowBoxplot_", theBatchType, "_", theCountType, "_", theDisease, "_", filePost,
 		                                      "_", subFileName, "_Diagram.PNG", sep=""))
-		outfileTSV <- file.path(theOutdir, paste("NarrowBoxplot_", theBatchType, "_", theCountType, "_", theDisease, "_", filePost,
+		outfileTSV <- cleanFilePath(theOutdir, paste("NarrowBoxplot_", theBatchType, "_", theCountType, "_", theDisease, "_", filePost,
 		                                      "_", subFileName, ".tsv", sep=""))
 		writeMutationBoxplot_Narrow_Internal(outfile, outfileTSV, myMatrixFile, theAllBatchesDataframe, theAllSampleIds,
 																						theBatchType, theCountType, theDisease, theMax, theZscoreFlag)
@@ -672,7 +672,7 @@ writeMutationStripchart <- function(theOutdir, theMatrixFiles, theAllBatchesData
 																		theBatchType, theCountType, theDisease, theMax, theZscoreFlag=FALSE)
 {
 	message("writeMutationStripchart")
-	outfile <- file.path(theOutdir, paste("FullMutCounts_", theBatchType, "_", theCountType, "_", theDisease, "_MutStrip_Diagram.PNG", sep=""))
+	outfile <- cleanFilePath(theOutdir, paste("FullMutCounts_", theBatchType, "_", theCountType, "_", theDisease, "_MutStrip_Diagram.PNG", sep=""))
 	message("write ", basename(outfile))
 	##############################################################################
 	# build list of values to plot, where each element of list is combination of a batch and a data file
@@ -772,7 +772,7 @@ writeMutationStripchart <- function(theOutdir, theMatrixFiles, theAllBatchesData
 # 																		theBatchType, theCountType, theDisease, theMax, theZscoreFlag=FALSE)
 # {
 # 	message("writeMutationStripchart")
-# 	outfile <- file.path(theOutdir, paste("FullMutCounts_", theBatchType, "_", theCountType, "_", theDisease, "_MutStrip_Diagram.PNG", sep=""))
+# 	outfile <- cleanFilePath(theOutdir, paste("FullMutCounts_", theBatchType, "_", theCountType, "_", theDisease, "_MutStrip_Diagram.PNG", sep=""))
 # 	message("write ", basename(outfile))
 # 	symbol <- 0
 # 	batchesAsLevels <- as.factor(as.vector(unlist(theAllBatchesDataframe[theBatchType])))
@@ -1013,7 +1013,7 @@ makeKruskalTsv <- function(theFile, theValues, theBatches, theMain, batchAddOn, 
                       negLog10PValue=as.vector(unlist(theValues)),
                       batchesCalled=batchAddOn,
                       negLog10Cutoff=rep(-log10(thePvalueCutoff), length(theValues)))
-  writeAsDataframe(theFile, outDF)
+  writeAsGenericDataframe(theFile, outDF)
 }
 
 dunnTestBatches <- function(dataVector, batchValues, thePvalueCutoff, theZScoreCutoff)
@@ -1289,7 +1289,7 @@ runMBatchForMutCounts <- function(theDataMatrix, theBatchesDf, theOutputDir, the
 callMBatch_SupervisedClustering_Structures_MBA <- function(theOutputDir, theDataObject, theTitle)
 {
 	# output directory
-	outdir <- file.path(theOutputDir, "SupervisedClustering")
+	outdir <- cleanFilePath(theOutputDir, "SupervisedClustering")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	# here, we call supervised clustering, passing a title and an output path,
 	# telling it to generate a heatmap and to use the data without removing any type/values
@@ -1304,7 +1304,7 @@ callMBatch_SupervisedClustering_Structures_MBA <- function(theOutputDir, theData
 callMBatch_HierarchicalClustering_Structures_MBA <- function(theOutputDir, theDataObject, theTitle)
 {
 	# output directory
-	outdir <- file.path(theOutputDir, "HierarchicalClustering")
+	outdir <- cleanFilePath(theOutputDir, "HierarchicalClustering")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	# here, we take all the defaults to hierarchical clustering, passing a title and an output path
 	HierarchicalClustering_Structures(theData=theDataObject,
@@ -1322,7 +1322,7 @@ callMBatch_PCA_Structures_MBA <- function(theOutputDir, theDataObject, theTitle,
 																			theMaxGeneCount=10000)
 {
 	# output directory
-	outdir <- file.path(theOutputDir, "PCA")
+	outdir <- cleanFilePath(theOutputDir, "PCA")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	# here, we call PCA, passing a title and an output path,
 	# and to use the data without removing any type/values
@@ -1347,7 +1347,7 @@ callMBatch_BoxplotGroup_Structures_MBA <- function(theOutputDir, theDataObject, 
 																							 theFunction=list(mean), theFunctionName=list("Mean"))
 {
 	# output directory
-	outdir <- file.path(theOutputDir, "BoxPlot")
+	outdir <- cleanFilePath(theOutputDir, "BoxPlot")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	# here, we call boxplot group, passing a title and an output path,
 	# and to use the data without removing any type/values

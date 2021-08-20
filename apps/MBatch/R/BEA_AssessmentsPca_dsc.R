@@ -173,7 +173,7 @@ buildDSCOverviewFile<-function(theStartDir, theAllOutDir, theBaseDir, theOutputF
 	}
 	if (!is.null(myDscOverviewStruct))
 	{
-	  logDebug("overall DSC ", file.path(theAllOutDir, theOutputFile))
+	  logDebug("overall DSC ", cleanFilePath(theAllOutDir, theOutputFile))
 		### sort the structure for storing DSC Overview data
 		oldColNames <- colnames(myDscOverviewStruct)
 		myDscOverviewStruct <- data.frame(myDscOverviewStruct, check.names=FALSE)
@@ -182,7 +182,7 @@ buildDSCOverviewFile<-function(theStartDir, theAllOutDir, theBaseDir, theOutputF
 		myDscOverviewStruct <- as.matrix(myDscOverviewStruct)
 		colnames(myDscOverviewStruct) <- oldColNames
 		### write DSC Overview file
-		write.table(myDscOverviewStruct, file=file.path(theAllOutDir, theOutputFile), quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE)
+		write.table(myDscOverviewStruct, file=cleanFilePath(theAllOutDir, theOutputFile), quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE)
 	}
 	return(myDscOverviewStruct)
 }

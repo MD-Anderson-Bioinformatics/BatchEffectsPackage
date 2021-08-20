@@ -25,7 +25,7 @@ RBN_internal <- function(theInvariantMatrix, theVariantMatrix,
   myPath <- thePath
   if (TRUE==theWriteToFile)
   {
-    checkCreateDir(myPath)
+    checkDirForCreation(myPath)
   }
   results <- BeaRBN(t(theInvariantMatrix), t(theVariantMatrix),
                     theInvariantReplicates, theVariantReplicates,
@@ -36,7 +36,7 @@ RBN_internal <- function(theInvariantMatrix, theVariantMatrix,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- file.path(myPath, paste("ANY_Corrections-", theRBNType, ".tsv", sep=""))
+    correctFile <- cleanFilePath(myPath, paste("ANY_Corrections-", theRBNType, ".tsv", sep=""))
     writeDataToFile(results, correctFile)
     results <- correctFile
   }

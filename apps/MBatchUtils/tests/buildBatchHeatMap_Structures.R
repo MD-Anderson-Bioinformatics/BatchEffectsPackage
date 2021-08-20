@@ -23,25 +23,25 @@ if (!is.null(getTestOutputDir()))
   #options(showErrorCalls=TRUE)
   ########################################################
   ########################################################
-  jarDir=file.path(getTestInputDir(), "exe")
-  baseTestDir=file.path(getTestInputDir(), "heatmap")
+  jarDir=cleanFilePath(getTestInputDir(), "exe")
+  baseTestDir=cleanFilePath(getTestInputDir(), "heatmap")
   baseOutputDir=getTestOutputDir()
   javaExe=getJava()
   ####
-  jarFile=file.path(jarDir, "ShaidyMapGen.jar")
-  jsFile=file.path(jarDir, "ngchmWidget-min.js")
-  sourceMatrix=file.path(baseTestDir, "brca_agi4502_matrix_data.tsv")
-  sourceBatches=file.path(baseTestDir, "brca_agi4502_batches.tsv")
-  dir.create(file.path(baseOutputDir, "NGCHM"), showWarnings=FALSE)
-  outputFile=file.path(baseOutputDir, "NGCHM", "buildBatchHeatMap_Structures.ngchm")
+  jarFile=cleanFilePath(jarDir, "ShaidyMapGen.jar")
+  jsFile=cleanFilePath(jarDir, "ngchmWidget-min.js")
+  sourceMatrix=cleanFilePath(baseTestDir, "brca_agi4502_matrix_data.tsv")
+  sourceBatches=cleanFilePath(baseTestDir, "brca_agi4502_batches.tsv")
+  dir.create(cleanFilePath(baseOutputDir, "NGCHM"), showWarnings=FALSE)
+  outputFile=cleanFilePath(cleanFilePath(baseOutputDir, "NGCHM"), "buildBatchHeatMap_Structures.ngchm")
   ########################################################
   #############################l###########################
   print(sourceMatrix)
   matData <- readAsGenericMatrix(sourceMatrix)
   print(sourceBatches)
-  # need this to keep log in readAsDataFrame from failing
+  # need this to keep log in readAsGenericDataframe from failing
   setLogging(NULL)
-  dfData <- readAsDataFrame(sourceBatches)
+  dfData <- readAsGenericDataframe(sourceBatches)
   print("call buildBatchHeatMap_Structures")
   buildBatchHeatMap_Structures(theMatrixData=matData,
                                theBatchData=dfData,

@@ -20,11 +20,11 @@ print(inputDir)
 print(outputDir)
 print(compareDir)
 
-theDataFile1=file.path(inputDir, "brca_rnaseq2_matrix_data.tsv")
-theDataFile2=file.path(inputDir, "brca_agi4502_matrix_data.tsv")
-theOutputDir=file.path(outputDir, "ebnplus")
+theDataFile1=cleanFilePath(inputDir, "brca_rnaseq2_matrix_data.tsv")
+theDataFile2=cleanFilePath(inputDir, "brca_agi4502_matrix_data.tsv")
+theOutputDir=cleanFilePath(outputDir, "ebnplus")
 dir.create(theOutputDir, recursive=TRUE, showWarnings=FALSE)
-theCompareFile=file.path(compareDir, "EBNPlus_Correction_Files.tsv.zip")
+theCompareFile=cleanFilePath(compareDir, "EBNPlus_Correction_Files.tsv.zip")
 theCompareFilename="EBNPlus_Correction_Files.tsv"
 theBatchId1="RNASeqV2"
 theBatchId2="Agilent4502"
@@ -44,10 +44,10 @@ if (!is.null(inputDir))
   # if there is an error, show the calls leading up to it
   options(showErrorCalls=TRUE)
   #
-  outdir <- file.path(theOutputDir, "EBNPlus_Correction_Files")
+  outdir <- cleanFilePath(theOutputDir, "EBNPlus_Correction_Files")
   unlink(outdir, recursive=TRUE)
   dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
-  #setLogging(new("Logging", theFile=file.path(outdir, "mbatch.log")))
+  #setLogging(new("Logging", theFile=cleanFilePath(outdir, "mbatch.log")))
   # this is an MDA function that starts with and processes standardized data files
   myCorrectedFile <- EBNPlus_Correction_Files(
     theDataFile1=theDataFile1,
@@ -59,7 +59,7 @@ if (!is.null(inputDir))
     theEBNP_PriorPlotsFlag=TRUE)
   message("after correction-load file")
   myCorrectedFile <- myCorrectedFile[[1]]
-  myRenamedFile <- file.path(dirname(myCorrectedFile), "corrected.tsv")
+  myRenamedFile <- cleanFilePath(dirname(myCorrectedFile), "corrected.tsv")
   file.rename(myCorrectedFile, myRenamedFile)
   correctedMatrix <- readAsGenericMatrix(myRenamedFile)
   compareMatrix <- as.matrix(read.delim(unz(theCompareFile, theCompareFilename), header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE, stringsAsFactors=FALSE, row.names=1))

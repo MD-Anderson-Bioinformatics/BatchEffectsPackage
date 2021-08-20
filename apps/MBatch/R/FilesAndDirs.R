@@ -11,14 +11,19 @@
 
 ################################################################################
 
-createDirPlusFilename<-function(theDir, ...)
+cleanFilePath <- function(theDir, theNewDir)
 {
-	file.path(theDir, paste(..., sep="", collapse=""))
+  #cleanDir <- iconv(theNewDir, from = "UTF-8", to = "ASCII", sub = "byte")
+  #cleanDir <- gsub("><", "_", cleanDir, fixed=TRUE)
+  #cleanDir <- gsub("<", "_", cleanDir, fixed=TRUE)
+  #cleanDir <- gsub(">", "_", cleanDir, fixed=TRUE)
+  #file.path(theDir, cleanDir)
+  file.path(theDir, theNewDir)
 }
 
-createDirPath<-function(...)
+createDirPlusFilename<-function(theDir, ...)
 {
-	file.path(...)
+  cleanFilePath(theDir, paste(..., sep="", collapse=""))
 }
 
 checkDirForCreation <- function(thePath)
@@ -31,11 +36,12 @@ checkDirForCreation <- function(thePath)
 			dir.create(thePath, recursive=FALSE)
 		}
 	}
+  return(thePath)
 }
 
-checkCreateDir<-function(...)
+checkCreateDir<-function(theBaseDir, theNewDir)
 {
-	myDir <-createDirPath(...)
+	myDir <-cleanFilePath(theBaseDir, theNewDir)
 	logDebug("checkCreateDir: ", myDir)
 	checkDirForCreation(myDir)
 	return(myDir)
@@ -95,7 +101,8 @@ writeAsGenericMatrixNoRows <- function(theFile, theMatrix)
 
 readAsGenericDataframe <- function(theFile, theNaString=NULL, theUnknownString="Unknown")
 {
-	df <- read.csv(theFile, header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE, stringsAsFactors=FALSE, colClasses="character", na.strings=theNaString)
+	df <- read.csv(theFile, header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE,
+	               stringsAsFactors=FALSE, colClasses="character", na.strings=theNaString)
 	df[df==""] <- theUnknownString
   return(df)
 }

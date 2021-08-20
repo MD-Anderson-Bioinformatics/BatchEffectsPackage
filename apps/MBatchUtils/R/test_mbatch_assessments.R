@@ -22,10 +22,28 @@ loadDataManually <- function(theGeneFile, theBatchFile)
 {
 	# this reads files into a matrix (for the gene data) and a data frame (for the batch information)
 	# as an example of how to get the MBatch object from mbatchLoadStructures, which is used as an argument to the other MBatch functions
-	geneMatrix <- read.csv(theGeneFile, header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE, stringsAsFactors=FALSE, row.names=1)
-	geneMatrix <- as.matrix(geneMatrix)
-	batchDataframe <- read.csv(theBatchFile, header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE, stringsAsFactors=FALSE, colClasses="character")
+	geneMatrix <- readAsGenericMatrix(theGeneFile)
+	batchDataframe <- readAsGenericDataframe(theBatchFile)
 	mbatchLoadStructures(geneMatrix, batchDataframe)
+}
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+callMBatch_UMAP_Structures <- function(theOutputDir, theDataObject, theTitle)
+{
+  # output directory
+  outdir <- cleanFilePath(theOutputDir, "UMAP")
+  dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
+  # here, we call UMAP, passing a title and an output path,
+  # and to use the data without removing any type/values
+  # and keeping any other defaults
+  UMAP_Structures(theDataObject,
+                  theTitle,
+                  outdir)
 }
 
 ################################################################################
@@ -43,7 +61,7 @@ callMBatch_HierarchicalClustering <- function(theOutputDir, theGeneFile, theBatc
 callMBatch_HierarchicalClustering_Structures <- function(theOutputDir, theDataObject, theTitle, theBoxplotMaxGenes)
 {
   # output directory
-	outdir <- file.path(theOutputDir, "HierarchicalClustering")
+	outdir <- cleanFilePath(theOutputDir, "HierarchicalClustering")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	theDataObject <- as.numericWithIssues(theDataObject)
 	theDataObject@mData <- mbatchTrimData(theDataObject@mData, theMaxSize = (theBoxplotMaxGenes *
@@ -63,7 +81,7 @@ callMBatch_TRINOVA_Structures <- function(theOutputDir, theDataObject, theTitle,
 {
   message("callMBatch_TRINOVA_Structures")
   # output directory
-  outdir <- file.path(theOutputDir, "TRINOVA")
+  outdir <- cleanFilePath(theOutputDir, "TRINOVA")
   dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
   message("callMBatch_TRINOVA_Structures as.numericWithIssues")
   theDataObject <- as.numericWithIssues(theDataObject)
@@ -105,13 +123,13 @@ callMBatch_SupervisedClustering_Structures <- function(theOutputDir, theDataObje
                                                        theNgchmFeatureMapFile)
 {
   # output directory
-	outdir <- file.path(theOutputDir, "SupervisedClustering")
+	outdir <- cleanFilePath(theOutputDir, "SupervisedClustering")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	message("callMBatch_SupervisedClustering_Structures")
 	# here, we call supervised clustering, passing a title and an output path,
 	# telling it to generate a heatmap and to use the data without removing any type/values
 	# and keeping any other defaults
-	message("trim to same size as hierarchical")
+	message("trim to same size as hierarchical 2")
 	SupervisedClustering_Batches_Structures(theData=theDataObject,
 									theTitle=theTitle,
 									theOutputPath=outdir,
@@ -128,32 +146,35 @@ callMBatch_SupervisedClustering_Structures <- function(theOutputDir, theDataObje
     message("theNgchmWidgetJs ", theNgchmWidgetJs)
     message("theShaidyMapGenJava ", theShaidyMapGenJava)
     message("dim(myMBatchData@mBatches) ", dim(theDataObject@mBatches))
-    message("trim to same size as hierarchical")
-    matrixFile <- file.path(outdir, "Batches", paste(myBatchType, "SCMatrix.tsv", sep="_"))
+    message("trim to same size as hierarchical 3")
+    matrixFile <- cleanFilePath(cleanFilePath(outdir, "Batches"), paste(myBatchType, "SCMatrix.tsv", sep="_"))
     message("matrixFile ", matrixFile)
-    # matrix from file is transposed
-    myMatrix <- readAsGenericMatrix(matrixFile)
-    message("dim(myMatrix) ", dim(myMatrix))
-    colDend <- file.path(outdir, "Batches", paste(myBatchType, "uDend.RData", sep="_"))
-    rowDend <- file.path(outdir, "Batches", paste(myBatchType, "uDend_feature.RData", sep="_"))
-    message("colDend ", colDend)
-    message("rowDend ", rowDend)
-    #c("pearson", "ward.D2"),
-    # do not use feature map, since supervised clustering is sample ids in both directions
-    buildBatchHeatMapFromHC_Structures(theMatrixData=myMatrix,
-                                       theBatchData=theDataObject@mBatches,
-                                       theTitle=paste(theTitle, myBatchType, sep=" "),
-                                       theOutputFile=file.path(outdir, "Batches", paste(myBatchType, "ngchm.ngchm", sep="_")),
-                                       theColDendRDataFile=colDend,
-                                       theRowDendRDataFile=rowDend,
-                                       theNgchmFeatureMapFile=theNgchmFeatureMapFile,
-                                       theRowType=theNgchmRowType, theColType=theNgchmColumnType,
-                                       theRowCluster=NULL,
-                                       theShaidyMapGen=theShaidyMapGen,
-                                       theNgchmWidgetJs=theNgchmWidgetJs,
-                                       theShaidyMapGenJava=theShaidyMapGenJava,
-                                       theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
-  }
+    if (file.exists(matrixFile))
+    {
+      # matrix from file is transposed
+      myMatrix <- readAsGenericMatrix(matrixFile)
+      message("dim(myMatrix) ", dim(myMatrix))
+      colDend <- cleanFilePath(cleanFilePath(outdir, "Batches"), paste(myBatchType, "uDend.RData", sep="_"))
+      rowDend <- cleanFilePath(cleanFilePath(outdir, "Batches"), paste(myBatchType, "uDend_feature.RData", sep="_"))
+      message("colDend ", colDend)
+      message("rowDend ", rowDend)
+      #c("pearson", "ward.D2"),
+      # do not use feature map, since supervised clustering is sample ids in both directions
+      buildBatchHeatMapFromHC_Structures(theMatrixData=myMatrix,
+                                         theBatchData=theDataObject@mBatches,
+                                         theTitle=paste(theTitle, myBatchType, sep=" "),
+                                         theOutputFile=cleanFilePath(cleanFilePath(outdir, "Batches"), paste(myBatchType, "ngchm.ngchm", sep="_")),
+                                         theColDendRDataFile=colDend,
+                                         theRowDendRDataFile=rowDend,
+                                         theNgchmFeatureMapFile=theNgchmFeatureMapFile,
+                                         theRowType=theNgchmRowType, theColType=theNgchmColumnType,
+                                         theRowCluster=NULL,
+                                         theShaidyMapGen=theShaidyMapGen,
+                                         theNgchmWidgetJs=theNgchmWidgetJs,
+                                         theShaidyMapGenJava=theShaidyMapGenJava,
+                                         theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
+    }
+	}
 }
 
 ################################################################################
@@ -171,7 +192,7 @@ callMBatch_SupervisedClusteringPairs <- function(theOutputDir, theGeneFile, theB
 callMBatch_SupervisedClusteringPairs_Structures <- function(theOutputDir, theDataObject, theTitle)
 {
   # output directory
-	outdir <- file.path(theOutputDir, "SupervisedClusteringPairs")
+	outdir <- cleanFilePath(theOutputDir, "SupervisedClusteringPairs")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	# here, we call supervised clustering pairs, passing a title and an output path,
 	# telling it to generate a heatmap and tell it we want the BatchId and PlateId data paired and the TSS and ShipDate data paired
@@ -202,8 +223,8 @@ callMBatch_PCA <- function(theOutputDir, theGeneFile, theBatchFile, theTitle, aT
   callMBatch_PCA_Structures(theOutputDir, myData, theTitle, isTrendBatch)
   if(TRUE==aTest)
   {
-    buildDSCOverviewFile(file.path(theOutputDir, "PCA"), "DSCOverview.tsv")
-    clearDSCOverviewFiles(file.path(theOutputDir, "PCA"))
+    buildDSCOverviewFile(cleanFilePath(theOutputDir, "PCA"), "DSCOverview.tsv")
+    clearDSCOverviewFiles(cleanFilePath(theOutputDir, "PCA"))
   }
 }
 
@@ -217,7 +238,7 @@ callMBatch_PCA_Structures <- function(theOutputDir, theDataObject, theTitle,
                                       theMaxGeneCount=10000)
 {
   # output directory
-	outdir <- file.path(theOutputDir, "PCA")
+	outdir <- cleanFilePath(theOutputDir, "PCA")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	# here, we call PCA, passing a title and an output path,
 	# and to use the data without removing any type/values
@@ -248,8 +269,8 @@ callMBatch_PCADualBatch <- function(theOutputDir, theGeneFile, theBatchFile, the
   callMBatch_PCADualBatch_Structures(theOutputDir, myData, theTitle, isTrendBatch)
   if(TRUE==aTest)
   {
-    buildDSCOverviewFile(file.path(theOutputDir, "PCADualBatch"), "DSCOverview.tsv")
-    clearDSCOverviewFiles(file.path(theOutputDir, "PCADualBatch"))
+    buildDSCOverviewFile(cleanFilePath(theOutputDir, "PCADualBatch"), "DSCOverview.tsv")
+    clearDSCOverviewFiles(cleanFilePath(theOutputDir, "PCADualBatch"))
   }
 }
 
@@ -263,7 +284,7 @@ callMBatch_PCADualBatch_Structures <- function(theOutputDir, theDataObject, theT
                                                theMaxGeneCount=10000)
 {
   # output directory
-	outdir <- file.path(theOutputDir, "PCADualBatch")
+	outdir <- cleanFilePath(theOutputDir, "PCADualBatch")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	# here, we call PCA dual batch, passing a title and an output path,
 	# and to use the data without removing any type/values
@@ -299,7 +320,7 @@ callMBatch_BoxplotAllSamplesData <- function(theOutputDir, theGeneFile, theBatch
 callMBatch_BoxplotAllSamplesData_Structures <- function(theOutputDir, theDataObject, theTitle, theMaxGeneCount = 10000)
 {
   # output directory
-	outdir <- file.path(theOutputDir, "BoxPlot")
+	outdir <- cleanFilePath(theOutputDir, "BoxPlot")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	# here, we call boxplot all samples data, passing a title and an output path,
 	# and to use the data without removing any type/values
@@ -328,7 +349,7 @@ callMBatch_BoxplotAllSamplesRLE <- function(theOutputDir, theGeneFile, theBatchF
 callMBatch_BoxplotAllSamplesRLE_Structures <- function(theOutputDir, theDataObject, theTitle, theMaxGeneCount = 10000)
 {
 	# output directory
-  outdir <- file.path(theOutputDir, "BoxPlot")
+  outdir <- cleanFilePath(theOutputDir, "BoxPlot")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	# here, we call boxplot all samples RLE, passing a title and an output path,
 	# and to use the data without removing any type/values
@@ -361,7 +382,7 @@ callMBatch_BoxplotGroup_Structures <- function(theOutputDir, theDataObject, theT
                                                theFunction=list(mean), theFunctionName=list("Mean"))
 {
 	# output directory
-  outdir <- file.path(theOutputDir, "BoxPlot")
+  outdir <- cleanFilePath(theOutputDir, "BoxPlot")
 	dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
 	# here, we call boxplot group, passing a title and an output path,
 	# and to use the data without removing any type/values

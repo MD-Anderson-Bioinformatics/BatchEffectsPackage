@@ -1,5 +1,0 @@
-mLabel	mName	mTooltip
-Program	*	The Program entry is highest level of organization at the GDC. More details <a target="_blank" href="https://gdc.cancer.gov">here</a>.
-Disease	*	The Project entry corresponds to the GDC project organization node, which is combination of program and disease. More details <a target="_blank" href="https://gdc.cancer.gov">here</a>.
-Workflow	*	The Workflow is also called a pipeline at the GDC. More details <a target="_blank" href="https://gdc.cancer.gov">here</a>.
-Algorithm	*	The Algorithm is a particular MBatch assessment for the given Data Set.

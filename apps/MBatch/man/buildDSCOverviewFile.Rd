@@ -21,7 +21,8 @@ So, for the GBM output listed above, you end up with these values in the output,
 After running mbatchAssess, there are *DSC.RData files created -- these can either be use to create a DSC Overview file with buildDSCOverviewFile, or they can be deleted using clearDSCOverviewFiles. This is handled outside of these functions, so all data sets can be processed by multiple calls to mbatchAssess in a parallel or distributed environment, and then the DSC Overview created from these files at the end of the processing.
 }
 \usage{
-buildDSCOverviewFile(theStartDir, theAllOutDir, theBaseDir, theOutputFile, theAltDatasetName=NULL)
+buildDSCOverviewFile(theStartDir, theAllOutDir, theBaseDir,
+       theOutputFile, theAltDatasetName=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

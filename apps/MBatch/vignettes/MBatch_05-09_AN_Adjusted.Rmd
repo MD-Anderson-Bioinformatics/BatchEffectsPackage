@@ -49,7 +49,7 @@ A string identifying the batch type to correct.
 Output path for any files.
 
 ## theWriteToFile
-TRUE to write the corrected data to file and return the file pathname instead of the corrected matrix.
+TRUE to write the corrected data to file and return the cleanFilePathname instead of the corrected matrix.
 
 # Example Call
 
@@ -64,9 +64,9 @@ The following code is adapted from the tests/AN_Adjusted.R file. Data used is fr
   compareDir <- getTestCompareDir()
   
   # set the paths
-  theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
-  theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
-  theOutputDir=file.path(outputDir, "AN_Adjusted")
+  theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
+  theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
+  theOutputDir=cleanFilePath(outputDir, "AN_Adjusted")
   theRandomSeed=314
   theBatchType="TSS"
   

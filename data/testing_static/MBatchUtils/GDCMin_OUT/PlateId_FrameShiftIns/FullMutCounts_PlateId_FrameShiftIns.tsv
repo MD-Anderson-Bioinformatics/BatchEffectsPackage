@@ -1,5 +1,0 @@
-dataset	negLog10PValue	batchesCalled	negLog10Cutoff
-TCGA-ACC.MuSEVariantAggregationandMasking_HG38	0.0000000		5
-TCGA-ACC.MuTect2VariantAggregationandMasking_HG38	0.1367181		5
-TCGA-ACC.SomaticSniperVariantAggregationandMasking_HG38	0.0000000		5
-TCGA-ACC.VarScan2VariantAggregationandMasking_HG38	0.0000000		5

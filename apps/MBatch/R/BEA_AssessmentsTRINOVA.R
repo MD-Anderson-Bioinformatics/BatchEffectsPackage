@@ -12,8 +12,8 @@
 createBatchEffectsOutput_TRINOVA<-function(theMatrixGeneData, theDataframeBatchData,
 																					theTitle, theOutputPath)
 {
-  textFile <- file.path(theOutputPath, "TRINOVA.tsv")
-  pngFile <- file.path(theOutputPath, "TRINOVA.png")
+  textFile <- cleanFilePath(theOutputPath, "TRINOVA.tsv")
+  pngFile <- cleanFilePath(theOutputPath, "TRINOVA.png")
 
 	mySuccess <- FALSE
 	myError <- NULL
@@ -49,7 +49,7 @@ createBatchEffectsOutput_TRINOVA<-function(theMatrixGeneData, theDataframeBatchD
 
 openAndWriteIssuesLogFile<-function(theOutputDir)
 {
-  myFile <- file(file.path(theOutputDir, "error.log"), "w+")
+  myFile <- file(cleanFilePath(theOutputDir, "error.log"), "w+")
   on.exit(close(myFile))
   cat("Not calculated\n", file=myFile, append=TRUE)
 }
@@ -124,7 +124,7 @@ writeTrinovaTSV <- function(theTextFile, theTitle, theSetNames, b1, b2, b3, b12,
                              round(b1, 3), round(b2, 3), round(b3, 3),
                              round(b12, 3), round(b13, 3), round(b23, 3),
                              round(b123, 3)))
-  writeAsDataframe(theTextFile, df)
+  writeAsGenericDataframe(theTextFile, df)
   theTextFile
 }
 

@@ -15,10 +15,10 @@ inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
 compareDir <- getTestCompareDir()
 
-theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
-theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
-theOutputDir=file.path(outputDir, "AN_Adjusted")
-theCompareFile=file.path(compareDir, "AN_Adjusted.tsv")
+theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
+theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
+theOutputDir=cleanFilePath(outputDir, "AN_Adjusted")
+theCompareFile=cleanFilePath(compareDir, "AN_Adjusted.tsv")
 theRandomSeed=314
 #myRandomSeed <- 314
 #myTestSeed <- 42
@@ -46,7 +46,7 @@ if (!is.null(inputDir))
              theBatchType=theBatchType,
              thePath=theOutputDir,
              theWriteToFile=TRUE)
-  correctedMatrix <- readAsGenericMatrix(file.path(theOutputDir, "ANY_Corrections-ANAdjusted.tsv"))
+  correctedMatrix <- readAsGenericMatrix(cleanFilePath(theOutputDir, "ANY_Corrections-ANAdjusted.tsv"))
   compareMatrix <- readAsGenericMatrix(theCompareFile)
   message("correctedMatrix")
   print(dim(correctedMatrix))

@@ -58,8 +58,8 @@ doEBNPlus_internal <- function(theBeaData1Matrix,
   correctFile <- NULL
   if (!is.null(corrections))
   {
-    checkCreateDir(thePath)
-    correctFile <- file.path(thePath, paste("ANY_Corrections-", theType, ".tsv", sep=""))
+    checkDirForCreation(thePath)
+    correctFile <- cleanFilePath(thePath, paste("ANY_Corrections-", theType, ".tsv", sep=""))
     writeDataToFile(corrections, correctFile)
   }
   else
@@ -86,9 +86,9 @@ EBNPlus_Correction_Files <- function(theDataFile1, theDataFile2, theOutputDir,
 	ebnp_PriorPlotsFile <- NULL
 	if (theEBNP_PriorPlotsFlag)
 	{
-		ebnp_PriorPlotsFile <- file.path(theOutputDir, "ENBPlus_PriorPlots.PNG")
+		ebnp_PriorPlotsFile <- cleanFilePath(theOutputDir, "ENBPlus_PriorPlots.PNG")
 	}
-	#setLogging(new("Logging", theFile=file.path(theOutputDir, "logENBplusTest.log")))
+	#setLogging(new("Logging", theFile=cleanFilePath(theOutputDir, "logENBplusTest.log")))
 	logInfo("ebnp_PriorPlotsFile=", ebnp_PriorPlotsFile)
 	logInfo(getMBatchVersion())
 	#############################################################################
@@ -103,7 +103,7 @@ EBNPlus_Correction_Files <- function(theDataFile1, theDataFile2, theOutputDir,
 	currentNames <- names(correctedFilenames)
 	correctedFilenames[[length(correctedFilenames)+1]] <- doEBNPlus_internal(theBeaData1Matrix=myData1,
 																																	thePath=theOutputDir,
-																																	theIssue=file.path(theOutputDir, "error.txt"),
+																																	theIssue=cleanFilePath(theOutputDir, "error.txt"),
 																																	theType="EBNPlus",
 																																	theBeaData2Matrix=myData2,
 																																	theEBNP_TrimGenesFunction=trimGenes,

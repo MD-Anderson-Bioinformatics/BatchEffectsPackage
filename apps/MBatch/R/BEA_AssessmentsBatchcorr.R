@@ -44,8 +44,8 @@ createBatchEffectsOutput_batchcorr<-function(theMatrixGeneData, theDataframeBatc
 			theContinueFunction, theContinueTestCount)
 		### RData output write resultList and theDataframeBatchData for batchcorr
 		### TODO: D3 batchcorr data
-		###checkCreateDir(file.path(theOutputDir, theBatchCorrBase))
-		###outputFile <- file.path(theOutputDir, theBatchCorrBase, "BatchCorr_Many2Many_Calc.RData")
+		###checkCreateDir(theOutputDir, theBatchCorrBase)
+		###outputFile <- cleanFilePath(cleanFilePath(theOutputDir, theBatchCorrBase), "BatchCorr_Many2Many_Calc.RData"))
 		###logDebug("RData-output write resultList and theDataframeBatchData for batchcorr ", outputFile)
 		###save(resultList, theDataframeBatchData, file=outputFile)
 		logDebug("createBatchEffectsOutput_batchcorr 2")
@@ -74,8 +74,8 @@ createBatchEffectsOutput_batchcorr_one2many<-function(theMatrixGeneData, theData
 						theContinueFunction, theContinueTestCount)
 		### RData output write resultList for batchcorr one2many
 		### TODO: D3 batchcorr data
-		### checkCreateDir(file.path(theOutputDir, theBatchCorrBase))
-		### outputFile <- file.path(theOutputDir, theBatchCorrBase, "BatchCorr_One2Many_Calc.RData")
+		### checkCreateDir(theOutputDir, theBatchCorrBase)
+		### outputFile <- cleanFilePath(cleanFilePath(theOutputDir, theBatchCorrBase), "BatchCorr_One2Many_Calc.RData")
 		### logDebug("RData output write resultList and theDataframeBatchData for batchcorr one2many ", outputFile)
 		### save(resultList, theDataframeBatchData, file=outputFile)
 		logDebug("createBatchEffectsOutput_batchcorr_one2many 2")
@@ -136,7 +136,7 @@ one2ManyBatchcorrForBatchType_images<-function(theResultList, theTitle, theOutpu
 			### dimnames = c(rowNames, colNames)
 			metricMatrix <- matrixWithIssues(metricList, nrow=length(batchIds), ncol=length(CZ_NAME_LIST), dimnames=list(batchIds, CZ_NAME_LIST))
 			pvalueMatrix <- matrixWithIssues(pvalueList, nrow=length(batchIds), ncol=length(CZ_NAME_LIST), dimnames=list(batchIds, CZ_NAME_LIST))
-			outputDir <- checkCreateDir(theOutputDir, theBatchCorrBase, batchType, "OneToMany")
+			outputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, theBatchCorrBase), batchType), "OneToMany")
 			###logDebug("batchcorrForBatchType_writeImage outputDir ", outputDir)
 			metricFile <- createDirPlusFilename(outputDir, theBatchCorrBase, "_Metric", "_", "ALL", "_Diagram.png")
 			pvalueFile <- createDirPlusFilename(outputDir, theBatchCorrBase, "_Pvalue", "_", "ALL", "_Diagram.png")
@@ -618,7 +618,7 @@ batchcorrForBatchType_writeImage<-function(theResultsBatchList, theTitle, theOut
 		{
 			###logDebug("batchcorrForBatchType_writeImage character")
 			### write string to file name
-			outputDir <- checkCreateDir(theOutputDir, theBatchCorrBase, batchTypeName, "OneToMany")
+			outputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, theBatchCorrBase), batchTypeName), "OneToMany")
 			metricFile <- createDirPlusFilename(outputDir, theBatchCorrBase, "_Metric_Diagram.png")
 			pvalueFile <- createDirPlusFilename(outputDir, theBatchCorrBase, "_Pvalue_Diagram.png")
 			writeStringToImage(metricFile, breakIntoTitle(paste(theTitle, batchTypeName, resultsBatchArrayList, sep=" "), theOldChar=" ", theNewChar=" " ))
@@ -642,7 +642,7 @@ batchcorrForBatchType_writeImage<-function(theResultsBatchList, theTitle, theOut
 					###logDebug("batchcorrForBatchType_writeImage batch type ", longBatchType)
 					myTitle <- paste(theTitle, longBatchType, sep=" ")
 					### write string to file name
-					outputDir <- checkCreateDir(theOutputDir, theBatchCorrBase, batchTypeName, "ManyToMany")
+					outputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, theBatchCorrBase), batchTypeName), "ManyToMany")
 					###logDebug("batchcorrForBatchType_writeImage outputDir ", outputDir)
 					metricFile <- createDirPlusFilename(outputDir, theBatchCorrBase, "_Metric", "_", czType, "_Diagram.png")
 					pvalueFile <- createDirPlusFilename(outputDir, theBatchCorrBase, "_Pvalue", "_", czType, "_Diagram.png")

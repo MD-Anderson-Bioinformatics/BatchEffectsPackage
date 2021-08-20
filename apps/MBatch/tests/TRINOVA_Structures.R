@@ -15,10 +15,10 @@ inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
 compareDir <- getTestCompareDir()
 
-theGeneFile=file.path(inputDir, "brca_agi4502_matrix_data.tsv")
-theBatchFile=file.path(inputDir, "brca_agi4502_batches.tsv")
-theOutputDir=file.path(outputDir, "TRINOVA_Structures")
-theCompareFile=file.path(compareDir, "TRINOVA_Structures.tsv")
+theGeneFile=cleanFilePath(inputDir, "brca_agi4502_matrix_data.tsv")
+theBatchFile=cleanFilePath(inputDir, "brca_agi4502_batches.tsv")
+theOutputDir=cleanFilePath(outputDir, "TRINOVA_Structures")
+theCompareFile=cleanFilePath(compareDir, "TRINOVA_Structures.tsv")
 theRandomSeed=314
 
 if (!is.null(inputDir))
@@ -45,8 +45,8 @@ if (!is.null(inputDir))
                            theBatchTypeAndValuePairsToRemove=NULL,
                            theBatchTypeAndValuePairsToKeep=NULL,
                            theMaxGeneCount=10000)
-  newDF <- readAsDataFrame(outFile)
-  compareDF <- readAsDataFrame(theCompareFile)
+  newDF <- readAsGenericDataframe(outFile)
+  compareDF <- readAsGenericDataframe(theCompareFile)
   message("newDF dim")
   print(dim(newDF))
   message("compareDF dim")

@@ -27,8 +27,7 @@ createBatchEffectsOutput_hierclust<-function(theMatrixGeneData, theDataframeBatc
 	rdataFile <- NULL
 	if (is.null(uDendSamples))
 	{
-		filename<-makeHCFileName_PNG(hierClustOutputDir, "Diagram")
-		writeStringToImage(filename, paste("Unable to calculate--too many NAs, Infinities or NaNs in data - ", theTitle, sep=""))
+	  hc_openAndWriteIssuesLogFile(hierClustOutputDir)
 	}
 	else
 	{
@@ -40,6 +39,14 @@ createBatchEffectsOutput_hierclust<-function(theMatrixGeneData, theDataframeBatc
 		hierClust_draw(uDendSamples, theDataframeBatchData, theTitle, hierClustOutputDir, theHierClustFileBase)
 	}
 	rdataFile
+}
+
+
+hc_openAndWriteIssuesLogFile<-function(theOutputDir)
+{
+  myFile <- file(cleanFilePath(theOutputDir, "error.log"), "w+")
+  on.exit(close(myFile))
+  cat("HC not calculated -- too many nulls, NAs, infinities, or no deviation\n", file=myFile, append=TRUE)
 }
 
 ####################################################################
@@ -90,18 +97,25 @@ hierClust_calc<-function(theMatrixGeneData)
 		subMatrix <- subMatrix[!is.infinite(rowSums(subMatrix)),]
 		if (nrow(subMatrix)>0)
 		{
-			logDebug("calculating HC")
-			d<-distanceMatrix(subMatrix, metric="pearson")
-			#logDebug("checking distance matrix results")
-			#subMatrix <- d[!is.na(rowSums(d)),]
-			#subMatrix <- subMatrix[!is.infinite(rowSums(subMatrix)),]
-			uDend <- NULL
-			tryCatch(
-				uDend<-hclust(d, method="ward"),
+		  uDend <- NULL
+		  tryCatch(
+		    {
+		      logDebug("calculating HC")
+			    d<-distanceMatrix(subMatrix, metric="pearson")
+			    #logDebug("checking distance matrix results")
+			    #subMatrix <- d[!is.na(rowSums(d)),]
+			    #subMatrix <- subMatrix[!is.infinite(rowSums(subMatrix)),]
+				  uDend<-hclust(d, method="ward")
+				},
+				warning=function(e)
+				{
+				  logWarn("1 Unable to calculate hclust--too many NAs, Infinities or NaNs in data")
+				  uDend <- NULL
+				},
 				error=function(e)
 				{
-					logWarn("Unable to calculate hclust--too many NAs, Infinities or NaNs in data")
-					uDend <- NULL
+				  logWarn("2 Unable to calculate hclust--too many NAs, Infinities or NaNs in data")
+				  uDend <- NULL
 				})
 			return(uDend)
 		}
@@ -299,16 +313,16 @@ makeHCFileName_PNG<-function(theDir, theDiagramOrLegend, theLegendType="")
 
 writeHCDataTSVs<-function(uDend, theHierClustOutputDir, theOutputHCDataFileName, theOutputHCOrderFileName, theUdendRData="uDend.RData")
 {
-  rdataFile <- file.path(theHierClustOutputDir,theUdendRData)
+  rdataFile <- cleanFilePath(theHierClustOutputDir,theUdendRData)
 	data<-cbind(uDend$merge, uDend$height, deparse.level=0)
 	colnames(data)<-c("A", "B", "Height")
 	###Write out the data as a Tab separated file to the specified location
-	write.table(data, file = file.path(theHierClustOutputDir,theOutputHCDataFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
+	write.table(data, file = cleanFilePath(theHierClustOutputDir,theOutputHCDataFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
 
 	data<-cbind(uDend$labels, uDend$order, deparse.level=0)
 	colnames(data)<-c("Id", "Order")
 	###Write out the order data as a Tab separated file to the specified location (1 more row than data file)
-	write.table(data, file = file.path(theHierClustOutputDir,theOutputHCOrderFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
+	write.table(data, file = cleanFilePath(theHierClustOutputDir,theOutputHCOrderFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
   # write udend RData file
 	save(uDend, file=rdataFile)
 	rdataFile

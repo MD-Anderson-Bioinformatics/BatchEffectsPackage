@@ -91,9 +91,9 @@ After the output is an explanation of files and directories created.
   compareDir <- getTestCompareDir()
 
   # set the paths
-  theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
-  theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
-  theOutputDir=file.path(outputDir, "Boxplot_AllSamplesRLE_Structures")
+  theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
+  theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
+  theOutputDir=cleanFilePath(outputDir, "Boxplot_AllSamplesRLE_Structures")
   theRandomSeed=314
   
   # make sure the output dir exists and is empty
@@ -210,4 +210,4 @@ TCGA-OR-A5J3-01A-11D-A29J-05	7	-0.32982819164709853	520.0	-0.19185967737525045	6
 ##Diagram
 Here is a diagram generated from this code.
 
-`r sprintf("![Boxplot All Samples RLE Output](%s)", file.path(theOutputDir, "AllSample-RLE", "BoxPlot_AllSample-RLE_Diagram-TSS.png"))`
+`r sprintf("![Boxplot All Samples RLE Output](%s)", cleanFilePath(cleanFilePath(theOutputDir, "AllSample-RLE"), "BoxPlot_AllSample-RLE_Diagram-TSS.png"))`

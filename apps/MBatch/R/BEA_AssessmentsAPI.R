@@ -10,16 +10,29 @@
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
 #############################################################################
+### UMAP
+#############################################################################
+
+UMAP_Structures <- function(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove=list(), theBatchTypeAndValuePairsToKeep=list())
+{
+  theData <- as.numericWithIssues(theData)
+  theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
+                              theBatchTypeAndValuePairsToKeep=theBatchTypeAndValuePairsToKeep)
+  theTitle <- breakIntoTitle(theTitle)
+  createBatchEffectsOutput_umap(theData@mData, theData@mBatches, theTitle, theUmapOutputDir=theOutputPath)
+}
+
+#############################################################################
 ### Hierarchical Clustering
 #############################################################################
 
 HierarchicalClustering_Structures <- function(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove=list(), theBatchTypeAndValuePairsToKeep=list())
 {
-	theData <- as.numericWithIssues(theData)
-	theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
-	                            theBatchTypeAndValuePairsToKeep=theBatchTypeAndValuePairsToKeep)
-	theTitle <- breakIntoTitle(theTitle)
-	createBatchEffectsOutput_hierclust(theData@mData, theData@mBatches, theTitle, "", theHierClustOutputDir=theOutputPath)
+  theData <- as.numericWithIssues(theData)
+  theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
+                              theBatchTypeAndValuePairsToKeep=theBatchTypeAndValuePairsToKeep)
+  theTitle <- breakIntoTitle(theTitle)
+  createBatchEffectsOutput_hierclust(theData@mData, theData@mBatches, theTitle, "", theHierClustOutputDir=theOutputPath)
 }
 
 #############################################################################

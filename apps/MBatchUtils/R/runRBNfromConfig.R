@@ -27,9 +27,9 @@ runRBNfromConfig <- function(theConfigFile, theOutputDir)
   message("RBN_VariantReps ", RBN_VariantReps)
   ####################################################################
   sourceDir <-dirname(theConfigFile)
-  logFile <- file.path(sourceDir, "mbatch.log")
-  datFile <- file.path(sourceDir, "matrix_data.tsv")
-  datFile2 <- file.path(sourceDir, "matrix_data2.tsv")
+  logFile <- cleanFilePath(sourceDir, "mbatch.log")
+  datFile <- cleanFilePath(sourceDir, "matrix_data.tsv")
+  datFile2 <- cleanFilePath(sourceDir, "matrix_data2.tsv")
   #############################################################################
   # check directories
   message("theOutputDir=", theOutputDir)

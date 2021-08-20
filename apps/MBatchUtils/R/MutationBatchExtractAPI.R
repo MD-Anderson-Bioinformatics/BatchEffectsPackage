@@ -93,11 +93,11 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 	  print(myMaf)
 		# create the destination directory with disease sub-directory
 	  message("create the destination directory with disease sub-directory")
-	  dir.create(file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), showWarnings=FALSE, recursive=TRUE)
+	  dir.create(cleanFilePath(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), showWarnings=FALSE, recursive=TRUE)
 		# copy batches file into disease sub-directory
 	  message("copy batches file into disease sub-directory")
-	  file.copy(file.path(dirname(myMaf), "batches.tsv"),
-							file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag), paste(convertPathToName(myMaf, theGDCflag), "_batches.tsv", sep="")))
+	  file.copy(cleanFilePath(dirname(myMaf), "batches.tsv"),
+	            cleanFilePath(cleanFilePath(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), paste(convertPathToName(myMaf, theGDCflag), "_batches.tsv", sep="")))
 	}
 	##############################################################################
 	# pull out and collate the mutation type counts by gene for each file
@@ -112,7 +112,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 		message("Save as Total Mutations by Gene")
 		############################################################################
 		# make sure disease sub-directory exists
-		dir.create(file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), showWarnings=FALSE, recursive=TRUE)
+		dir.create(cleanFilePath(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), showWarnings=FALSE, recursive=TRUE)
 		# process GDC-derived and DCC-derived data differently
 		# TODO: make ref build selection an argument (same as mutation type specific code above)
 		if (isTRUE(theGDCflag))
@@ -122,7 +122,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 		  message("myMaf=",myMaf)
 		  # name output file in disease subdirectory
 		  # file name is <disease-type>.<platform>_HG38_Total.tsv
-		  outputFile <- file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag), paste(convertPathToName(myMaf, theGDCflag), "_HG38_Total.tsv", sep=""))
+		  outputFile <- cleanFilePath(cleanFilePath(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), paste(convertPathToName(myMaf, theGDCflag), "_HG38_Total.tsv", sep=""))
 		  message("outputFile=", outputFile)
 		  # extra data matrix totals from dataframe for gene symbols
 		  # note call to DCC-specific matrix processing
@@ -131,7 +131,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 		  dataMatrix <- getMatrixOfTotalsGDC(df, geneSymbols)
 		  # write the matrix to the output file
 		  message("calling writeAsMatrix")
-		  writeAsMatrix(outputFile, dataMatrix, thePar)
+		  writeAsGenericMatrix(outputFile, dataMatrix)
 		  message("after writeAsMatrix")
 		}
 		else
@@ -145,13 +145,13 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 		    message("Process GRCh37 Totals")
 		    # name output file in disease subdirectory
 		    # file name is <disease-type>.<platform>.<institution>.<level>_HG19_Total.tsv
-		    outputFile <- file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag), paste(convertPathToName(myMaf, theGDCflag), "_HG19_Total.tsv", sep=""))
+		    outputFile <- cleanFilePath(cleanFilePath(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), paste(convertPathToName(myMaf, theGDCflag), "_HG19_Total.tsv", sep=""))
 		    # extract data matrix totals from dataframe for gene symbols
 		    # note call to DCC-specific matrix processing
 		    # TODO: take arguments for matrix processing
 		    dataMatrix <- getMatrixOfTotalsDCC(df, geneSymbols, my37)
 		    # write the matrix to the output file
-		    writeAsMatrix(outputFile, dataMatrix, thePar)
+		    writeAsGenericMatrix(outputFile, dataMatrix)
 		  }
 		  ##########################################################################
 		  my36 <- (refBuilds=="36"|refBuilds=="hg18")
@@ -161,13 +161,13 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 		    message("Process GRCh36 Totals")
 		    # name output file in disease subdirectory
 		    # file name is <disease-type>.<platform>.<institution>.<level>_HG18_Total.tsv
-		    outputFile <- file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag), paste(convertPathToName(myMaf, theGDCflag), "_HG18_Total.tsv", sep=""))
+		    outputFile <- cleanFilePath(cleanFilePath(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), paste(convertPathToName(myMaf, theGDCflag), "_HG18_Total.tsv", sep=""))
 		    # extract data matrix totals from dataframe for gene symbols
 		    # note call to DCC-specific matrix processing
 		    # TODO: take arguments for matrix processing
 		    dataMatrix <- getMatrixOfTotalsDCC(df, geneSymbols, my36)
 		    # write the matrix to the output file
-		    writeAsMatrix(outputFile, dataMatrix, thePar)
+		    writeAsGenericMatrix(outputFile, dataMatrix)
 		  }
   	}
 		############################################################################
@@ -185,7 +185,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 		for (callType in variantClassifications)
 		{
 			# make sure disease name sub-directory exists
-			dir.create(file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), showWarnings=FALSE, recursive=TRUE)
+			dir.create(cleanFilePath(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), showWarnings=FALSE, recursive=TRUE)
 			# extract data and write file
 			if (isTRUE(theGDCflag))
 			{
@@ -194,7 +194,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 				message("Process GRCh38")
 				# name output file in disease subdirectory
 				# file name is <disease-type>.<platform>_HG38_<mutation-type>.tsv
-				outputFile <- file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag), paste(convertPathToName(myMaf, theGDCflag), "_HG38_",  cleanString(callType), ".tsv", sep=""))
+				outputFile <- cleanFilePath(cleanFilePath(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), paste(convertPathToName(myMaf, theGDCflag), "_HG38_",  cleanString(callType), ".tsv", sep=""))
 				# extract data matrix from dataframe for gene symbols and mutation type
 				# note call to GDC-specific matrix processing
 				# TODO: take arguments for matrix processing
@@ -202,7 +202,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 				#browser()
 				dataMatrix <- getMatrixOfTypeGDC(df, geneSymbols, callType)
 				# write the matrix to the output file
-				writeAsMatrix(outputFile, dataMatrix, thePar)
+				writeAsGenericMatrix(outputFile, dataMatrix)
 			}
 			else
 			{
@@ -217,7 +217,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 					message("Process GRCh37")
 					# name output file in disease subdirectory
 					# file name is <disease-type>.<platform>.<institution>.<level>_HG19_<mutation-type>.tsv
-					outputFile <- file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag), paste(convertPathToName(myMaf, theGDCflag), "_HG19_",  cleanString(callType), ".tsv", sep=""))
+					outputFile <- cleanFilePath(cleanFilePath(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), paste(convertPathToName(myMaf, theGDCflag), "_HG19_",  cleanString(callType), ".tsv", sep=""))
 					# extract data matrix from dataframe for gene symbols and mutation type
 					# note call to DCC-specific matrix processing
 					# TODO: take arguments for matrix processing
@@ -225,7 +225,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 					#browser()
 					dataMatrix <- getMatrixOfTypeDCC(df, geneSymbols, my37, callType)
 					# write the matrix to the output file
-					writeAsMatrix(outputFile, dataMatrix, thePar)
+					writeAsGenericMatrix(outputFile, dataMatrix)
 				}
 				##########################################################################
 				my36 <- (refBuilds=="36"|refBuilds=="hg18")
@@ -235,7 +235,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 					message("Process GRCh36")
 					# name output file in disease subdirectory
 					# file name is <disease-type>.<platform>.<institution>.<level>_HG18_<mutation-type>.tsv
-					outputFile <- file.path(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag), paste(convertPathToName(myMaf, theGDCflag), "_HG18_",  cleanString(callType), ".tsv", sep=""))
+					outputFile <- cleanFilePath(cleanFilePath(theTypeCountDir, getProjectDiseaseIdentifier(myMaf, theGDCflag)), paste(convertPathToName(myMaf, theGDCflag), "_HG18_",  cleanString(callType), ".tsv", sep=""))
 					# extract data matrix from dataframe for gene symbols and mutation type
 					# note call to DCC-specific matrix processing
 					# TODO: take arguments for matrix processing
@@ -243,7 +243,7 @@ mutationBatchExtract <- function(theMafDir, theTypeCountDir, theGDCflag, thePar 
 					#browser()
 					dataMatrix <- getMatrixOfTypeDCC(df, geneSymbols, my36, callType)
 					# write the matrix to the output file
-					writeAsMatrix(outputFile, dataMatrix, thePar)
+					writeAsGenericMatrix(outputFile, dataMatrix)
 				}
 				##########################################################################
 			}

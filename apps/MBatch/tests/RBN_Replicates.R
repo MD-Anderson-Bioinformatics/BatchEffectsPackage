@@ -15,10 +15,10 @@ inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
 compareDir <- getTestCompareDir()
 
-invariantFile=file.path(inputDir, "rbn-test6-iset.tsv")
-variantFile=file.path(inputDir, "rbn-test6-vset.tsv")
-theOutputDir=file.path(outputDir, "RBN_Replicates")
-theCompareFile=file.path(compareDir, "rbn-test6-output.tsv")
+invariantFile=cleanFilePath(inputDir, "rbn-test6-iset.tsv")
+variantFile=cleanFilePath(inputDir, "rbn-test6-vset.tsv")
+theOutputDir=cleanFilePath(outputDir, "RBN_Replicates")
+theCompareFile=cleanFilePath(compareDir, "rbn-test6-output.tsv")
 theRandomSeed=314
 #myRandomSeed <- 314
 #myTestSeed <- 42
@@ -93,7 +93,7 @@ if (!is.null(inputDir))
                              theCombineOnlyFlag=FALSE,
                              thePath=theOutputDir,
                              theWriteToFile=TRUE)
-  correctedMatrix <- readAsGenericMatrix(file.path(theOutputDir, "ANY_Corrections-RBN_Replicates.tsv"))
+  correctedMatrix <- readAsGenericMatrix(cleanFilePath(theOutputDir, "ANY_Corrections-RBN_Replicates.tsv"))
   compareMatrix <- readAsGenericMatrix(theCompareFile)
   message("correctedMatrix")
   print(dim(correctedMatrix))

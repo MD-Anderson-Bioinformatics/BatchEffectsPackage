@@ -15,13 +15,13 @@ inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
 compareDir <- getTestCompareDir()
 
-theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
-theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
-theOutputDir=file.path(outputDir, "Boxplot_Group_Structures")
-theCompareFile=file.path(compareDir, "Boxplot_Group_Structures.tsv")
-theCompareFileAnn=file.path(compareDir, "BoxPlot_Group-Mean_Annotations-TSS.tsv")
-theCompareFileBox=file.path(compareDir, "BoxPlot_Group-Mean_BoxData-TSS.tsv")
-theCompareFileHis=file.path(compareDir, "BoxPlot_Group-Mean_Histogram-TSS.tsv")
+theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
+theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
+theOutputDir=cleanFilePath(outputDir, "Boxplot_Group_Structures")
+theCompareFile=cleanFilePath(compareDir, "Boxplot_Group_Structures.tsv")
+theCompareFileAnn=cleanFilePath(compareDir, "BoxPlot_Group-Mean_Annotations-TSS.tsv")
+theCompareFileBox=cleanFilePath(compareDir, "BoxPlot_Group-Mean_BoxData-TSS.tsv")
+theCompareFileHis=cleanFilePath(compareDir, "BoxPlot_Group-Mean_Histogram-TSS.tsv")
 theRandomSeed=314
 #myRandomSeed <- 314
 #myTestSeed <- 42
@@ -53,15 +53,15 @@ if (!is.null(inputDir))
                            theListOfGroupBoxLabels=list("Mean"),
                            theMaxGeneCount=10000)
   ########################
-  correctedDataframe <- readAsGenericDataframe(file.path(theOutputDir, "Group-Mean", "BoxPlot_Group-Mean_BoxData-TSS.tsv"))
+  correctedDataframe <- readAsGenericDataframe(cleanFilePath(cleanFilePath(theOutputDir, "Group-Mean"), "BoxPlot_Group-Mean_BoxData-TSS.tsv"))
   compareDataframe <- readAsGenericDataframe(theCompareFileBox)
   comparedBox <- compareTwoDataframes(correctedDataframe, compareDataframe)
   ########################
-  correctedDataframe <- readAsGenericDataframe(file.path(theOutputDir, "Group-Mean", "BoxPlot_Group-Mean_Annotations-TSS.tsv"))
+  correctedDataframe <- readAsGenericDataframe(cleanFilePath(cleanFilePath(theOutputDir, "Group-Mean"), "BoxPlot_Group-Mean_Annotations-TSS.tsv"))
   compareDataframe <- readAsGenericDataframe(theCompareFileAnn)
   comparedAnn <- compareTwoDataframes(correctedDataframe, compareDataframe)
   ########################
-  correctedDataframe <- readAsGenericDataframe(file.path(theOutputDir, "Group-Mean", "BoxPlot_Group-Mean_Histogram-TSS.tsv"))
+  correctedDataframe <- readAsGenericDataframe(cleanFilePath(cleanFilePath(theOutputDir, "Group-Mean"), "BoxPlot_Group-Mean_Histogram-TSS.tsv"))
   compareDataframe <- readAsGenericDataframe(theCompareFileHis)
   comparedHis <- compareTwoDataframes(correctedDataframe, compareDataframe)
   ########################

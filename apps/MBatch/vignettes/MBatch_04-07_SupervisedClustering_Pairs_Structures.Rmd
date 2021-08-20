@@ -85,9 +85,9 @@ After the output is an explanation of files and directories created.
   compareDir <- getTestCompareDir()
 
   # set the paths
-  theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
-  theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
-  theOutputDir=file.path(outputDir, "SupervisedClustering_Pairs_Structures")
+  theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
+  theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
+  theOutputDir=cleanFilePath(outputDir, "SupervisedClustering_Pairs_Structures")
   theRandomSeed=314
   
   # make sure the output dir exists and is empty
@@ -132,4 +132,4 @@ total 276
 
 Here is the diagram generated from this code.
 
-`r sprintf("![SupervisedClustering_Pairs_Structures Output](%s)", file.path(theOutputDir, "BatchId-TSS", "SupervisedClust_Diagram.png"))`
+`r sprintf("![SupervisedClustering_Pairs_Structures Output](%s)", cleanFilePath(cleanFilePath(theOutputDir, "BatchId-TSS"), "SupervisedClust_Diagram.png"))`

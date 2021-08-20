@@ -1,4 +1,4 @@
-FROM mdabcb/centos_r_java:2021-04-27-1030
+FROM mdabcb/bcb_base:2021-08-13-1100
 
 ## This can be built with: docker build -t mdabcb/mbatchsa_image:BEA_VERSION_TIMESTAMP .
 ## Login to docker hub with: docker login

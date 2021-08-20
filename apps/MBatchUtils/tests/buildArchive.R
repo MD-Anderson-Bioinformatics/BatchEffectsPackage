@@ -16,14 +16,14 @@ if (!is.null(getTestOutputDir()))
   ########################################################
   ########################################################
   # writes to input directory, so copy files to output
-  sourceDir=file.path(getTestInputDir(), "configout")
-  outDir=file.path(getTestOutputDir(), "archiveout", "2018-07-11-1200")
+  sourceDir=cleanFilePath(getTestInputDir(), "configout")
+  outDir=cleanFilePath(cleanFilePath(getTestOutputDir(), "archiveout"), "2018-07-11-1200")
   unlink(outDir)
   dir.create(outDir, recursive=TRUE, showWarnings=FALSE)
-  #file.copy(file.path(getTestInputDir(), "config", "MBatchConfig.tsv"), file.path(outDir, "MBatchConfig.tsv"))
+  #file.copy(cleanFilePath(cleanFilePath(getTestInputDir(), "config"), "MBatchConfig.tsv"), cleanFilePath(outDir, "MBatchConfig.tsv"))
   #buildSingleArchive theMbatchID, theResultDir, theDataDir, theZipDir
   theMbatchID <- "tmp-test-id"
-  theResultDir <- file.path(sourceDir, "2018-07-11-1200")
+  theResultDir <- cleanFilePath(sourceDir, "2018-07-11-1200")
   theDataDir <- NULL
   theZipDir <- outDir
   buildSingleArchive(theMbatchID, theResultDir, theDataDir, theZipDir)

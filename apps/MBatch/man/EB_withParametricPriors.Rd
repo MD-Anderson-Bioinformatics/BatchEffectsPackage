@@ -22,7 +22,7 @@ theWriteToFile = FALSE)
   for calculating priors.}
   \item{thePath}{Output path for any files.}
   \item{theWriteToFile}{TRUE to write the corrected data to file and return
-  the file pathname instead of the corrected matrix.}
+  the cleanFilePathname instead of the corrected matrix.}
 }
 \details{
 Perform Empirical Bayes correction with Parametric Priors.

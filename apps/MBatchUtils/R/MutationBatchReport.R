@@ -29,7 +29,7 @@ htmlMutationBatchEffects <- function(theBaseDir)
 	{
 		message(myRef)
 		outDir <- dirname(myRef)
-		outFile <- file.path(outDir, "index.html")
+		outFile <- cleanFilePath(outDir, "index.html")
 		if (file.exists(outFile))
 		{
 			file.remove(outFile)
@@ -70,56 +70,58 @@ htmlMutationBatchEffects <- function(theBaseDir)
 			possibleFiles <- c(
 				# MutBatch Output
 				# MutDots image:		FullMutCounts_<BatchType>_<Mutation_Type>_<Disease>_MutDots_Diagram.PNG
-				file.path(outDir, paste("FullMutCounts", row$BatchType, row$MutationType, row$Disease, "MutDots_Diagram.PNG", sep="_")),
+				cleanFilePath(outDir, paste("FullMutCounts", row$BatchType, row$MutationType, row$Disease, "MutDots_Diagram.PNG", sep="_")),
 				# Narrow Boxplots:	NarrowBoxplot_<BatchType>_<Mutation_Type>_<Disease>_Log10_<Caller>_<Mutation_Type>_Diagram.PNG
-				file.path(outDir, paste( paste("NarrowBoxplot", row$BatchType, row$MutationType, row$Disease, "Log10",
+				cleanFilePath(outDir, paste( paste("NarrowBoxplot", row$BatchType, row$MutationType, row$Disease, "Log10",
 																			 strsplit(gsub(pattern="AggregationandMasking", x=row$Caller, replacement="", fixed=TRUE), ".", fixed=TRUE)[[1]][1],
 																			 row$MutationType, sep="_"),
 																 "_Diagram.PNG", sep="")),
 				# Narrow Boxplots:	NarrowBoxplot_<BatchType>_<Mutation_Type>_<Disease>_Log10_<Caller>_Diagram.PNG
-				file.path(outDir, paste( paste("NarrowBoxplot", row$BatchType, row$MutationType, row$Disease, "Log10",
+				cleanFilePath(outDir, paste( paste("NarrowBoxplot", row$BatchType, row$MutationType, row$Disease, "Log10",
 																			 strsplit(gsub(pattern="AggregationandMasking", x=row$Caller, replacement="", fixed=TRUE), ".", fixed=TRUE)[[1]][1],
 																			 sep="_"),
 																 "_Diagram.PNG", sep="")),
 				# Narrow Boxplots:	NarrowBoxplot_<BatchType>_<Mutation_Type>_<Disease>_ZScore_<Caller>_<Mutation_Type>_Diagram.PNG
-				file.path(outDir, paste( paste("NarrowBoxplot", row$BatchType, row$MutationType, row$Disease, "ZScore",
+				cleanFilePath(outDir, paste( paste("NarrowBoxplot", row$BatchType, row$MutationType, row$Disease, "ZScore",
 																			 strsplit(gsub(pattern="AggregationandMasking", x=row$Caller, replacement="", fixed=TRUE), ".", fixed=TRUE)[[1]][1],
 																			 row$MutationType, sep="_"),
 																 "_Diagram.PNG", sep="")),
 				# Narrow Boxplots:	NarrowBoxplot_<BatchType>_<Mutation_Type>_<Disease>_ZScore_<Caller>_Diagram.PNG
-				file.path(outDir, paste( paste("NarrowBoxplot", row$BatchType, row$MutationType, row$Disease, "ZScore",
+				cleanFilePath(outDir, paste( paste("NarrowBoxplot", row$BatchType, row$MutationType, row$Disease, "ZScore",
 																			 strsplit(gsub(pattern="AggregationandMasking", x=row$Caller, replacement="", fixed=TRUE), ".", fixed=TRUE)[[1]][1],
 																			 sep="_"),
 																 "_Diagram.PNG", sep="")),
 				# Wide Boxplot:			WideBoxplot_<BatchType>_<Mutation_Type>_<Disease>_Log10_Diagram.PNG
-				file.path(outDir, paste( paste("WideBoxplot", row$BatchType, row$MutationType, row$Disease, "Log10", sep="_"),
+				cleanFilePath(outDir, paste( paste("WideBoxplot", row$BatchType, row$MutationType, row$Disease, "Log10", sep="_"),
 																 "_Diagram.PNG", sep="")),
 				# Wide Boxplot:			WideBoxplot_<BatchType>_<Mutation_Type>_<Disease>_ZScore_Diagram.PNG
-				file.path(outDir, paste( paste("WideBoxplot", row$BatchType, row$MutationType, row$Disease, "ZScore", sep="_"),
+				cleanFilePath(outDir, paste( paste("WideBoxplot", row$BatchType, row$MutationType, row$Disease, "ZScore", sep="_"),
 																 "_Diagram.PNG", sep="")),
 				# MBatch Output
 				# BoxPlot Diagram:	<MutationFile>_<MutationType>/BoxPlot/Group-MEAN/BoxPlot_Group-MEAN_Diagram-<BatchType>_Diagram.PNG
-				file.path(outDir, paste(row$MutationFile, row$MutationType, sep="_"), "BoxPlot", "Group-MEAN",
-									paste( "BoxPlot_Group-MEAN_Diagram-", row$BatchType, "_Diagram.PNG", sep="")),
+				cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(outDir, paste(row$MutationFile, row$MutationType, sep="_")), "BoxPlot"),
+				              "Group-MEAN"), paste( "BoxPlot_Group-MEAN_Diagram-", row$BatchType, "_Diagram.PNG", sep="")),
 				# BoxPlot Legend:		<MutationFile>_<MutationType>/BoxPlot/Group-MEAN/BoxPlot_Group-MEAN_Legend-<BatchType>_Diagram.PNG
-				file.path(outDir, paste(row$MutationFile, row$MutationType, sep="_"), "BoxPlot", "Group-MEAN",
+				cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(outDir, paste(row$MutationFile, row$MutationType, sep="_")), "BoxPlot"), "Group-MEAN"),
 									paste( "BoxPlot_Group-MEAN_Legend-", row$BatchType, "_Diagram.PNG", sep="")),
 				# HierClust	Diagram:	<MutationFile>_<MutationType>/HierarchicalClustering/HierarchicalClustering_Diagram_Diagram.PNG
-				file.path(outDir, paste(row$MutationFile, row$MutationType, sep="_"), "HierarchicalClustering",
+				cleanFilePath(cleanFilePath(cleanFilePath(outDir, paste(row$MutationFile, row$MutationType, sep="_")), "HierarchicalClustering"),
 									"HierarchicalClustering_Diagram_Diagram.PNG"),
 				# HierClust	Legend:		<MutationFile>_<MutationType>/HierarchicalClustering/HierarchicalClustering_Legend-<BatchType>_Diagram.PNG
-				file.path(outDir, paste(row$MutationFile, row$MutationType, sep="_"), "HierarchicalClustering",
+				cleanFilePath(cleanFilePath(cleanFilePath(outDir, paste(row$MutationFile, row$MutationType, sep="_")), "HierarchicalClustering"),
 									paste( "HierarchicalClustering_Legend-", row$BatchType, "_Diagram.PNG", sep="")),
 				# SuperClust	Diagram:	<MutationFile>_<MutationType>/SupervisedClustering/Batches/SupervisedClust_Diagram-<BatchType>_Diagram.PNG
-				file.path(outDir, paste(row$MutationFile, row$MutationType, sep="_"), "SupervisedClustering", "Batches",
+				cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(outDir, paste(row$MutationFile, row$MutationType, sep="_")), "SupervisedClustering"), "Batches"),
 									paste( "SupervisedClust_Diagram-", row$BatchType, "_Diagram.PNG", sep="")),
 				# SuperClust	Legend:		<MutationFile>_<MutationType>/SupervisedClustering/Batches/SupervisedClust_Legend-<BatchType>_Diagram.PNG
-				file.path(outDir, paste(row$MutationFile, row$MutationType, sep="_"), "SupervisedClustering", "Batches",
+				cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(outDir, paste(row$MutationFile, row$MutationType, sep="_")), "SupervisedClustering"), "Batches"),
 									paste( "SupervisedClust_Legend-", row$BatchType, "_Diagram.PNG", sep="")),
 				# PCAPlus Diagram:	<MutationFile>_<MutationType>/PCA/<BatchType>/ManyToMany/PCA-Plus/ALL_Comp1_Comp2_Diagram_Diagram.PNG
-				file.path(outDir, paste(row$MutationFile, row$MutationType, sep="_"), "ManyToMany", "PCA-Plus", "ALL_Comp1_Comp2_Diagram_Diagram.PNG"),
+				cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(outDir, paste(row$MutationFile, row$MutationType, sep="_")),
+				                                          "ManyToMany"), "PCA-Plus"), "ALL_Comp1_Comp2_Diagram_Diagram.PNG"),
 				# PCAPlus Legend:		<MutationFile>_<MutationType>/PCA/<BatchType>/ManyToMany/PCA-Plus/ALL_Comp1_Comp2_Legend-ALL_Diagram.PNG
-				file.path(outDir, paste(row$MutationFile, row$MutationType, sep="_"), "ManyToMany", "PCA-Plus", "ALL_Comp1_Comp2_Legend-ALL_Diagram.PNG")
+				cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(outDir, paste(row$MutationFile, row$MutationType, sep="_")),
+				                                          "ManyToMany"), "PCA-Plus"), "ALL_Comp1_Comp2_Legend-ALL_Diagram.PNG")
 			)
 			cat("\t\t", "<br><hr>", "\n", file=outFile, append=TRUE, sep="")
 			# table, with data on left, and buttons to display images at the right

@@ -151,7 +151,7 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile,
                            theBatchTypeAndValuePairsToRemove=NULL)
 {
   mymatrix <- readAsGenericMatrix(theInputMatrixFile)
-  batchs <- readAsDataFrame(theInputBatchFile)
+  batchs <- readAsGenericDataframe(theInputBatchFile)
   #############################################
   # add missing samples from matrix to batchs
   #############################################
@@ -193,6 +193,7 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile,
   #############################################
   if (isTRUE(theTransformFlag))
   {
+    print("****Log transform data****")
     # convert to vector
     myVector <- as.vector(mymatrix)
     # so we can remove all zero values
@@ -200,6 +201,8 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile,
     # so when we remove NAs and look for .1 quantile,
     # we get a non-zero answer
     qt <- quantile(myVector, .1, na.rm=TRUE)
+    print("****qt****")
+    print(qt)
     # that gives us non-zero (and non-infinite) values
     # within the transformed matrix
     mymatrix <- log2(mymatrix+qt)
@@ -211,9 +214,11 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile,
   #############################################
   # write to files
   #############################################
-  #writeAsMatrix(theOutputMatrixFile, mymatrix)
-  write.table(x=mymatrix, file=theOutputMatrixFile, sep="\t", na="NA", quote=FALSE, col.names=NA)
-  writeAsDataframe(theOutputBatchFile, batchs)
+  #writeAsGenericMatrix(theOutputMatrixFile, mymatrix)
+  print("****theOutputMatrixFile****")
+  print(theOutputMatrixFile)
+  writeAsGenericMatrix(theOutputMatrixFile,mymatrix)
+  writeAsGenericDataframe(theOutputBatchFile, batchs)
 }
 
 bidirectionalCentering <- function(theMatrix, theType=(function(x){median(x, na.rm=TRUE)}), theSampleFeatureFlag=TRUE)

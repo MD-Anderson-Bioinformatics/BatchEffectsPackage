@@ -31,7 +31,8 @@ Returns the data.frame read from file.
 ## The function is currently defined as
 #function (theFile, thePar = "-Xmx2000m")
 #{
-#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
+#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava",
+#                                  "ReadRJava.jar", package="MBatch")))
 #    logDebug("readAsDataFrame - thePar ", thePar)
 #    logDebug("readAsDataFrame - theFile ", theFile)
 #    logDebug("readAsDataFrame - Calling .jinit ", myJavaJars)

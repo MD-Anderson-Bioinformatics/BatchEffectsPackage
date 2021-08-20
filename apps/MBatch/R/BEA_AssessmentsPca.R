@@ -36,7 +36,7 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 	stopifnotWithLogging("createBatchEffectsOutput_pca - must have > 0 cols in theMatrixGeneData.", ncol(theMatrixGeneData)>0)
 	if (TRUE==theDoDSCFlag)
 	{
-		saveCompListDscData(file.path(theOutputDir, "ALL__CompListDSC.RData"), theListOfComponentsToPlot)
+		saveCompListDscData(cleanFilePath(theOutputDir, "ALL__CompListDSC.RData"), theListOfComponentsToPlot)
 	}
 	###logDebug("createBatchEffectsOutput_pca - rows in theMatrixGeneData=", nrow(theMatrixGeneData))
 	###logDebug("createBatchEffectsOutput_pca - cols in theMatrixGeneData=", ncol(theMatrixGeneData))
@@ -49,7 +49,7 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 		pca <- doSamplePcaCall(theMatrixGeneData, theMinBatchSize, batchIdsForSamples, theListOfComponentsToPlot, theSeed, theGeneLimit)
 		if (is.null(pca))
 		{
-			batchTypeOutputDir <- checkCreateDir(theOutputDir, batchTypeName, "ManyToMany")
+			batchTypeOutputDir <- checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), "ManyToMany")
 			openAndWriteIssuesLogFile(batchTypeOutputDir)
 		}
 		else
@@ -65,16 +65,16 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 			sortedListOfBatchIds <- sortBatchesBasedOnSize(unique(batchIdsForSamples), batchIdsForSamples)
 			###logDebug("sortBatchesBasedOnSize(sortedListOfBatchIds) = ", paste(sortedListOfBatchIds, collapse=","))
 			batchTypeOutputDir <- NULL
-			batchTypeOutputDir <- checkCreateDir(theOutputDir, batchTypeName, "ManyToMany")
+			batchTypeOutputDir <- checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), "ManyToMany")
 			centroidsOutputDir <- ""
 			if((TRUE==theDoCentroidsMtoMFlag)||(TRUE==theDoSampleLocatorFlag))
 			{
-				centroidsOutputDir <- checkCreateDir(theOutputDir, batchTypeName, "ManyToMany", thePcaCentroidsBase)
+				centroidsOutputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), "ManyToMany"), thePcaCentroidsBase)
 			}
 			plainOutputDir <- ""
 			if(TRUE==theDoPlainMtoMFlag)
 			{
-				plainOutputDir <- checkCreateDir(theOutputDir, batchTypeName, "ManyToMany", thePcaPlainBase)
+				plainOutputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), "ManyToMany"), thePcaPlainBase)
 			}
 			dscAllResults <- NULL
 			if(TRUE==theDoDSCFlag)
@@ -89,7 +89,7 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 				}
 				###logDebug("after openAndWriteDscAllFile")
 			}
-			writePcaDataFilesForDataset(file.path(theOutputDir, batchTypeName, "ManyToMany"), theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot)
+			writePcaDataFilesForDataset(cleanFilePath(cleanFilePath(theOutputDir, batchTypeName), "ManyToMany"), theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot)
 			####
 			logDebug("write writeSharedFveWeightScoresFiles")
 			writeSharedFveWeightScoresFiles(theDoSampleLocatorFlag, batchTypeOutputDir, pca, theSampleIds=rownames(theMatrixGeneData), theGeneIds=colnames(theMatrixGeneData))
@@ -160,7 +160,7 @@ createBatchEffectsOutput_pca_dualBatch<-function(theMatrixGeneData, theDataframe
 	checkPackageSettings()
 	if (TRUE==theDoDSCFlag)
 	{
-		saveCompListDscData(file.path(theOutputDir, "ALL__CompListDSC.RData"), theListOfComponentsToPlot)
+		saveCompListDscData(cleanFilePath(theOutputDir, "ALL__CompListDSC.RData"), theListOfComponentsToPlot)
 	}
 	logDebug("createBatchEffectsOutput_pca_dualBatch - start loop")
 	for(x in seq(from=1, to=(length(theListForDoCentroidDualBatchType)-1), by=2 ))
@@ -182,8 +182,8 @@ createBatchEffectsOutput_pca_dualBatch<-function(theMatrixGeneData, theDataframe
 			sortedListOfBatchIdsB <- sort(unique(batchIdsForSamplesB))
 			###logDebug("createBatchEffectsOutput_pca_dualBatch - loop pvalueDSC")
 			tempBatchTypes <- paste(batchTypeA, "with", batchTypeB, sep="")
-			outputDir <- checkCreateDir(theOutputDir, tempBatchTypes, "DualBatch", theFileBase)
-			datafilesOutputDir <- checkCreateDir(theOutputDir, tempBatchTypes, "DualBatch")
+			outputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, tempBatchTypes), "DualBatch"), theFileBase)
+			datafilesOutputDir <- checkCreateDir(checkCreateDir(theOutputDir, tempBatchTypes), "DualBatch")
 			dscAllResults <- NULL
 			if(TRUE==theDoDSCFlag)
 			{
@@ -257,7 +257,7 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 	stopifnotWithLogging("createBatchEffectsOutput_pca_one2many - must have > 0 cols in theMatrixGeneData.", ncol(theMatrixGeneData)>0)
 	if (TRUE==theDoDSCFlag)
 	{
-		saveCompListDscData(file.path(theOutputDir, "ALL__CompListDSC.RData"), theListOfComponentsToPlot)
+		saveCompListDscData(cleanFilePath(theOutputDir, "ALL__CompListDSC.RData"), theListOfComponentsToPlot)
 	}
 	for(batchTypeIndex in c(2:length(theDataframeBatchData)))
 	{
@@ -292,16 +292,16 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 				o2mUniqueListOfBatchIds <- sortBatchesBasedOnSize(unique(o2mBatchIdsForSamples), o2mBatchIdsForSamples)
 				batchIdentifiersWithCount <- getListOfBatchNamesWithCounts(o2mBatchIdsForSamples, c(batchId, "Other Batches"))
 				batchIdFilename <- compressIntoFilename(batchId)
-				batchTypeOutputDir <- checkCreateDir(theOutputDir, batchTypeName, paste("OneToMany", batchId, sep="-"))
+				batchTypeOutputDir <- checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), paste("OneToMany", batchId, sep="-"))
 				centroidsOutputDir <- ""
 				if((TRUE==theDoCentroidsOtoMFlag)||(TRUE==theDoSampleLocatorFlag))
 				{
-					centroidsOutputDir <- checkCreateDir(theOutputDir, batchTypeName, paste("OneToMany", batchId, sep="-"), thePcaCentroidsBase)
+					centroidsOutputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), paste("OneToMany", batchId, sep="-")), thePcaCentroidsBase)
 				}
 				plainOutputDir <- ""
 				if(TRUE==theDoPlainOtoMFlag)
 				{
-					plainOutputDir <- checkCreateDir(theOutputDir, batchTypeName, paste("OneToMany", batchId, sep="-"), thePcaPlainBase)
+					plainOutputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), paste("OneToMany", batchId, sep="-")), thePcaPlainBase)
 				}
 				pcaTitle <- paste(batchIdentifiersWithCount, sep="", collapse=" versus ")
 				dscAllResults <- NULL
@@ -1219,7 +1219,7 @@ makePcaFileName_TXT<-function(theDir, theAllOrBatch, theComponentA, theComponent
 writePcaDataFilesForDataset<-function(theOutputDir, theDSCPermutations, thePca, theDscAllResults, theCompPairList)
 {
 	logDebug("write writePcaDataFilesForDataset")
-	checkCreateDir(theOutputDir)
+  checkDirForCreation(theOutputDir)
 	writePCAValuesTSV(theOutputDir, thePca, theCompPairList)
 	writePCAAnnotations(theOutputDir, theDSCPermutations, thePca, theDscAllResults, NULL, NULL, NULL )
 }
@@ -1255,7 +1255,7 @@ writePCAValuesTSV <- function(theOutputDir, thePca, theCompPairList)
 	### The top row is PC1	PC2	PC3 PC$ and so on. The second row is the fractional variance value.
 	### PC1	PC2	PC3	PC4
 	logDebug("writePCAValuesTSV outputFile")
-	outputFile <- file.path(theOutputDir, "PCAValues.tsv")
+	outputFile <- cleanFilePath(theOutputDir, "PCAValues.tsv")
 	logDebug("writePCAValuesTSV components")
 	components <- order(unique(theCompPairList))
 	logDebug("writePCAValuesTSV myDataFrame")
@@ -1275,7 +1275,7 @@ writePCAValuesTSV <- function(theOutputDir, thePca, theCompPairList)
 writePCAAnnotations <- function(theOutputDir, thePerms, thePca, theDscAllResults, theDscResults, theComponentA, theComponentB )
 {
 	logDebug("writePCAAnnotations")
-	outputFile <- file.path(theOutputDir, "PCAAnnotations.tsv")
+	outputFile <- cleanFilePath(theOutputDir, "PCAAnnotations.tsv")
 	##############################################
 	### File for annotations related to a particular diagram. (DSC values for the diagram, that is, overall DSC values can go here.)
 	### PCADiagramAnnotations.tsv is a tab-delimited file containing two columns, Annotation and Value.
@@ -1337,7 +1337,7 @@ writePCAAnnotations <- function(theOutputDir, thePerms, thePca, theDscAllResults
 
 openAndWriteIssuesLogFile<-function(theOutputDir)
 {
-	myFile <- file(file.path(theOutputDir, "error.log"), "w+")
+	myFile <- file(cleanFilePath(theOutputDir, "error.log"), "w+")
 	on.exit(close(myFile))
 	cat("PCA not calculated or number of components calculated less than number requested\n", file=myFile, append=TRUE)
 }

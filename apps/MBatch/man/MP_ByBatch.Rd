@@ -14,7 +14,7 @@ MP_ByBatch(theBeaData, theBatchType, thePath = NULL, theWriteToFile = FALSE)
   \item{theBatchType}{A string identifying the batch type to correct.}
   \item{thePath}{Output path for any files.}
   \item{theWriteToFile}{TRUE to write the corrected data to file and return
-  the file pathname instead of the corrected matrix.}
+  the cleanFilePathname instead of the corrected matrix.}
 }
 \details{
 Perform Median Polish correction by Batch.

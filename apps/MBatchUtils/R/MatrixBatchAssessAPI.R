@@ -21,7 +21,7 @@ mutBatchSingle <- function(theDataFile, theBatchFile, theTitle, theOutputDir,
   message("pValueVector=", paste(pValueVector, collapse=" "))
   print(pValueVector)
   message("theOutputDir=", theOutputDir)
-  theOutputDir <- file.path(theOutputDir, "Discrete")
+  theOutputDir <- cleanFilePath(theOutputDir, "Discrete")
   message("updated theOutputDir=", theOutputDir)
   ####################
   # add p-values to result list
@@ -38,12 +38,12 @@ mutBatchSingle <- function(theDataFile, theBatchFile, theTitle, theOutputDir,
     # collect the batch names found as significant by a Dunn's test
     collectBatches <- collectLoggedBatches(resultList, myBatchType)
     # subdir named for batch type and count type
-    outdir <- file.path(theOutputDir, myBatchType)
+    outdir <- cleanFilePath(theOutputDir, myBatchType)
     # make sure sub-dir exists
     dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
     # output for Kruval - name the file "FullMutCounts_<batch-type>_<mutation-type>_Diagram.PNG"
-    outfile <- file.path(outdir, "KW_Dunns_Diagram.PNG")
-    outfileTSV <- file.path(outdir, "KW_Dunns_Diagram.tsv")
+    outfile <- cleanFilePath(outdir, "KW_Dunns_Diagram.PNG")
+    outfileTSV <- cleanFilePath(outdir, "KW_Dunns_Diagram.tsv")
     # add names from title vector to logged p-values
     names(loggedPvalues) <- titleVector
     # if Dunn's test returned batch names, put them into parens to put in diagram otherwise, put an empty string

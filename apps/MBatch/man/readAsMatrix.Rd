@@ -30,7 +30,8 @@ The matrix read in.
 ## The function is currently defined as
 #function (theFile, thePar = "-Xmx2000m")
 #{
-#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar", package="MBatch")))
+#    myJavaJars <- getJarsFromDir(dirname(system.file("ReadRJava", "ReadRJava.jar",
+#                                   package="MBatch")))
 #    logDebug("readAsMatrix - thePar ", thePar)
 #    logDebug("readAsMatrix - theFile ", theFile)
 #    logDebug("readAsMatrix - Calling .jinit ", myJavaJars)

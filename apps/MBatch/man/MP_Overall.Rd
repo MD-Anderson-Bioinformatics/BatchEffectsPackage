@@ -13,7 +13,7 @@ MP_Overall(theBeaData, thePath = NULL, theWriteToFile = FALSE)
   \item{theBeaData}{An instance of BEA_DATA \code{\link{BEA_DATA-class}}}
   \item{thePath}{Output path for any files.}
   \item{theWriteToFile}{TRUE to write the corrected data to file and return
-  the file pathname instead of the corrected matrix.}
+  the cleanFilePathname instead of the corrected matrix.}
 }
 \details{
 Perform Median Polish correction overall.

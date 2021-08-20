@@ -27,7 +27,7 @@ The configuration file used for this example is:
   require(MBatchUtils)
   # set the paths
   inputDir <- getTestInputDir()
-  theConfigFile=file.path(inputDir, "vignettes", "MBatchConfig.tsv")
+  theConfigFile=cleanFilePath(cleanFilePath(inputDir, "vignettes"), "MBatchConfig.tsv")
   cat(readLines(theConfigFile), sep = '\n')
 ```
 
@@ -163,19 +163,19 @@ Create a ZIP file usable with the stand-alone Batch Effects Viewer, to use dynam
   # set the paths
   baseTestDir=getTestInputDir()
   baseOutputDir=getTestOutputDir()
-  theOrigConfigFile=file.path(baseTestDir, "vignettes", "MBatchConfig.tsv")
-  theOrigGeneFile=file.path(baseTestDir, "vignettes", "matrix_data.tsv")
-  theOrigBatchFile=file.path(baseTestDir, "vignettes", "batches.tsv")
-  theOutputDir=file.path(baseOutputDir, "ZIP_Archive")
-  theOutputDirMBatch=file.path(theOutputDir, "ZIP-RESULTS")
-  theOutputDirData=file.path(theOutputDir, "ZIP-DATA")
-  jarDir=file.path(baseTestDir, "exe")
+  theOrigConfigFile=cleanFilePath(cleanFilePath(baseTestDir, "vignettes"), "MBatchConfig.tsv")
+  theOrigGeneFile=cleanFilePath(cleanFilePath(baseTestDir, "vignettes"), "matrix_data.tsv")
+  theOrigBatchFile=cleanFilePath(cleanFilePath(baseTestDir, "vignettes"), "batches.tsv")
+  theOutputDir=cleanFilePath(baseOutputDir, "ZIP_Archive")
+  theOutputDirMBatch=cleanFilePath(theOutputDir, "ZIP-RESULTS")
+  theOutputDirData=cleanFilePath(theOutputDir, "ZIP-DATA")
+  jarDir=cleanFilePath(baseTestDir, "exe")
   javaExe=getJava()
-  jarFile=file.path(jarDir, "ShaidyMapGen.jar")
-  jsFile=file.path(jarDir, "ngchmWidget-min.js")
-  theDestConfigFile=file.path(theOutputDirMBatch, "MBatchConfig.tsv")
-  theDestGeneFile=file.path(theOutputDirData, "matrix_data.tsv")
-  theDestBatchFile=file.path(theOutputDirData, "batches.tsv")
+  jarFile=cleanFilePath(jarDir, "ShaidyMapGen.jar")
+  jsFile=cleanFilePath(jarDir, "ngchmWidget-min.js")
+  theDestConfigFile=cleanFilePath(theOutputDirMBatch, "MBatchConfig.tsv")
+  theDestGeneFile=cleanFilePath(theOutputDirData, "matrix_data.tsv")
+  theDestBatchFile=cleanFilePath(theOutputDirData, "batches.tsv")
   ####
   # make sure the output dir exists and is empty
   unlink(theOutputDir, recursive=TRUE)

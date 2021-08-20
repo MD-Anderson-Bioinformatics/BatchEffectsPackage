@@ -15,10 +15,10 @@ inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
 compareDir <- getTestCompareDir()
 
-theGeneFile=file.path(inputDir, "matrix_data-Tumor.tsv")
-theBatchFile=file.path(inputDir, "batches-Tumor.tsv")
-theOutputDir=file.path(outputDir, "HierarchicalClustering_Structures")
-theCompareFile=file.path(compareDir, "HierarchicalClustering_Structures.tsv")
+theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
+theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
+theOutputDir=cleanFilePath(outputDir, "HierarchicalClustering_Structures")
+theCompareFile=cleanFilePath(compareDir, "HierarchicalClustering_Structures.tsv")
 theRandomSeed=314
 #myRandomSeed <- 314
 #myTestSeed <- 42
@@ -44,7 +44,7 @@ if (!is.null(inputDir))
   HierarchicalClustering_Structures(theData=myData,
                                     theTitle="Test PCA",
                                     theOutputPath=theOutputDir)
-  correctedMatrix <- readAsGenericMatrix(file.path(theOutputDir, "HCData.tsv"))
+  correctedMatrix <- readAsGenericMatrix(cleanFilePath(theOutputDir, "HCData.tsv"))
   compareMatrix <- readAsGenericMatrix(theCompareFile)
   message("correctedMatrix")
   print(dim(correctedMatrix))
