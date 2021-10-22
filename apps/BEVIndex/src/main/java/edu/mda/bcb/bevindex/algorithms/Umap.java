@@ -46,7 +46,6 @@ public class Umap
 				batchType.entry_label = diaDir.getName();
 				batchType.diagram_type = "umap";
 				batchType.umap_batches = "/UMAP/" + diaDir.getName() + "/UMAP_Data-batc.tsv";
-				batchType.umap_samples = "/UMAP/" + diaDir.getName() + "/UMAP_Data-samp.tsv";
 				batchType.umap_umapdat = "/UMAP/" + diaDir.getName() + "/UMAP_Data-umap.tsv";
 				File imageFile = new File(diaDir, "UMAP_Diagram.png");
 				File legendFile = new File(diaDir, "UMAP_Legend.png");

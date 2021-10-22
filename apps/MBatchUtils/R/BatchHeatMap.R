@@ -44,7 +44,8 @@ buildBatchHeatMap_Structures <- function(theMatrixData, theBatchData, theTitle, 
                                          theShaidyMapGen,
                                          theNgchmWidgetJs,
                                          theShaidyMapGenJava="/usr/bin/java",
-                                         theShaidyMapGenArgs="-Xmx16G")
+                                         theShaidyMapGenArgs="-Xmx16G",
+                                         theEncoding="en_US.UTF-8")
 {
   # need to do this, since NGCHM uses title as filename, so slashed become directories.
   theTitle <- compressIntoFilename(theTitle)
@@ -103,11 +104,13 @@ buildBatchHeatMap_Structures <- function(theMatrixData, theBatchData, theTitle, 
       message(length(myData))
       names(myData) <- as.vector(unlist(theBatchData["Sample"]))
       message("covariate length ", length(myData))
-      covar <- chmNewCovariate(myCovariate, myData)
+      covar <- chmNewCovariate(myCovariate, myData, chmNewColorMap(unique(sort(myData))))
       barvar <- chmNewCovariateBar(covar, thickness=as.integer(20))
       chm <- chmAddCovariateBar(chm, 'column', barvar)
     }
   }
+  message("Set Environment LC_CTYPE=en_US.UTF-8")
+  Sys.setenv(LC_CTYPE=theEncoding)
   message("chmExportToHTML")
   htmlNgchm <- paste(theOutputFile, ".html", sep="")
   message(htmlNgchm)
@@ -283,7 +286,8 @@ buildBatchHeatMapFromHC_Structures <- function(theMatrixData, theBatchData,
                                                theShaidyMapGen,
                                                theNgchmWidgetJs,
                                                theShaidyMapGenJava="/usr/bin/java",
-                                               theShaidyMapGenArgs="-Xmx16G")
+                                               theShaidyMapGenArgs="-Xmx16G",
+                                               theEncoding="en_US.UTF-8")
 {
   message(mbatchUtilVersion())
   # need to do this, since NGCHM uses title as filename, so slashed become directories.
@@ -420,11 +424,13 @@ buildBatchHeatMapFromHC_Structures <- function(theMatrixData, theBatchData,
       names(myData) <- as.vector(unlist(theBatchData["Sample"]))
       message("covariate length ", length(myData))
       #print(myData)
-      covar <- chmNewCovariate(myCovariate, myData)
+      covar <- chmNewCovariate(myCovariate, myData, chmNewColorMap(unique(sort(myData))))
       barvar <- chmNewCovariateBar(covar, thickness=as.integer(20))
       chm <- chmAddCovariateBar(chm, 'column', barvar)
     }
   }
+  message("Set Environment LC_CTYPE=", theEncoding)
+  Sys.setenv(LC_CTYPE=theEncoding)
   message("chmExportToHTML")
   htmlNgchm <- paste(theOutputFile, ".html", sep="")
   message(htmlNgchm)

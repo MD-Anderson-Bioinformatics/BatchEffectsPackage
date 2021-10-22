@@ -74,7 +74,8 @@ readAsGenericMatrix <- function(theFile)
 		}
 	})
 	myScan <- scan(file=theFile, skip=1, what=whatList, quote="",
-								 sep="\t", na.strings="", flush=TRUE, fill=FALSE, multi.line=FALSE)
+								 sep="\t", na.strings="", flush=TRUE, fill=FALSE, multi.line=FALSE,
+								 allowEscapes=TRUE)
 	genes <- as.vector(unlist(myScan[1]))
 	data <- as.vector(unlist(myScan[2:length(myScan)]))
 	temp<-matrixWithIssues(data,
@@ -102,7 +103,8 @@ writeAsGenericMatrixNoRows <- function(theFile, theMatrix)
 readAsGenericDataframe <- function(theFile, theNaString=NULL, theUnknownString="Unknown")
 {
 	df <- read.csv(theFile, header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE,
-	               stringsAsFactors=FALSE, colClasses="character", na.strings=theNaString)
+	               stringsAsFactors=FALSE, colClasses="character", na.strings=theNaString,
+	               allowEscapes=TRUE)
 	df[df==""] <- theUnknownString
   return(df)
 }
