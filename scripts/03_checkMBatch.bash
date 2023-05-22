@@ -7,7 +7,20 @@ BASE_DIR=$1
 echo "move to app dir"
 cd ${BASE_DIR}/apps
 
+# conda is a function, which is not propagated to bash scripts
+# need to activate this so R can use it
+echo "activate conda itself"
+source /home/bcbuser/conda/etc/profile.d/conda.sh
+
+echo "cd PyMBatch"
+cd PyMBatch
+echo "conda activate gendev"
+conda activate gendev
+echo "install PyMBatch for MBatch R build"
+pip install .
+
 echo "build for check MBatch"
+cd ..
 R CMD build MBatch
 
 echo "check MBatch"

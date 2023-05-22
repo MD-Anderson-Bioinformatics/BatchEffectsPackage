@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -9,32 +9,66 @@
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
+
+openAndWriteIssuesLogFileSuperClust<-function(theOutputDir)
+{
+  myFile <- file(cleanFilePath(theOutputDir, "error.log"), "w+")
+  on.exit(close(myFile))
+  cat("Unable to Generate Supervised Clustering Heatmap\n", file=myFile, append=TRUE)
+}
+
 ###########################################################################################
 ###########################################################################################
 
 createBatchEffectsOutput_SupervisedClustering_batches<-function(theMatrixGeneData, theDataframeBatchData,
-																																theTitle, theOutputPath)
+                                                                theDataVersion, theTestVersion,
+																																theTitle, theOutputDir)
 {
-	myOutputPath <- cleanFilePath(theOutputPath, "Batches")
-	checkDirForCreation(myOutputPath)
-	for(batchTypeIndex in c(2:length(theDataframeBatchData)))
+  lastPath <- ""
+	tryCatch({
+	  for(batchTypeIndex in c(2:length(theDataframeBatchData)))
+  	{
+  		### compile data and information for display
+  		batchTypeName <- names(theDataframeBatchData)[batchTypeIndex]
+  		myOutputPath <- cleanFilePath(theOutputDir, batchTypeName)
+  		myOutputPath <- addVersionsIfNeeded(myOutputPath, theDataVersion, theTestVersion)
+  		lastPath <- myOutputPath
+  		checkDirForCreation(myOutputPath)
+  		# minor slow down, but needs to be here so path and error.log work
+  		checkIfTestError()
+  		batchIdsForSamples <- as.character(as.vector(unlist(theDataframeBatchData[batchTypeIndex])))
+  		logInfo("createBatchEffectsOutput_SupervisedClustering_batches - batchTypeName = ", batchTypeName)
+  		color <- beaRainbow(length(unique(batchIdsForSamples)), v=0.7)
+  		title <- paste(theTitle, "SupervisedClust", batchTypeName, sep=" ")
+  		diagramFilename = createDirPlusFilename(myOutputPath, "SupervisedClust_Diagram-", batchTypeName, ".png")
+  		legendFilename = createDirPlusFilename(myOutputPath, "SupervisedClust_Legend-", batchTypeName, ".png")
+  		makeBiasClust(theMatrixGeneData, theDataframeBatchData, batchTypeName, color, title, diagramFilename)
+  		supervisedClustLegend(color, batchIdsForSamples, sort(unique(batchIdsForSamples)), batchTypeName, legendFilename)
+	  }
+	},
+	warning=function(e)
 	{
-		### compile data and information for display
-		batchTypeName <- names(theDataframeBatchData)[batchTypeIndex]
-		batchIdsForSamples <- as.character(as.vector(unlist(theDataframeBatchData[batchTypeIndex])))
-		logInfo("createBatchEffectsOutput_SupervisedClustering_batches - batchTypeName = ", batchTypeName)
-		color <- beaRainbow(length(unique(batchIdsForSamples)), v=0.7)
-		title <- paste(theTitle, "SupervisedClust", batchTypeName, sep=" ")
-		diagramFilename = createDirPlusFilename(myOutputPath, "SupervisedClust_Diagram-", batchTypeName, ".png")
-		legendFilename = createDirPlusFilename(myOutputPath, "SupervisedClust_Legend-", batchTypeName, ".png")
-		makeBiasClust(theMatrixGeneData, theDataframeBatchData, batchTypeName, color, title, diagramFilename)
-		supervisedClustLegend(color, batchIdsForSamples, sort(unique(batchIdsForSamples)), batchTypeName, legendFilename)
-	}
+	  logWarn("1 Unable to generate SupervisedClustering_batches")
+	  logDebug(lastPath)
+	  unlink(lastPath, recursive = TRUE, force = TRUE)
+	  dir.create(lastPath, showWarnings=FALSE, recursive=TRUE)
+	  openAndWriteIssuesLogFileSuperClust(lastPath)
+	},
+	error=function(e)
+	{
+	  logWarn("2 Unable to generate SupervisedClustering_batches")
+	  logDebug(lastPath)
+	  unlink(lastPath, recursive = TRUE, force = TRUE)
+	  dir.create(lastPath, showWarnings=FALSE, recursive=TRUE)
+	  openAndWriteIssuesLogFileSuperClust(lastPath)
+	})
 }
 
-createBatchEffectsOutput_SupervisedClustering_pairs<-function(theMatrixGeneData, theDataframeBatchData,
-																															thePairList, theTitle, theOutputPath)
+createBatchEffectsOutput_SupervisedClustering_pairs<-function(theMatrixGeneData, theDataframeBatchData, thePairList,
+																															theDataVersion, theTestVersion,
+																															theTitle, theOutputDir)
 {
+  lastPath <- ""
 	for(indexA in seq(1, length(thePairList), 2))
 	{
 		indexB <- indexA + 1
@@ -46,17 +80,36 @@ createBatchEffectsOutput_SupervisedClustering_pairs<-function(theMatrixGeneData,
 		combinedName = paste(batchTypeNameA, "-", batchTypeNameB, sep="")
 		logInfo("createBatchEffectsOutput_SupervisedClustering_pairs - batchTypeNameA = ", batchTypeNameA)
 		logInfo("createBatchEffectsOutput_SupervisedClustering_pairs - batchTypeNameB = ", batchTypeNameB)
-		myOutputPath <- cleanFilePath(theOutputPath, combinedName)
+		myOutputPath <- cleanFilePath(theOutputDir, combinedName)
+		myOutputPath <- addVersionsIfNeeded(myOutputPath, theDataVersion, theTestVersion)
 		checkDirForCreation(myOutputPath)
-		color <- beaRainbow(max(length(unique(batchIdsForSamplesA)),length(unique(batchIdsForSamplesB))), v=0.7)
-		title <- paste(theTitle, combinedName, sep=" ")
-		diagramFilename = createDirPlusFilename(myOutputPath, "SupervisedClust_Diagram.png")
-		legendFilenameA = createDirPlusFilename(myOutputPath, "SupervisedClust_Legend", "-", batchTypeNameA,".png")
-		legendFilenameB = createDirPlusFilename(myOutputPath, "SupervisedClust_Legend", "-", batchTypeNameB,".png")
-		success <- makeBiasClust(theMatrixGeneData, theDataframeBatchData, batchTypeNameA, color, title,
-									diagramFilename, theMore=batchTypeNameB)
-		supervisedClustLegend(color, batchIdsForSamplesA, sort(unique(batchIdsForSamplesA)), batchTypeNameA, legendFilenameA)
-		supervisedClustLegend(color, batchIdsForSamplesB, sort(unique(batchIdsForSamplesB)), batchTypeNameB, legendFilenameB)
+		lastPath <- myOutputPath
+		tryCatch({
+		  checkIfTestError()
+  		color <- beaRainbow(max(length(unique(batchIdsForSamplesA)),length(unique(batchIdsForSamplesB))), v=0.7)
+  		title <- paste(theTitle, combinedName, sep=" ")
+  		diagramFilename = createDirPlusFilename(myOutputPath, "SupervisedClust_Diagram.png")
+  		legendFilenameA = createDirPlusFilename(myOutputPath, "SupervisedClust_Legend", "-", batchTypeNameA,".png")
+  		legendFilenameB = createDirPlusFilename(myOutputPath, "SupervisedClust_Legend", "-", batchTypeNameB,".png")
+  		success <- makeBiasClust(theMatrixGeneData, theDataframeBatchData, batchTypeNameA, color, title,
+  									diagramFilename, theMore=batchTypeNameB)
+  		supervisedClustLegend(color, batchIdsForSamplesA, sort(unique(batchIdsForSamplesA)), batchTypeNameA, legendFilenameA)
+  		supervisedClustLegend(color, batchIdsForSamplesB, sort(unique(batchIdsForSamplesB)), batchTypeNameB, legendFilenameB)
+		},
+		warning=function(e)
+		{
+		  logWarn("1 Unable to generate SupervisedClustering_pairs")
+		  unlink(lastPath, recursive = TRUE, force = TRUE)
+		  dir.create(lastPath, showWarnings=FALSE, recursive=TRUE)
+		  openAndWriteIssuesLogFileSuperClust(lastPath)
+		},
+		error=function(e)
+		{
+		  logWarn("2 Unable to generate SupervisedClustering_pairs")
+		  unlink(lastPath, recursive = TRUE, force = TRUE)
+		  dir.create(lastPath, showWarnings=FALSE, recursive=TRUE)
+		  openAndWriteIssuesLogFileSuperClust(lastPath)
+		})
 	}
 }
 

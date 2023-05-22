@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -17,16 +17,16 @@ if (!is.null(getTestOutputDir()))
   ########################################################
   # writes to input directory, so copy files to output
   sourceDir=cleanFilePath(getTestInputDir(), "configout")
-  outDir=cleanFilePath(cleanFilePath(getTestOutputDir(), "archiveout"), "2018-07-11-1200")
-  unlink(outDir)
+  outDir=cleanFilePath(getTestOutputDir(), "archiveout")
+  theOutputDirResults=cleanFilePath(outDir, "ZIP-RESULTS")
+  theOutputDirData=cleanFilePath(outDir, "ZIP-DATA")
+  unlink(outDir, recursive = TRUE)
   dir.create(outDir, recursive=TRUE, showWarnings=FALSE)
-  #file.copy(cleanFilePath(cleanFilePath(getTestInputDir(), "config"), "MBatchConfig.tsv"), cleanFilePath(outDir, "MBatchConfig.tsv"))
-  #buildSingleArchive theMbatchID, theResultDir, theDataDir, theZipDir
-  theMbatchID <- "tmp-test-id"
-  theResultDir <- cleanFilePath(sourceDir, "2018-07-11-1200")
-  theDataDir <- NULL
-  theZipDir <- outDir
-  buildSingleArchive(theMbatchID, theResultDir, theDataDir, theZipDir)
+  dir.create(theOutputDirResults, recursive=TRUE, showWarnings=FALSE)
+  dir.create(theOutputDirData, recursive=TRUE, showWarnings=FALSE)
+  file.copy(cleanFilePath(sourceDir, "ZIP-RESULTS"), outDir, recursive=TRUE)
+  file.copy(cleanFilePath(sourceDir, "ZIP-DATA"), outDir, recursive=TRUE)
+  buildSingleArchive(theOutputDirResults, theOutputDirData, outDir)
   TRUE
 } else {
   message("No test data. Skip test.")

@@ -14,8 +14,6 @@ With the package loaded, ?methodname will get the help for a method and class?cl
 **** Cairo Prerequisites (OS level)
 *********************************************
 
-This should already be setup on DQS and HPC servers.
-
 The R Package Cairo (http://www.rforge.net/Cairo/) is dependent on the Cairo Graphics Library.
 
 Please check http://www.cairographics.org/ for Windows and Linux prerequisites.
@@ -29,26 +27,12 @@ When installing the Cairo R package, if the complaint is about Cairo.h, you need
 We compile for R/4+
 
 *******************************************
-**** rJava (R Package) and Java Setup for R
+**** Python environment
 *******************************************
 
-MBatch requires Java 8 or higher.
+MBatch requires a Python environment
 
-The javareconf step below is not needed on DQS servers.
-
-On Linux only, to configure rJava for Java 1.8:
-
-Install Java 8
-Setup environment path same as it will be when R and Java 8 are used.
-"R CMD javareconf" command as root (or whoever installed/owns the R install).
-Install the rJava package as the R install owner. (See below.)
-
-rJava can be tested with:
-
-library(rJava)
-.jinit()
-J("java.lang.System")$getProperty("java.version")
-
+See main README.md
 
 *********************************************
 **** Installing Other Required Packages (R Command Line)

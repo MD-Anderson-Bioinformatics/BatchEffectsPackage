@@ -11,7 +11,9 @@ EBNPlus_Correction_Structures(theDataMatrix1, theDataMatrix2,
 theBatchId1, theBatchId2,
 theEBNP_BatchWithZero, theEBNP_FixDataSet, theEBNP_CorrectForZero,
 theEBNP_ParametricPriorsFlag,
-theSeed = NULL, theEBNP_PriorPlotsFile=NULL, theEBNP_MinSampleNum = 3,
+theSeed = NULL, theOutputDir=NULL,
+theDataVersion=NULL, theTestVersion=NULL,
+thePriorFile=NULL, theEBNP_MinSampleNum = 3,
 theEBNP_AddData1Rows = FALSE, theEBNP_AddData2Rows = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -35,9 +37,14 @@ theEBNP_AddData1Rows = FALSE, theEBNP_AddData2Rows = FALSE)
   for corrections (TRUE or FALSE)}
   \item{theSeed}{NULL or a seed to use. Defaults to NULL.
   This is passed to the standard R set.seed function.}
-  \item{theEBNP_PriorPlotsFile}{Defaults to NULL and does not create PNG.
-  Non-NULL should be the full path and filename for where
-  to create the prior plots PNG.}
+  \item{theOutputDir}{Defaults to NULL and does not create PNG.
+  Non-NULL path for where to create the prior plots PNG.}
+  \item{theDataVersion}{Object of class \code{"character"} Version of the data prefaced
+	with DATA_, such as DATA_2022-09-09-1600. Use empty string to not include. }
+	\item{theTestVersion}{Object of class \code{"character"} Version of the test prefaced
+	with TEST_, such as TEST_2022-10-10-1300. Use empty string to not include. }
+	\item{thePriorFile}{Defaults to NULL and does not create PNG.
+  Filename for prior plots PNG.}
   \item{theEBNP_MinSampleNum}{Defaults to 3. Any row (gene) with less than
   this number of samples is dropped.}
   \item{theEBNP_AddData1Rows}{Defaults to FALSE. TRUE indicates rows in data

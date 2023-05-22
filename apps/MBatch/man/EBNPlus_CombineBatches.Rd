@@ -26,6 +26,20 @@ theEBNP_Data2BatchId, theBarcodeTrimFunction = NULL, theSep=".")
   This defaults to ".""}
 }
 \details{
+Use EBNPlus_Correction_Structures for Corrections
+
+Use the EBNPlus_Correction_Structures function to performed 
+corrections.
+
+For most users, the function EBNPlus_Correction_Structures 
+is what you want to use for processing. It is designed 
+specifically to do corrections. The EBNPlus_TrainAndValidate 
+functions are for researchers interested in the internal 
+workings of the EBNPlus algorithm.
+
+See the tests/EBNPlus_Correction_Structures.R or 
+tests/EBNPlus_Correction_Files.R for details.
+
 Combine the two data.frames.
 Add the new "batch names" at batches for the two data sets and the EBNPlus batch type.
 }

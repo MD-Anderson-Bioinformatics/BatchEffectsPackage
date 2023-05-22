@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -87,8 +87,9 @@ mutationBatchAssess <- function(theTypeCountDir, theOutputDir, theJavaArgs=c("-X
 				myBatchFile <- cleanFilePath(dirname(myDataFile), gsub(x=basename(myDataFile), pattern=paste("HG.*", myCountType, sep=""), replacement="batches"))
 				# build the title based on file names
 				myTitle <- gsub(x=basename(myDataFile), pattern=paste("_", myCountType, ".tsv", sep=""), fixed=TRUE, replacement="")
+				myMBatchData <- mbatchLoadFiles(myDataFile, myBatchFile)
 				# get vector of p-values (and possible Dunn's batch values) for this data (see resultList description for details)
-				pValueVector <- loadAndRunForKruskal(myDataFile, myBatchFile, theBatchTypes, thePvalueCutoff, theZScoreCutoff)
+				pValueVector <- loadAndRunForKruskal(myMBatchData, theBatchTypes, thePvalueCutoff, theZScoreCutoff)
 				# add p-values to result list
 				resultList <- c(resultList, list(pValueVector))
 				# add title to title vector
@@ -1060,10 +1061,9 @@ dunnTestBatches <- function(dataVector, batchValues, thePvalueCutoff, theZScoreC
 	batchesWithEffects
 }
 
-loadAndRunForKruskal <- function(theMatrixFile, theBatchesFile, theBatchTypes, thePvalueCutoff, theZScoreCutoff)
+loadAndRunForKruskal <- function(theMBatchData, theBatchTypes, thePvalueCutoff, theZScoreCutoff)
 {
-	# theMatrixFile - full path to matrix data file
-	# theBatchesFile - full path to corresponding batch file
+	# theMBatchData - matrix and batch information
 	# theBatchTypes=c("BatchId", "PlateId", "ShipDate", "TSS") - Batch types to check (correspond to columns for batch files)
 	# thePvalueCutoff=.00001 - P-value to use for cutoff for "significant" difference in Kruskal-Wallis and Dunn's tests
 	# theZScoreCutoff=1.96 - cut off for Dunn's test for "significant" confidence interval
@@ -1075,14 +1075,11 @@ loadAndRunForKruskal <- function(theMatrixFile, theBatchesFile, theBatchTypes, t
 	#
 	# This function does Kruskal-Wallis Test by Rank for each batch type on the given data files.
 	# If Kruskal-Wallis gives a p-value less than the given cutoff, a Dunn's Test is performed to find signifant batches
-	message("read data")
-	message(theMatrixFile)
-	message(theBatchesFile)
 	################################
-	# read the Matrix Data File
-	dataMatrix <- readMatrixScore(theMatrixFile)
-	# read the Dataframe Batch File
-	batchDF <- readDataframeScore(theBatchesFile)
+	# Matrix Data
+	dataMatrix <- theMBatchData@mData
+	# Dataframe Batch
+	batchDF <- theMBatchData@mBatches
 	# print original matrix and df sizes
 	print(dim(dataMatrix))
 	print(dim(batchDF))
@@ -1259,7 +1256,6 @@ runMBatchForMutCounts <- function(theDataMatrix, theBatchesDf, theOutputDir, the
 															theDSCPermutations=thePermutations,
 															theDSCThreads=thePermutationThreads,
 															theMinBatchSize=5,
-															theJavaParameters=theJavaArgs,
 															theSeed=314,
 															theMaxGeneCount=nrow(theDataObject@mData))
 	}
@@ -1274,7 +1270,7 @@ runMBatchForMutCounts <- function(theDataMatrix, theBatchesDf, theOutputDir, the
 	maxBoxPlotGenes <- bpGene
 	print(maxBoxPlotGenes)
 	#callMBatch_BoxplotAllSamplesData_Structures(theOutputDir, theDataObject, theTitle,
-	#																						theJavaParameters="-Xms12000m", theMaxGeneCount=maxBoxPlotGenes)
+	#																						theMaxGeneCount=maxBoxPlotGenes)
 	#callMBatch_BoxplotAllSamplesRLE_Structures(theOutputDir, theDataObject, theTitle,
 	callMBatch_BoxplotGroup_Structures_MBA(theOutputDir, theDataObject, theTitle,
 																		 theMaxGeneCount=maxBoxPlotGenes,
@@ -1296,7 +1292,7 @@ callMBatch_SupervisedClustering_Structures_MBA <- function(theOutputDir, theData
 	# and keeping any other defaults
 	SupervisedClustering_Batches_Structures(theData=theDataObject,
 																					theTitle=theTitle,
-																					theOutputPath=outdir,
+																					theOutputDir=outdir,
 																					theBatchTypeAndValuePairsToRemove=NULL,
 																					theBatchTypeAndValuePairsToKeep=NULL)
 }
@@ -1309,7 +1305,7 @@ callMBatch_HierarchicalClustering_Structures_MBA <- function(theOutputDir, theDa
 	# here, we take all the defaults to hierarchical clustering, passing a title and an output path
 	HierarchicalClustering_Structures(theData=theDataObject,
 																		theTitle=theTitle,
-																		theOutputPath=outdir)
+																		theOutputDir=outdir)
 }
 
 callMBatch_PCA_Structures_MBA <- function(theOutputDir, theDataObject, theTitle,
@@ -1317,7 +1313,6 @@ callMBatch_PCA_Structures_MBA <- function(theOutputDir, theDataObject, theTitle,
 																			theDSCPermutations=1000,
 																			theDSCThreads=1,
 																			theMinBatchSize=2,
-																			theJavaParameters="-Xms2000m",
 																			theSeed=314,
 																			theMaxGeneCount=10000)
 {
@@ -1329,7 +1324,7 @@ callMBatch_PCA_Structures_MBA <- function(theOutputDir, theDataObject, theTitle,
 	# and keeping any other defaults
 	PCA_Regular_Structures(theData=theDataObject,
 												 theTitle=theTitle,
-												 theOutputPath=outdir,
+												 theOutputDir=outdir,
 												 theBatchTypeAndValuePairsToRemove=NULL,
 												 theBatchTypeAndValuePairsToKeep=NULL,
 												 theDoDscPermsFileFlag = TRUE,
@@ -1337,7 +1332,6 @@ callMBatch_PCA_Structures_MBA <- function(theOutputDir, theDataObject, theTitle,
 												 theDSCPermutations=theDSCPermutations,
 												 theDSCThreads=theDSCThreads,
 												 theMinBatchSize=theMinBatchSize,
-												 theJavaParameters=theJavaParameters,
 												 theSeed=theSeed,
 												 theMaxGeneCount=theMaxGeneCount)
 }
@@ -1356,7 +1350,7 @@ callMBatch_BoxplotGroup_Structures_MBA <- function(theOutputDir, theDataObject, 
 	# and keeping any other defaults
 	Boxplot_Group_Structures(theData=theDataObject,
 													 theTitle=theTitle,
-													 theOutputPath=outdir,
+													 theOutputDir=outdir,
 													 theBatchTypeAndValuePairsToRemove=NULL,
 													 theBatchTypeAndValuePairsToKeep=NULL,
 													 theListOfGroupBoxFunction=theFunction,

@@ -6,15 +6,16 @@
 A function to perform Box Plot RLE all data analysis from data in files.
 }
 \usage{
-Boxplot_AllSamplesRLE_Structures(theData, theTitle, theOutputPath,
+Boxplot_AllSamplesRLE_Structures(theData, theTitle, theOutputDir,
 theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
+theDataVersion, theTestVersion,
 theMaxGeneCount=20000)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{theData}{An instance of BEA_DATA \code{\link{BEA_DATA-class}}}
   \item{theTitle}{Object of class \code{"character"} Title to use in PNG files. }
-  \item{theOutputPath}{Object of class \code{"character"}
+  \item{theOutputDir}{Object of class \code{"character"}
   Directory in which to place output PNG files. }
   \item{theBatchTypeAndValuePairsToRemove}{Object of class \code{"list"} A list of vectors
   containing the batch type (or * for all types) and the value to remove. list() indicates
@@ -22,6 +23,10 @@ theMaxGeneCount=20000)
   \item{theBatchTypeAndValuePairsToKeep}{Object of class \code{"list"} A list of vectors
   containing the batch type (or * for all types) and a vector of the the value(s) to keep.
   list() indicates none while NULL will cause an error. }
+	\item{theDataVersion}{Object of class \code{"character"} Version of the data prefaced
+	with DATA_, such as DATA_2022-09-09-1600. Use empty string to not include. }
+	\item{theTestVersion}{Object of class \code{"character"} Version of the test prefaced
+	with TEST_, such as TEST_2022-10-10-1300. Use empty string to not include. }
   \item{theMaxGeneCount}{Integer giving maximum number of features (genes) to keep. Default is 20000. 0 means keep all.}
 }
 \details{

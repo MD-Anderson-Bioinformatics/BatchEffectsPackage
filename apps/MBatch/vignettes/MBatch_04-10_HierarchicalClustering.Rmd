@@ -1,0 +1,177 @@
+---
+title: "Using MBatch Assessments: HierarchicalClustering_Structures"
+author: "Tod Casasent"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+    number_sections: TRUE
+vignette: >
+  %\VignetteIndexEntry{Using MBatch Assessments: HierarchicalClustering_Structures}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+These instructions are aimed at people familiar with R and familiar with TCGA/GDC platforms and data types. They are intended to introduce the reader to producing the given assessment. These instructions will only rarely, if ever, touch on the appropriateness of the assessment algorithm or interpretation of output. See MBatch_01_InstallLinux for instructions on downloading test data.
+
+# Algorithm
+
+HierarchicalClustering_Structures is a function used to perform batch effects assessments using hierarchical clustering.
+
+# Output
+
+The primary output method for MBatch is to view results in the Batch Effects Website, described elsewhere. The PNG files are rough versions of the website output.
+
+Graphical output is a hierarchical clustering diagram, with a dendrogram and annotations at the bottom for batches and batch types.
+
+(See Batch Effects Viewer documentation for more details.)
+
+FIRST IMAGES
+
+
+# Usage
+
+HierarchicalClustering_Structures(theData, theTitle, theOutputDir,
+theDataVersion, theTestVersion,
+theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep)
+
+# Arguments
+
+##theData
+An instance of BEA_DATA.
+
+BEA_DATA objects can be created by calls of the form new("BEA_DATA", theData, theBatches, theCovariates). If you have no covariate data, use an empty data.frame created with data.frame()
+
+mData:
+Object of class "matrix" A matrix where the colnames are sample ids and the rownames are gene equivalents. All names should be strings, not factors.
+
+mBatches:
+Object of class "data.frame" A data.frame where the column "names" are batch types. The first batch "type" is "Sample". All names and values should be strings, not factors or numeric.
+
+mCovariates:
+Object of class "data.frame" A data.frame where the column "names" 
+are covariate types. The first covariate "type" is "Sample". All names 
+and values should be strings, not factors or numeric.
+
+##theTitle
+A string title to use in PNG files.
+
+##theOutputPath
+String giving directory in which to place output PNG files.
+
+##theDataVersion
+Object of class character. Version of the data prefaced with DATA_, 
+such as DATA_2022-09-09-1600. Use empty string to not include.
+
+##theTestVersion
+Object of class character. Version of the test prefaced with TEST_, 
+such as TEST_2022-10-10-1300. Use empty string to not include.
+
+##theBatchTypeAndValuePairsToRemove
+A list of vectors containing the batch type (or * for all types)
+and the value to remove. list() indicates none while NULL will cause an error.
+
+##theBatchTypeAndValuePairsToKeep
+A list of vectors containing the batch type (or * for all types)
+and a vector of the the value(s) to keep. list() indicates none while NULL
+will cause an error.
+
+# Example Call
+
+The following code is adapted from the tests/HierarchicalClustering_Structures file. Data used is from the testing data as per the MBatch_01_InstallLinux document. In the future, we plan to make the output from MBatch more user friendly, but currently, this produces the following output at the command line.
+
+This output can generally be skipped as very long and generally obscure.
+After the output is an explanation of files and directories created.
+
+```{r, echo=TRUE}
+{
+  require(MBatch)
+
+  logTransform <- function(mymatrix)
+  {
+    print("****Log transform data****")
+    # convert to vector
+    myVector <- as.vector(mymatrix)
+    # so we can remove all zero values
+    myVector <- myVector[myVector>0]
+    # so when we remove NAs and look for .1 quantile,
+    # we get a non-zero answer
+    qt <- quantile(myVector, .1, na.rm=TRUE)
+    # that gives us non-zero (and non-infinite) values
+    # within the transformed matrix
+    mymatrix <- log2(mymatrix+qt)
+    mymatrix
+  }
+  
+  inputDir <- getTestInputDir()
+  outputDir <- getTestOutputDir()
+  compareDir <- getTestCompareDir()
+
+  # set the paths
+  # data used here has already been log transformed previously
+  theGeneFile=cleanFilePath(inputDir, "AN002418_matrix_data.tsv")
+  theBatchFile=cleanFilePath(inputDir, "AN002418_batches.tsv")
+  theOutputDir=cleanFilePath(outputDir, "MWB_HierarchicalClustering_Structures")
+  theRandomSeed=314
+  
+  # make sure the output dir exists and is empty
+  unlink(theOutputDir, recursive=TRUE)
+  dir.create(theOutputDir, showWarnings=FALSE, recursive=TRUE)
+
+  # load the data and reduce the amount of data to reduce run time
+  myData <- mbatchLoadFiles(theGeneFile, theBatchFile)
+  myData@mData <- logTransform(myData@mData)
+  
+  # here, we take most defaults
+  HierarchicalClustering_Structures(myData, "Metabolomics WorkBench Test Data", theOutputDir, 
+                                    theDataVersion="DATA_2022-09-09-1600", 
+                                    theTestVersion="TEST_2022-10-10-1300",
+                                    theBatchTypeAndValuePairsToRemove=list(),
+                                    theBatchTypeAndValuePairsToKeep=list())
+}
+```
+
+# Example File Output
+
+The above code creates the following subdirectories and files. The subdirectories correspond to the run type were requested.
+
+```bash
+/output/MWB_HierarchicalClustering_Structures$ ls -l DATA_2022-09-09-1600/TEST_2022-10-10-1300/
+
+BatchData.tsv
+HCData_feature.tsv
+HCData.tsv
+HCOrder_feature.tsv
+HCOrder.tsv
+HierarchicalClustering_Diagram.png
+HierarchicalClustering_Legend-ALL.png
+HierarchicalClustering_Legend-time_point.png
+HierarchicalClustering_Legend-Treatment.Protocol.png
+uDend_feature.RData
+uDend.RData
+```
+
+##Files
+
+Example data may not match output from above.
+
+###Data TSV Files
+The TSV files are used by the hierarchical structure visualization code to dynamically build the diagram.
+
+###Data RData Files
+RData files used internally to re-use clustering results during pipeline runs.
+
+###Data PNG Files
+The PNG files are:
+HierarchicalClustering_Diagram.png - the actual diagram
+HierarchicalClustering_Legend-ALL.png - legend containing all batch types
+HierarchicalClustering_Legend-time_point.png - batch type specific legend
+HierarchicalClustering_Legend-Treatment.Protocol.png - batch type specific legend
+
+
+##Diagram
+
+Here is the diagram generated from this code.
+
+`r sprintf("![Hierarchical Clustering Output](%s)", cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(outputDir, "MWB_HierarchicalClustering_Structures"),"DATA_2022-09-09-1600"),"TEST_2022-10-10-1300"), "HierarchicalClustering_Diagram.png"))`

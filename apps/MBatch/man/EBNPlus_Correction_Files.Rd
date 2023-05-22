@@ -8,7 +8,8 @@ apply the normal TCGA Batch Effects Correction values to those files to
 correct the data into one dataset.
 }
 \usage{
-EBNPlus_Correction_Files(theDataFile1, theDataFile2, theOutputDir,
+EBNPlus_Correction_Files(theDataFile1, theDataFile2,
+theOutputDir, theDataVersion, theTestVersion,
 theBatchId1, theBatchId2,
 theSeed = NULL, theEBNP_PriorPlotsFlag=FALSE, theEBNP_MinSampleNum = 3,
 theEBNP_AddData1Rows = FALSE, theEBNP_AddData2Rows = FALSE)
@@ -19,8 +20,12 @@ theEBNP_AddData1Rows = FALSE, theEBNP_AddData2Rows = FALSE)
   Standardized data matrix file for data set 1.}
   \item{theDataFile2}{A string containing the full path to a
   Standardized data matrix file for data set 2.}
-  \item{theOutputDir}{
-  A string containing the full path to the output directory.}
+  \item{theOutputDir}{Defaults to NULL and does not create PNG.
+  Non-NULL path for where to create the prior plots PNG.}
+  \item{theDataVersion}{Object of class \code{"character"} Version of the data prefaced
+	with DATA_, such as DATA_2022-09-09-1600. Use empty string to not include. }
+	\item{theTestVersion}{Object of class \code{"character"} Version of the test prefaced
+	with TEST_, such as TEST_2022-10-10-1300. Use empty string to not include. }
   \item{theBatchId1}{The group name for data set 1 (for example, RNASeqV2)}
   \item{theBatchId2}{The group name for data set 2 (for example, Agilent4502)}
   \item{theSeed}{NULL or a seed to use. Defaults to NULL.

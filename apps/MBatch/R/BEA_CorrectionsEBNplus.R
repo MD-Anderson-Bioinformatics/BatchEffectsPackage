@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -505,11 +505,13 @@ plotPrior <- function(priorPlotsFile, gamma.hat,gamma.bar,t2, delta.hat, a.prior
   invgam <- 1/rgamma(ncol(delta.hat),a.prior[1],b.prior[1])
   if(length(invgam)==(sum(is.na(invgam))))
   {
+    logDebug("plotPrior - if")
     plot.new()
     mtext("INVGAM is all NaN or NA")
   }
   else
   {
+    logDebug("plotPrior - else")
     tmp1 <- density(invgam, na.rm =TRUE)
     plot(tmp,  typ='l', main="Density Plot", ylim=c(0,max(tmp$y,tmp1$y)))
     lines(tmp1, col=2)
@@ -517,7 +519,7 @@ plotPrior <- function(priorPlotsFile, gamma.hat,gamma.bar,t2, delta.hat, a.prior
     lines(c(0,max(invgam)),c(0,max(invgam)),col=2)
     title('Q-Q Plot')
   }
-  #logDebug("finished prior plots")
+  logDebug("plotPrior - finished prior plots")
 }
 
 

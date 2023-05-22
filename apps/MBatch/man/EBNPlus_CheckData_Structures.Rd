@@ -21,6 +21,20 @@ theDataReplicates2 = NULL)
   Defaults to NULL. See "details" below.}
 }
 \details{
+Use EBNPlus_Correction_Structures for Corrections
+
+Use the EBNPlus_Correction_Structures function to performed 
+corrections.
+
+For most users, the function EBNPlus_Correction_Structures 
+is what you want to use for processing. It is designed 
+specifically to do corrections. The EBNPlus_TrainAndValidate 
+functions are for researchers interested in the internal 
+workings of the EBNPlus algorithm.
+
+See the tests/EBNPlus_Correction_Structures.R or 
+tests/EBNPlus_Correction_Files.R for details.
+
 Performs a stop if conditions are not met.
 This function checks the following:
 Both matrix arguments pass is.matrix test.

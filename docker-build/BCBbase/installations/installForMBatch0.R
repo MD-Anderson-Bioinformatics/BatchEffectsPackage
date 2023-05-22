@@ -1,4 +1,4 @@
-# Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -11,13 +11,18 @@
 
 message("starting installForMBatch0")
 
-# used by oompaBase, ClassDiscovery, and PreProcess (in install 1)
+message("#*#* reticulate used by MBatch")
+install.packages("reticulate", dependencies=TRUE, repos = "http://cran.r-project.org")
+
+message("#*#* mclust used by oompaBase, ClassDiscovery, and PreProcess (in install 1)")
 install.packages("mclust", dependencies=TRUE, repos = "http://cran.r-project.org")
 
-# used by oompaBase, ClassDiscovery, and PreProcess (in install 1)
+message("#*#* Biobase used by oompaBase, ClassDiscovery, and PreProcess (in install 1)")
 install.packages("BiocManager", dependencies=TRUE, repos = "http://cran.r-project.org")
 BiocManager::install(c("Biobase"), update=FALSE)
 
+# no longer needed
 #BiocManager::install(c("limma", "RBGL", "graph", "Biobase"), update=FALSE)
 
 message("done installForMBatch0")
+

@@ -18,9 +18,6 @@ echo "remove Docker installations data"
 rm -rf ${BASE_DIR}/docker-build/MBatchImage/installations/*
 
 echo "remove JAR files in R packages"
-rm -rf ${BASE_DIR}/apps/MBatch/inst/DscJava/*
-rm -rf ${BASE_DIR}/apps/MBatch/inst/LegendJava/*
-rm -rf ${BASE_DIR}/apps/MBatch/inst/ReadRJava/*
 rm -rf ${BASE_DIR}/apps/MBatchUtils/inst/BEVIndex/*
 
 echo "list apps directory"

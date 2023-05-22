@@ -39,6 +39,7 @@ Here is an example of the static plot for a medium-sized dataset.
 
 Boxplot_AllSamplesRLE_Structures(theData, theTitle, theOutputPath,
 theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
+theDataVersion, theTestVersion,
 theMaxGeneCount=20000)
 
 # Arguments
@@ -105,7 +106,8 @@ After the output is an explanation of files and directories created.
   myData@mData <- mbatchTrimData(myData@mData, 100000)
 
   # here, we take most defaults
-  Boxplot_AllSamplesRLE_Structures(myData, "Disease/Data Type/Platform/Data Level", theOutputDir, list(), list())
+  Boxplot_AllSamplesRLE_Structures(myData, "Disease/Data Type/Platform/Data Level", theOutputDir, list(), list(), 
+                                   theDataVersion="DATA_2022-09-09-1600", theTestVersion="TEST_2022-10-10-1300")
 }
 ```
 
@@ -210,4 +212,4 @@ TCGA-OR-A5J3-01A-11D-A29J-05	7	-0.32982819164709853	520.0	-0.19185967737525045	6
 ##Diagram
 Here is a diagram generated from this code.
 
-`r sprintf("![Boxplot All Samples RLE Output](%s)", cleanFilePath(cleanFilePath(theOutputDir, "AllSample-RLE"), "BoxPlot_AllSample-RLE_Diagram-TSS.png"))`
+`r sprintf("![Boxplot All Samples RLE Output](%s)", cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "AllSample-RLE"),"DATA_2022-09-09-1600"),"TEST_2022-10-10-1300"), "BoxPlot_AllSample-RLE_Diagram-TSS.png"))`

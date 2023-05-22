@@ -1,4 +1,8 @@
-FROM mdabcb/bcb_base:2021-08-13-1100
+FROM mdabcb/bcb_base:2023-03-09-1313
+
+# NOTE: above version should match build from Dockerfile for BCBBase, which is manually done.
+#       manual build of BCBBase is because of the extended build time to generate the image.
+#       it is generally rebuilt very seldomly.
 
 ## This can be built with: docker build -t mdabcb/mbatchsa_image:BEA_VERSION_TIMESTAMP .
 ## Login to docker hub with: docker login
@@ -12,20 +16,20 @@ LABEL edu.mda.bcb.name="MBatch" \
       edu.mda.bcb.mba.version="BEA_VERSION_TIMESTAMP"
 
 # make bcbuser
-RUN mkdir /home/bcbuser && \
-    mkdir /home/bcbuser/mbatch && \
-    useradd -l -s /bin/bash -d /home/bcbuser -u 2002 bcbuser && \
+RUN useradd -l -s /bin/bash -d /home/bcbuser -u 2002 bcbuser && \
     echo "bcbuser:bcbuser" | chpasswd && \
+    mkdir /home/bcbuser/mbatch && \
     chown -R bcbuser:bcbuser /home/bcbuser && \
     mkdir /BatchEffectsPackage_data && \
     mkdir /BatchEffectsPackage_data/testing_static && \
     chown -R bcbuser:bcbuser /BatchEffectsPackage_data && \
     chmod -R u+rwx /BatchEffectsPackage_data
-
+    
 # COPY is always done as root!!!!
 # quote: When using COPY with more than one source file, the destination must be a directory and end with a / :unquote
 COPY installations/*.tar.gz /home/bcbuser/mbatch/
 COPY installations/testing_static /BatchEffectsPackage_data/testing_static
+COPY installations/PyMBatch /home/bcbuser/PyMBatch/
 RUN ls -lh /BatchEffectsPackage_data && \
     chown -R bcbuser:bcbuser /BatchEffectsPackage_data && \
     chmod -R u+rwx /BatchEffectsPackage_data && \
@@ -34,8 +38,16 @@ RUN ls -lh /BatchEffectsPackage_data && \
     chown -R bcbuser:bcbuser /bea_testing && \
     chmod -R u+rwx /bea_testing
 
+# perform Python packge install
+RUN source /home/bcbuser/conda/bin/activate && \
+    conda activate /home/bcbuser/conda/envs/gendev && \
+    cd /home/bcbuser/PyMBatch && \
+    pip install .
+
 # perform R installs for packages, and install MBatch and MBatchUtils
 RUN cd /home/bcbuser/mbatch && \
     R CMD INSTALL MBatch_*.tar.gz && \
     R CMD INSTALL MBatchUtils_*.tar.gz
+
+ENV PATH="/home/bcbuser/conda/bin:$PATH"
 

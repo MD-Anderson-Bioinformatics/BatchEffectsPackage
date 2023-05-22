@@ -1,4 +1,4 @@
-# Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -11,22 +11,10 @@
 
 message("starting installForMBatch2")
 
-# used in MBatch for images
+message("#*#* Cairo used in MBatch for images")
 install.packages("Cairo", dependencies=TRUE, repos = "http://cran.r-project.org")
 
-# used in correlation density plot
-install.packages("epiR", dependencies=TRUE, repos = "http://cran.r-project.org")
-
-# used for even and odd function in color code
-install.packages("gtools", dependencies=TRUE, repos = "http://cran.r-project.org")
-
-# used for euler in MANOVA
-install.packages("eulerr", dependencies=TRUE, repos = "http://cran.r-project.org")
-
-# used for dendromat in Supervised Clustering and Hierarchical Clustering
+message("#*#* squash used for dendromat in Supervised Clustering and Hierarchical Clustering")
 install.packages("squash", dependencies=TRUE, repos = "http://cran.r-project.org")
-
-# used in many places to call Java
-install.packages("rJava",,"http://rforge.net/",type="source")
 
 message("done installForMBatch2")

@@ -1,4 +1,4 @@
-# Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -12,16 +12,22 @@
 message("starting installForMBatch3")
 
 # used in DAPIR
+message("#*#* httr")
 install.packages("httr", dependencies=TRUE, repos = "http://cran.r-project.org")
+message("#*#* jsonlite")
 install.packages("jsonlite", dependencies=TRUE, repos = "http://cran.r-project.org")
 
 # uses dunn.test in MBatchUtils
+message("#*#* dunn.test")
 install.packages("dunn.test", dependencies=TRUE, repos = "http://cran.r-project.org")
 
 # used for UMAP
+message("#*#* uwot")
 install.packages("uwot", dependencies=TRUE, repos = "http://cran.r-project.org")
+message("#*#* devtools")
 install.packages("devtools", dependencies=TRUE, repos = "http://cran.r-project.org")
 library(devtools)
+message("#*#* jlmelville/vizier")
 devtools::install_github("jlmelville/vizier")
 
 message("done installForMBatch3")

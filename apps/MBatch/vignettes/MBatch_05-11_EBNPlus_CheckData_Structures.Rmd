@@ -11,6 +11,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+# Use EBNPlus_Correction_Structures for Corrections
+
+***Use the EBNPlus_Correction_Structures function to performed corrections.***
+
+For most users, the function EBNPlus_Correction_Structures is what you want to use for processing. It is designed specifically to do corrections. The EBNPlus_TrainAndValidate functions are for researchers interested in the internal workings of the EBNPlus algorithm.
+
+See the tests/EBNPlus_Correction_Structures.R or tests/EBNPlus_Correction_Files.R for details.
+
 # Introduction
 
 These instructions are aimed at people familiar with R and familiar with TCGA/GDC platforms and data types. They are intended to introduce the reader to producing the given assessment. These instructions will only rarely, if ever, touch on the appropriateness of the assessment algorithm or interpretation of output. See MBatch_01_InstallLinux for instructions on downloading test data.

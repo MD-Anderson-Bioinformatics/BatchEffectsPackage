@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -47,7 +47,7 @@ EB_internal<-function(theBeaData,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- cleanFilePath(myPath, paste("ANY_Corrections-", theEbType, ".tsv", sep=""))
+    correctFile <- cleanFilePath(myPath, "corrected_matrix.tsv")
     writeDataToFile(results, correctFile)
     results <- correctFile
   }
@@ -67,11 +67,17 @@ EB_withNonParametricPriors<-function(theBeaData,
                                   theBatchType,
                                   theThreads=1,
                                   thePath=NULL,
+                                  theDataVersion=NULL, theTestVersion=NULL,
                                   theWriteToFile=FALSE)
 {
+  newOutputDir <- addVersionsIfNeeded(thePath, theDataVersion, theTestVersion)
+  if (!is.null(newOutputDir))
+  {
+    checkDirForCreation(newOutputDir)
+  }
   EB_internal(theBeaData, theBatchIdsNotToCorrect, theDoCheckPlotsFlag,
               theBatchType, "EBwithNonParametricPriors",
-              FALSE, theThreads, thePath, theWriteToFile)
+              FALSE, theThreads, newOutputDir, theWriteToFile)
 }
 
 EB_withParametricPriors<-function(theBeaData,
@@ -80,11 +86,17 @@ EB_withParametricPriors<-function(theBeaData,
                                   theBatchType,
                                   theThreads=1,
                                   thePath=NULL,
+                                  theDataVersion=NULL, theTestVersion=NULL,
                                   theWriteToFile=FALSE)
 {
+  newOutputDir <- addVersionsIfNeeded(thePath, theDataVersion, theTestVersion)
+  if (!is.null(newOutputDir))
+  {
+    checkDirForCreation(newOutputDir)
+  }
   EB_internal(theBeaData, theBatchIdsNotToCorrect, theDoCheckPlotsFlag,
               theBatchType, "EBwithParametricPriors",
-              TRUE, theThreads, thePath, theWriteToFile)
+              TRUE, theThreads, newOutputDir, theWriteToFile)
 }
 
 ###############################################################################
@@ -95,11 +107,12 @@ MP_Internal<- function(theBeaData,
                        theMpType,
                        theOverallFlag,
                        thePath=NULL,
+                       theDataVersion=NULL, theTestVersion=NULL,
                        theWriteToFile=FALSE)
 {
   logInfo("MP_Internal - starting")
   results <- NULL
-  myPath <- thePath
+  myPath <- addVersionsIfNeeded(thePath, theDataVersion, theTestVersion)
   myErrorFile <- NULL
   #setLogging(new("Logging", theFile=cleanFilePath(myPath, "MB.log")))
   if (TRUE==theWriteToFile)
@@ -114,7 +127,7 @@ MP_Internal<- function(theBeaData,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- cleanFilePath(myPath, paste("ANY_Corrections-", theMpType, ".tsv", sep=""))
+    correctFile <- cleanFilePath(myPath, "corrected_matrix.tsv")
     writeDataToFile(results, correctFile)
     results <- correctFile
   }
@@ -130,18 +143,20 @@ MP_Internal<- function(theBeaData,
 
 MP_Overall<- function(theBeaData,
                       thePath=NULL,
+                      theDataVersion=NULL, theTestVersion=NULL,
                       theWriteToFile=FALSE)
 {
   MP_Internal(theBeaData, "", "MPOverall", TRUE,
-              thePath, theWriteToFile)
+              thePath, theDataVersion, theTestVersion, theWriteToFile)
 }
 
 MP_ByBatch<- function(theBeaData, theBatchType,
                       thePath=NULL,
+                      theDataVersion=NULL, theTestVersion=NULL,
                       theWriteToFile=FALSE)
 {
   MP_Internal(theBeaData, theBatchType, "MPByBatch", FALSE,
-              thePath, theWriteToFile)
+              thePath, theDataVersion, theTestVersion, theWriteToFile)
 }
 
 ###############################################################################
@@ -152,11 +167,12 @@ AN_Internal<- function(theBeaData,
                        theAnType,
                        theDoAdjustFlag,
                        thePath=NULL,
+                       theDataVersion=NULL, theTestVersion=NULL,
                        theWriteToFile=FALSE)
 {
   logInfo("AN_Internal - starting")
   results <- NULL
-  myPath <- thePath
+  myPath <- addVersionsIfNeeded(thePath, theDataVersion, theTestVersion)
   myErrorFile <- NULL
   #setLogging(new("Logging", theFile=cleanFilePath(myPath, "AN.log")))
   if (TRUE==theWriteToFile)
@@ -171,7 +187,7 @@ AN_Internal<- function(theBeaData,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- cleanFilePath(myPath, paste("ANY_Corrections-", theAnType, ".tsv", sep=""))
+    correctFile <- cleanFilePath(myPath, "corrected_matrix.tsv")
     writeDataToFile(results, correctFile)
     results <- correctFile
   }
@@ -187,6 +203,7 @@ AN_Internal<- function(theBeaData,
 
 AN_Adjusted<-function(theBeaData, theBatchType,
                       thePath=NULL,
+                      theDataVersion=NULL, theTestVersion=NULL,
                       theWriteToFile=FALSE)
 {
   AN_Internal(theBeaData,
@@ -194,11 +211,14 @@ AN_Adjusted<-function(theBeaData, theBatchType,
               "ANAdjusted",
               TRUE,
               thePath=thePath,
+              theDataVersion=theDataVersion,
+              theTestVersion=theTestVersion,
               theWriteToFile=theWriteToFile)
 }
 
 AN_Unadjusted<-function(theBeaData, theBatchType,
                       thePath=NULL,
+                      theDataVersion=NULL, theTestVersion=NULL,
                       theWriteToFile=FALSE)
 {
   AN_Internal(theBeaData,
@@ -206,6 +226,8 @@ AN_Unadjusted<-function(theBeaData, theBatchType,
               "ANUnadjusted",
               FALSE,
               thePath=thePath,
+              theDataVersion=theDataVersion,
+              theTestVersion=theTestVersion,
               theWriteToFile=theWriteToFile)
 }
 

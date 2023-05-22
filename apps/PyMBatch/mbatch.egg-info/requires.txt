@@ -1,0 +1,7 @@
+matplotlib
+pandas
+numpy
+pillow
+jsonpickle
+requests
+xmltodict

@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -18,12 +18,31 @@ cleanFilePath <- function(theDir, theNewDir)
   #cleanDir <- gsub("<", "_", cleanDir, fixed=TRUE)
   #cleanDir <- gsub(">", "_", cleanDir, fixed=TRUE)
   #file.path(theDir, cleanDir)
-  file.path(theDir, theNewDir)
+  tmpPath <- file.path(theDir, theNewDir)
+  # clean double // from the path
+  tmpPath <- gsub("//", "/", tmpPath)
+  tmpPath
 }
 
 createDirPlusFilename<-function(theDir, ...)
 {
   cleanFilePath(theDir, paste(..., sep="", collapse=""))
+}
+
+addVersionsIfNeeded <- function(thePath, theDataVersion, theTestVersion)
+{
+  if (!is.null(thePath))
+  {
+    if ((!is.null(theDataVersion)) && (""!=theDataVersion))
+    {
+      thePath <- file.path(thePath, theDataVersion)
+    }
+    if ((!is.null(theTestVersion)) && (""!=theTestVersion))
+    {
+      thePath <- file.path(thePath, theTestVersion)
+    }
+  }
+  thePath
 }
 
 checkDirForCreation <- function(thePath)
@@ -83,8 +102,8 @@ readAsGenericMatrix <- function(theFile)
 												 nrow=length(genes),
 												 dimnames=list(make.unique(genes), make.unique(samples)),
 												 )
-	temp <- temp[,sort(colnames(temp))]
-	temp <- temp[sort(rownames(temp)),]
+	temp <- temp[,sort(colnames(temp)),drop=FALSE]
+	temp <- temp[sort(rownames(temp)),,drop=FALSE]
 	temp
 }
 
@@ -104,7 +123,19 @@ readAsGenericDataframe <- function(theFile, theNaString=NULL, theUnknownString="
 {
 	df <- read.csv(theFile, header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE,
 	               stringsAsFactors=FALSE, colClasses="character", na.strings=theNaString,
-	               allowEscapes=TRUE)
+	               allowEscapes=TRUE, quote="" )
+	# check for colons in the batch type names (incompatible with MANOVA tests)
+	coln  <- colnames(df)
+	coln <- unlist(lapply(coln, function(theName)
+	{
+	  if (grepl(":", theName, fixed = TRUE))
+	  {
+	    logWarn("Replacing colon in batch type name ", theName, " with tilde")
+	    theName <- gsub(":", "~", theName, fixed = TRUE)
+	  }
+	  theName
+	}))
+	colnames(df) <- coln
 	df[df==""] <- theUnknownString
   return(df)
 }

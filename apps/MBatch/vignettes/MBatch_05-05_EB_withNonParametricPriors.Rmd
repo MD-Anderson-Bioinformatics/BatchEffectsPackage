@@ -70,24 +70,30 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
 {
   require(MBatch)
 
+  cat("directories")
   inputDir <- getTestInputDir()
   outputDir <- getTestOutputDir()
   compareDir <- getTestCompareDir()
   
   # set the paths
+  cat("paths")
   theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
   theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
   theOutputDir=cleanFilePath(outputDir, "EB_withNonParametricPriors")
   theRandomSeed=314
   theBatchType="TSS"
-  
+
   # make sure the output dir exists and is empty
+  cat("clean dirs")
   unlink(theOutputDir, recursive=TRUE)
   dir.create(theOutputDir, showWarnings=FALSE, recursive=TRUE)
   # load data
+  cat("load data")
   myData <- mbatchLoadFiles(theGeneFile, theBatchFile)
+  cat("trim data")
   myData@mData <- mbatchTrimData(myData@mData, 100000)
   # call
+  cat("call EB")
   outputFile <- EB_withNonParametricPriors(theBeaData=myData,
                              theBatchIdsNotToCorrect=c(""),
                              theDoCheckPlotsFlag=TRUE,
@@ -95,13 +101,17 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
                              theThreads=1,
                              thePath=theOutputDir,
                              theWriteToFile=TRUE)
-  correctedMatrix <- readAsGenericMatrix(outputFile)
-  print(correctedMatrix[1:4, 1:4])
+  cat("outputFile")
+  cat(outputFile)
+  # cat("read corrected")
+  # correctedMatrix <- readAsGenericMatrix(outputFile)
+  # cat("print corrected")
+  # print(correctedMatrix[1:4, 1:4])
 }
 ```
 
 # Example File Output
 
 The above code creates the following output file. File is named using the following naming convention:
-ANY_Corrections-EBwithNonParametricPriors.tsv
+corrected_matrix.tsv
 The TSV file with the corrected dataset is written by the MBatch package. The end of the output shows a snippet from the corrected matrix.

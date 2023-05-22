@@ -14,8 +14,11 @@ mkdir ${BASE_DIR}/docker-build/MBatchImage/installations
 #echo "copy testing_static"
 #cp -r ${BASE_DIR}/data/testing_static ${BASE_DIR}/docker-build/MBatchImage/installations/.
 
-echo "copy R packages"
-cp ${BASE_DIR}/apps/*.tar.gz ${BASE_DIR}/docker-build/MBatchImage/installations/.
+echo "copy R package"
+cp ${BASE_DIR}/apps/MBatch*.tar.gz ${BASE_DIR}/docker-build/MBatchImage/installations/.
+
+echo "copy Python package"
+cp -r ${BASE_DIR}/apps/PyMBatch ${BASE_DIR}/docker-build/MBatchImage/installations/.
 
 echo "list files"
 ls -lh ${BASE_DIR}/docker-build/MBatchImage/installations/*

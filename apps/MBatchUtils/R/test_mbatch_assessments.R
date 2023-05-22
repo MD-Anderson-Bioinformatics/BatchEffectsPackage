@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -8,15 +8,6 @@
 #
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
-
-#SupervisedClustering_Batches_Structures(theData, theTitle, theOutputPath)
-#SupervisedClustering_Pairs_Structures(theData, theTitle, theOutputPath, theListOfBatchPairs)
-# theListOfBatchPairs=c("PlateId", "TSS", "BatchId", "TSS")
-#PCA_Regular_Structures(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep, theIsPcaTrendFunction=NULL, theDoCentroidsMtoMFlag=TRUE, theDoPlainMtoMFlag=FALSE, theDoCentroidsOtoMFlag=FALSE, theDoPlainOtoMFlag=FALSE, theDoDSCFlag=TRUE, theDoDscPermsFileFlag=FALSE, theDoSampleLocatorFlag=TRUE, theListOfComponentsToPlot=c(1, 2, 1, 3, 1, 4, 2, 3, 2, 4, 3, 4), theDSCPermutations=2000, theDSCThreads=1, theMinBatchSize=2, theJavaParameters="-Xms1200m", theSeed=0, theMaxGeneCount=20000)
-#PCA_DualBatch_Structures(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep, theListForDoCentroidDualBatchType, theIsPcaTrendFunction=NULL, theDoDSCFlag=TRUE, theDoDscPermsFileFlag=FALSE, theDoSampleLocatorFlag=TRUE, theListOfComponentsToPlot=c(1, 2, 1, 3, 1, 4, 2, 3, 2, 4, 3, 4), theDSCPermutations=2000, theDSCThreads=1, theMinBatchSize=2, theJavaParameters="-Xms1200m", theSeed=0, theMaxGeneCount=20000)
-#Boxplot_Group_Structures(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep, theListOfGroupBoxFunction, theListOfGroupBoxLabels)
-#Boxplot_AllSamplesRLE_Structures(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep)
-#Boxplot_Group_Structures(theData, theTitle, theOutputPath, theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep, theListOfGroupBoxFunction, theListOfGroupBoxLabels)
 
 loadDataManually <- function(theGeneFile, theBatchFile)
 {
@@ -32,8 +23,8 @@ loadDataManually <- function(theGeneFile, theBatchFile)
 ################################################################################
 ################################################################################
 
-
-callMBatch_UMAP_Structures <- function(theOutputDir, theDataObject, theTitle)
+callMBatch_UMAP_Structures <- function(theOutputDir, theDataVersion, theTestVersion,
+                                       theDataObject, theTitle)
 {
   # output directory
   outdir <- cleanFilePath(theOutputDir, "UMAP")
@@ -41,9 +32,8 @@ callMBatch_UMAP_Structures <- function(theOutputDir, theDataObject, theTitle)
   # here, we call UMAP, passing a title and an output path,
   # and to use the data without removing any type/values
   # and keeping any other defaults
-  UMAP_Structures(theDataObject,
-                  theTitle,
-                  outdir)
+  UMAP_Structures(theDataObject, theTitle,
+                  outdir, theDataVersion, theTestVersion)
 }
 
 ################################################################################
@@ -51,14 +41,16 @@ callMBatch_UMAP_Structures <- function(theOutputDir, theDataObject, theTitle)
 ################################################################################
 ################################################################################
 
-callMBatch_HierarchicalClustering <- function(theOutputDir, theGeneFile, theBatchFile, theTitle, theBoxplotMaxGenes)
+callMBatch_HierarchicalClustering <- function(theOutputDir, theDataVersion, theTestVersion,
+                                              theGeneFile, theBatchFile, theTitle, theBoxplotMaxGenes)
 {
   # load data
   myData <- loadDataManually(theGeneFile, theBatchFile)
-  callMBatch_HierarchicalClustering_Structures(theOutputDir, myData, theTitle, theBoxplotMaxGenes)
+  callMBatch_HierarchicalClustering_Structures(theOutputDir, theDataVersion, theTestVersion, myData, theTitle, theBoxplotMaxGenes)
 }
 
-callMBatch_HierarchicalClustering_Structures <- function(theOutputDir, theDataObject, theTitle, theBoxplotMaxGenes)
+callMBatch_HierarchicalClustering_Structures <- function(theOutputDir, theDataVersion, theTestVersion,
+                                                         theDataObject, theTitle, theBoxplotMaxGenes)
 {
   # output directory
 	outdir <- cleanFilePath(theOutputDir, "HierarchicalClustering")
@@ -67,9 +59,14 @@ callMBatch_HierarchicalClustering_Structures <- function(theOutputDir, theDataOb
 	theDataObject@mData <- mbatchTrimData(theDataObject@mData, theMaxSize = (theBoxplotMaxGenes *
 	                                                               ncol(theDataObject@mData)))
 	# here, we take all the defaults to hierarchical clustering, passing a title and an output path
+	message("outdir=",outdir)
+	message("theDataVersion=",theDataVersion)
+	message("theTestVersion=",theTestVersion)
 	HierarchicalClustering_Structures(theData=theDataObject,
 									theTitle=theTitle,
-									theOutputPath=outdir)
+									theOutputDir=outdir,
+									theDataVersion=theDataVersion,
+									theTestVersion=theTestVersion)
 }
 
 ################################################################################
@@ -77,46 +74,17 @@ callMBatch_HierarchicalClustering_Structures <- function(theOutputDir, theDataOb
 ################################################################################
 ################################################################################
 
-callMBatch_TRINOVA_Structures <- function(theOutputDir, theDataObject, theTitle, theTRINOVAtypes, theSampleType)
-{
-  message("callMBatch_TRINOVA_Structures")
-  # output directory
-  outdir <- cleanFilePath(theOutputDir, "TRINOVA")
-  dir.create(outdir, showWarnings=FALSE, recursive=TRUE)
-  message("callMBatch_TRINOVA_Structures as.numericWithIssues")
-  theDataObject <- as.numericWithIssues(theDataObject)
-  if (length(theTRINOVAtypes)!=3)
-  {
-    message("WARNING: need 3 batch types for TRINOVA")
-  }
-  else
-  {
-    message("callMBatch_TRINOVA_Structures theDataObject@mBatches")
-    theDataObject@mBatches <- theDataObject@mBatches[,c(theSampleType, theTRINOVAtypes)]
-    message("call TRINOVA_Structures")
-    # here, we take all the defaults to hierarchical clustering, passing a title and an output path
-    TRINOVA_Structures(theData=theDataObject,
-                      theTitle=theTitle,
-                      theOutputPath=outdir,
-                      theBatchTypeAndValuePairsToRemove=NULL, theBatchTypeAndValuePairsToKeep=NULL,
-                      theMaxGeneCount=10000)
-  }
-}
-
-################################################################################
-################################################################################
-################################################################################
-################################################################################
-
-callMBatch_SupervisedClustering <- function(theOutputDir, theGeneFile, theBatchFile, theTitle,
+callMBatch_SupervisedClustering <- function(theOutputDir, theDataVersion, theTestVersion,
+                                            theGeneFile, theBatchFile, theTitle,
                                             theShaidyMapGen, theNgchmWidgetJs, theShaidyMapGenJava,
                                             theNGCHMShaidyMem, theSampleType, theNgchmFeatureMapFile)
 {
   myData <- loadDataManually(theGeneFile, theBatchFile)
-  callMBatch_SupervisedClustering_Structures(theOutputDir, myData, theTitle, theSampleType)
+  callMBatch_SupervisedClustering_Structures(theOutputDir, theDataVersion, theTestVersion, myData, theTitle, theSampleType)
 }
 
-callMBatch_SupervisedClustering_Structures <- function(theOutputDir, theDataObject, theTitle,
+callMBatch_SupervisedClustering_Structures <- function(theOutputDir, theDataVersion, theTestVersion,
+                                                       theDataObject, theTitle,
                                                        theShaidyMapGen, theNgchmWidgetJs, theShaidyMapGenJava, theNGCHMShaidyMem,
                                                        theNgchmRowType,
                                                        theNgchmColumnType,
@@ -132,7 +100,9 @@ callMBatch_SupervisedClustering_Structures <- function(theOutputDir, theDataObje
 	message("trim to same size as hierarchical 2")
 	SupervisedClustering_Batches_Structures(theData=theDataObject,
 									theTitle=theTitle,
-									theOutputPath=outdir,
+									theOutputDir=outdir,
+									theDataVersion=theDataVersion,
+									theTestVersion=theTestVersion,
 									theBatchTypeAndValuePairsToRemove=NULL,
 									theBatchTypeAndValuePairsToKeep=NULL)
 	for(myBatchType in colnames(theDataObject@mBatches)[2:length(colnames(theDataObject@mBatches))])
@@ -147,33 +117,41 @@ callMBatch_SupervisedClustering_Structures <- function(theOutputDir, theDataObje
     message("theShaidyMapGenJava ", theShaidyMapGenJava)
     message("dim(myMBatchData@mBatches) ", dim(theDataObject@mBatches))
     message("trim to same size as hierarchical 3")
-    matrixFile <- cleanFilePath(cleanFilePath(outdir, "Batches"), paste(myBatchType, "SCMatrix.tsv", sep="_"))
+    dataDirVersioned <- cleanFilePath(outdir, myBatchType)
+    dataDirVersioned <- addVersionsIfNeeded(dataDirVersioned, theDataVersion, theTestVersion)
+    matrixFile <- cleanFilePath(dataDirVersioned, paste(myBatchType, "SCMatrix.tsv", sep="_"))
     message("matrixFile ", matrixFile)
+    myMatrix <- theDataObject@mData
+    colDend <- NULL
+    rowDend <- NULL
     if (file.exists(matrixFile))
     {
       # matrix from file is transposed
       myMatrix <- readAsGenericMatrix(matrixFile)
-      message("dim(myMatrix) ", dim(myMatrix))
-      colDend <- cleanFilePath(cleanFilePath(outdir, "Batches"), paste(myBatchType, "uDend.RData", sep="_"))
-      rowDend <- cleanFilePath(cleanFilePath(outdir, "Batches"), paste(myBatchType, "uDend_feature.RData", sep="_"))
-      message("colDend ", colDend)
-      message("rowDend ", rowDend)
-      #c("pearson", "ward.D2"),
-      # do not use feature map, since supervised clustering is sample ids in both directions
-      buildBatchHeatMapFromHC_Structures(theMatrixData=myMatrix,
-                                         theBatchData=theDataObject@mBatches,
-                                         theTitle=paste(theTitle, myBatchType, sep=" "),
-                                         theOutputFile=cleanFilePath(cleanFilePath(outdir, "Batches"), paste(myBatchType, "ngchm.ngchm", sep="_")),
-                                         theColDendRDataFile=colDend,
-                                         theRowDendRDataFile=rowDend,
-                                         theNgchmFeatureMapFile=theNgchmFeatureMapFile,
-                                         theRowType=theNgchmRowType, theColType=theNgchmColumnType,
-                                         theRowCluster=NULL,
-                                         theShaidyMapGen=theShaidyMapGen,
-                                         theNgchmWidgetJs=theNgchmWidgetJs,
-                                         theShaidyMapGenJava=theShaidyMapGenJava,
-                                         theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
+      colDend <- cleanFilePath(dataDirVersioned, paste(myBatchType, "uDend.RData", sep="_"))
+      rowDend <- cleanFilePath(dataDirVersioned, paste(myBatchType, "uDend_feature.RData", sep="_"))
     }
+    message("dim(myMatrix) ", dim(myMatrix))
+    message("colDend ", colDend)
+    message("rowDend ", rowDend)
+    #c("pearson", "ward.D2"),
+    # do not use feature map, since supervised clustering is sample ids in both directions
+    buildBatchHeatMapFromHC_Structures(theMatrixData=myMatrix,
+                                       theBatchData=theDataObject@mBatches,
+                                       theTitle=paste(theTitle, myBatchType, sep=" "),
+                                       theOutputDir=cleanFilePath(outdir, myBatchType),
+                                       theDataVersion=theDataVersion,
+                                       theTestVersion=theTestVersion,
+                                       theOutputFilename=paste(myBatchType, "ngchm.ngchm", sep="_"),
+                                       theColDendRDataFile=colDend,
+                                       theRowDendRDataFile=NULL,
+                                       theNgchmFeatureMapFile=theNgchmFeatureMapFile,
+                                       theRowType=theNgchmRowType, theColType=theNgchmColumnType,
+                                       theRowCluster=c("pearson", "ward.D2"),
+                                       theShaidyMapGen=theShaidyMapGen,
+                                       theNgchmWidgetJs=theNgchmWidgetJs,
+                                       theShaidyMapGenJava=theShaidyMapGenJava,
+                                       theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
 	}
 }
 
@@ -200,7 +178,7 @@ callMBatch_SupervisedClusteringPairs_Structures <- function(theOutputDir, theDat
 	# and keeping any other defaults
 	SupervisedClustering_Pairs_Structures(theData=theDataObject,
 									theTitle=theTitle,
-									theOutputPath=outdir,
+									theOutputDir=outdir,
 									theListOfBatchPairs=c("BatchId", "PlateId", "TSS", "ShipDate"),
 									theBatchTypeAndValuePairsToRemove=NULL,
 									theBatchTypeAndValuePairsToKeep=NULL)
@@ -223,17 +201,19 @@ callMBatch_PCA <- function(theOutputDir, theGeneFile, theBatchFile, theTitle, aT
   callMBatch_PCA_Structures(theOutputDir, myData, theTitle, isTrendBatch)
   if(TRUE==aTest)
   {
-    buildDSCOverviewFile(cleanFilePath(theOutputDir, "PCA"), "DSCOverview.tsv")
+    buildDSCOverviewFile(cleanFilePath(theOutputDir, "PCA"),
+                         cleanFilePath(theOutputDir, "DSC"),
+                         "DSCOverview.tsv")
     clearDSCOverviewFiles(cleanFilePath(theOutputDir, "PCA"))
   }
 }
 
-callMBatch_PCA_Structures <- function(theOutputDir, theDataObject, theTitle,
+callMBatch_PCA_Structures <- function(theOutputDir, theDataVersion, theTestVersion,
+                                      theDataObject, theTitle,
                                       theIsPcaTrendFunction,
                                       theDSCPermutations=1000,
                                       theDSCThreads=1,
                                       theMinBatchSize=2,
-                                      theJavaParameters="-Xms2000m",
                                       theSeed=314,
                                       theMaxGeneCount=10000)
 {
@@ -245,7 +225,9 @@ callMBatch_PCA_Structures <- function(theOutputDir, theDataObject, theTitle,
 	# and keeping any other defaults
 	PCA_Regular_Structures(theData=theDataObject,
 							theTitle=theTitle,
-							theOutputPath=outdir,
+							theOutputDir=outdir,
+							theDataVersion=theDataVersion,
+							theTestVersion=theTestVersion,
 							theBatchTypeAndValuePairsToRemove=NULL,
 							theBatchTypeAndValuePairsToKeep=NULL,
 							theDoDscPermsFileFlag = TRUE,
@@ -253,7 +235,6 @@ callMBatch_PCA_Structures <- function(theOutputDir, theDataObject, theTitle,
 							theDSCPermutations=theDSCPermutations,
 							theDSCThreads=theDSCThreads,
 							theMinBatchSize=theMinBatchSize,
-							theJavaParameters=theJavaParameters,
 							theSeed=theSeed,
 							theMaxGeneCount=theMaxGeneCount)
 }
@@ -269,7 +250,9 @@ callMBatch_PCADualBatch <- function(theOutputDir, theGeneFile, theBatchFile, the
   callMBatch_PCADualBatch_Structures(theOutputDir, myData, theTitle, isTrendBatch)
   if(TRUE==aTest)
   {
-    buildDSCOverviewFile(cleanFilePath(theOutputDir, "PCADualBatch"), "DSCOverview.tsv")
+    buildDSCOverviewFile(cleanFilePath(theOutputDir, "PCADualBatch"),
+                         cleanFilePath(theOutputDir, "PCADualBatch"),
+                         "DSCOverview.tsv")
     clearDSCOverviewFiles(cleanFilePath(theOutputDir, "PCADualBatch"))
   }
 }
@@ -279,7 +262,6 @@ callMBatch_PCADualBatch_Structures <- function(theOutputDir, theDataObject, theT
                                                theDSCPermutations=1000,
                                                theDSCThreads=1,
                                                theMinBatchSize=2,
-                                               theJavaParameters="-Xms2000m",
                                                theSeed=314,
                                                theMaxGeneCount=10000)
 {
@@ -292,7 +274,7 @@ callMBatch_PCADualBatch_Structures <- function(theOutputDir, theDataObject, theT
 	# and keeping any other defaults
 	PCA_DualBatch_Structures(theData=theDataObject,
 							theTitle=theTitle,
-							theOutputPath=outdir,
+							theOutputDir=outdir,
 							theBatchTypeAndValuePairsToRemove=NULL,
 							theBatchTypeAndValuePairsToKeep=NULL,
 							theListForDoCentroidDualBatchType=c("BatchId", "PlateId", "TSS", "ShipDate"),
@@ -300,7 +282,6 @@ callMBatch_PCADualBatch_Structures <- function(theOutputDir, theDataObject, theT
 							theDSCPermutations=theDSCPermutations,
 							theDSCThreads=theDSCThreads,
 							theMinBatchSize=theMinBatchSize,
-							theJavaParameters=theJavaParameters,
 							theSeed=theSeed,
 							theMaxGeneCount=theMaxGeneCount)
 }
@@ -317,7 +298,7 @@ callMBatch_BoxplotAllSamplesData <- function(theOutputDir, theGeneFile, theBatch
   callMBatch_BoxplotAllSamplesData_Structures(theOutputDir, myData, theTitle, theMaxGeneCount)
 }
 
-callMBatch_BoxplotAllSamplesData_Structures <- function(theOutputDir, theDataObject, theTitle, theMaxGeneCount = 10000)
+callMBatch_BoxplotAllSamplesData_Structures <- function(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle, theMaxGeneCount = 10000)
 {
   # output directory
 	outdir <- cleanFilePath(theOutputDir, "BoxPlot")
@@ -327,11 +308,13 @@ callMBatch_BoxplotAllSamplesData_Structures <- function(theOutputDir, theDataObj
 	# and tell it to use 8G of memory
 	# and keeping any other defaults
 	Boxplot_AllSamplesData_Structures(theData=theDataObject,
-							theTitle=theTitle,
-							theOutputPath=outdir,
-							theBatchTypeAndValuePairsToRemove=NULL,
-							theBatchTypeAndValuePairsToKeep=NULL,
-							theMaxGeneCount = theMaxGeneCount)
+                                    theTitle=theTitle,
+                    							  theOutputDir=outdir,
+                    							  theDataVersion=theDataVersion,
+                    							  theTestVersion=theTestVersion,
+                    							  theBatchTypeAndValuePairsToRemove=NULL,
+                    							  theBatchTypeAndValuePairsToKeep=NULL,
+                    							  theMaxGeneCount = theMaxGeneCount)
 }
 
 ################################################################################
@@ -346,7 +329,7 @@ callMBatch_BoxplotAllSamplesRLE <- function(theOutputDir, theGeneFile, theBatchF
   callMBatch_BoxplotAllSamplesRLE_Structures(theOutputDir, myData, theTitle)
 }
 
-callMBatch_BoxplotAllSamplesRLE_Structures <- function(theOutputDir, theDataObject, theTitle, theMaxGeneCount = 10000)
+callMBatch_BoxplotAllSamplesRLE_Structures <- function(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle, theMaxGeneCount = 10000)
 {
 	# output directory
   outdir <- cleanFilePath(theOutputDir, "BoxPlot")
@@ -356,11 +339,13 @@ callMBatch_BoxplotAllSamplesRLE_Structures <- function(theOutputDir, theDataObje
 	# and tell it to use 8G of memory
 	# and keeping any other defaults
 	Boxplot_AllSamplesRLE_Structures(theData=theDataObject,
-							theTitle=theTitle,
-							theOutputPath=outdir,
-							theBatchTypeAndValuePairsToRemove=NULL,
-							theBatchTypeAndValuePairsToKeep=NULL,
-							theMaxGeneCount=theMaxGeneCount)
+                                   theTitle=theTitle,
+                                   theOutputDir=outdir,
+                      						 theDataVersion=theDataVersion,
+                      						 theTestVersion=theTestVersion,
+                      						 theBatchTypeAndValuePairsToRemove=NULL,
+                      						 theBatchTypeAndValuePairsToKeep=NULL,
+                                	 theMaxGeneCount=theMaxGeneCount)
 }
 
 ################################################################################
@@ -378,7 +363,7 @@ callMBatch_BoxplotGroup <- function(theOutputDir, theGeneFile, theBatchFile, the
                                      theFunction, theFunctionName)
 }
 
-callMBatch_BoxplotGroup_Structures <- function(theOutputDir, theDataObject, theTitle, theMaxGeneCount = 10000,
+callMBatch_BoxplotGroup_Structures <- function(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle, theMaxGeneCount = 10000,
                                                theFunction=list(mean), theFunctionName=list("Mean"))
 {
 	# output directory
@@ -390,13 +375,15 @@ callMBatch_BoxplotGroup_Structures <- function(theOutputDir, theDataObject, theT
 	# and tell it to use 8G of memory
 	# and keeping any other defaults
 	Boxplot_Group_Structures(theData=theDataObject,
-							theTitle=theTitle,
-							theOutputPath=outdir,
-							theBatchTypeAndValuePairsToRemove=NULL,
-							theBatchTypeAndValuePairsToKeep=NULL,
-							theListOfGroupBoxFunction=theFunction,
-							theListOfGroupBoxLabels=theFunctionName,
-							theMaxGeneCount=theMaxGeneCount)
+	                                      theTitle=theTitle,
+                          							theOutputDir=outdir,
+                          							theDataVersion=theDataVersion,
+                          							theTestVersion=theTestVersion,
+                          							theBatchTypeAndValuePairsToRemove=NULL,
+                          							theBatchTypeAndValuePairsToKeep=NULL,
+                          							theListOfGroupBoxFunction=theFunction,
+                          							theListOfGroupBoxLabels=theFunctionName,
+                          							theMaxGeneCount=theMaxGeneCount)
 }
 
 ################################################################################

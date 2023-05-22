@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -129,12 +129,96 @@ convertNA <- function(theData)
   theData
 }
 
-mbatchRunFromConfig <- function(theConfigFile, theDataDir,
-                                theOutputDir, theNaStrings,
-                                theShaidyMapGen,
-                                theNgchmWidgetJs,
-                                theShaidyMapGenJava,
-                                theNGCHMShaidyMem="16G", thePCAMem="4800m", theBoxplotMem="16G", theRunPostFlag=FALSE)
+copyDataFiles <- function(theDatFile, theBatFile, theDatFile2, theBatFile2)
+{
+  message("rename data")
+  origDatFile <- file.path(dirname(theDatFile), paste("original-", basename(theDatFile), sep=""))
+  origBatFile <- file.path(dirname(theBatFile), paste("original-", basename(theBatFile), sep=""))
+  # use copy instead of rename, since on mounted filesystems,
+  # rename seems to not work properly.
+  print(paste("copy ", theDatFile, " to ", origDatFile, sep=""))
+  file.copy(theDatFile, origDatFile, overwrite=TRUE)
+  print(paste("copy ", theBatFile, " to ", origBatFile, sep=""))
+  file.copy(theBatFile, origBatFile, overwrite=TRUE)
+  if(file.exists(theDatFile2))
+  {
+    origDatFile2 <- file.path(dirname(theDatFile2), paste("original-", basename(theDatFile2), sep=""))
+    origBatFile2 <- file.path(dirname(theBatFile2), paste("original-", basename(theBatFile2), sep=""))
+    print(paste("copy ", theDatFile2, " to ", origDatFile2, sep=""))
+    file.copy(theDatFile2, origDatFile2, overwrite=TRUE)
+    print(paste("copy ", theBatFile2, " to ", origBatFile2, sep=""))
+    file.copy(theBatFile2, origBatFile2, overwrite=TRUE)
+  }
+}
+
+populateNeededFiles <- function(theInfoDir, theJobId)
+{
+  message("populateNeededFiles - with default values")
+  # if needed for insertion
+  timestamp <- format(Sys.time(), "%Y_%m_%d_%H%M")
+  dataStampFile <- file.path(theInfoDir, "data_stamp.txt")
+  if (!file.exists(dataStampFile))
+  {
+    value <- paste("DATA_", timestamp, sep="")
+    message("Set default test_stamp.txt to ", value)
+    write(value, file=dataStampFile)
+  }
+  jobIdFile <- file.path(theInfoDir, "job_id.txt")
+  if (!file.exists(jobIdFile))
+  {
+    value <- paste("JOB_", theJobId, sep="")
+    message("Set default job_id.txt to ", value)
+    write(value, file=jobIdFile)
+  }
+  originalDataFile <- file.path(theInfoDir, "original_data.json")
+  if (!file.exists(originalDataFile))
+  {
+    value <- paste("{\n",
+                   "\"source\": \"USER\",\n",
+                   "\"program\": \"USER\",\n",
+                   "\"project\": \"USER\",\n",
+                   "\"category\": \"USER\",\n",
+                   "\"platform\": \"USER\",\n",
+                   "\"data\": \"USER\",\n",
+                   "\"details\": \"USER\",\n",
+                   "\"version\": \"",timestamp ,"\"\n",
+                   "}", sep="")
+    message("Set default original_data.json to ", value)
+    write(value, file=originalDataFile)
+  }
+  sourceIdFile <- file.path(theInfoDir, "source_id.txt")
+  if (!file.exists(sourceIdFile))
+  {
+    value <- paste("SRC_", timestamp, sep="")
+    message("Set default source_id.txt to ", value)
+    write(value, file=sourceIdFile)
+  }
+  testStampFile <- file.path(theInfoDir, "test_stamp.txt")
+  if (!file.exists(testStampFile))
+  {
+    value <- paste("TEST_", timestamp, sep="")
+    message("Set default test_stamp.txt to ", value)
+    write(value, file=testStampFile)
+  }
+  versionTypeFile <- file.path(theInfoDir, "version_type.txt")
+  if (!file.exists(versionTypeFile))
+  {
+    message("Set default version_type.txt to Original-Analyzed")
+    write("Original-Analyzed", file=versionTypeFile)
+  }
+}
+
+notEmpty <- function(theValue)
+{
+  ((theValue!="") && (!is.null(theValue)) && (!is.na(theValue)))
+}
+
+
+mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
+                                theZipDataDir, theZipResultsDir, theNaStrings,
+                                theShaidyMapGen, theNgchmWidgetJs, theShaidyMapGenJava,
+                                theNGCHMShaidyMem="16G", theRunPostFlag=FALSE,
+                                theMatrixFile2=NULL, theBatchesFile2=NULL)
 {
   # used to flag if other than full success written
   otherNote <- FALSE
@@ -148,49 +232,68 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
   stopifnot(file.exists(theNgchmWidgetJs))
   stopifnot(file.exists(theShaidyMapGenJava))
   ####################################################################
-  myConfig <- read.csv(theConfigFile, header=FALSE, sep="\t", as.is=TRUE, row.names=1)
+  myConfig <- read.csv(theConfigFile, header=FALSE, sep="\t", as.is=TRUE, row.names=1, quote="" )
+  myDataVersion <- convertNulls(myConfig["DataVersion",])
+  # empty means don't use stopifnot(notEmpty(myDataVersion))
+  myTestVersion <- convertNulls(myConfig["TestVersion",])
+  # empty means don't use stopifnot(notEmpty(myTestVersion))
+  # get flag for replacing NAs with zero
+  replaceNAs <- as.logical(convertNulls(convertNA(myConfig["replaceNAs",])))
+  ########################
+  # setup data directories
+  ########################
+  zipDataFiles <- setupZipDataDir(theMatrixFile, theBatchesFile, theZipDataDir, myDataVersion,
+                                  theMatrixFile2, theBatchesFile2)
+  # matrix data file
+  currentMatrixFile <- convertNulls(zipDataFiles[1])
+  # batches data file
+  currentBatchesFile <- convertNulls(zipDataFiles[2])
+  # file to write filtered pipeline matrix
+  pipelineMatrixFile <- convertNulls(zipDataFiles[3])
+  pipelineLogTransformFile <- file.path(dirname(pipelineMatrixFile), "logTransform.txt")
+  # file to write filtered pipeline batches
+  pipelineBatchesFile <- convertNulls(zipDataFiles[4])
+  # matrix data file
+  currentMatrixFile2 <- convertNulls(zipDataFiles[5])
+  # batches data file
+  currentBatchesFile2 <- convertNulls(zipDataFiles[6])
+  # file to write filtered pipeline matrix
+  pipelineMatrixFile2 <- convertNulls(zipDataFiles[7])
+  pipelineLogTransformFile2 <- file.path(dirname(pipelineMatrixFile2), "logTransform2.txt")
+  # file to write filtered pipeline batches
+  pipelineBatchesFile2 <- convertNulls(zipDataFiles[8])
+  # current original and pipeline directories
+  zipDataCurrentOrigDir <- convertNulls(zipDataFiles[9])
+  zipDataCurrentPipeDir <- convertNulls(zipDataFiles[10])
+  # directory to be created and populated with original and pipeline data files
+  zipDataVersionDir <- convertNulls(zipDataFiles[11])
+  ########################
+  zipResultsFiles <- setupZipResultsDir(dirname(theConfigFile), theZipResultsDir, myDataVersion, myTestVersion)
+  # directory for logging and other run specific files
+  loggingDir <- zipResultsFiles[1]
+  # directory for correction files (path includes versions) not created yet
+  correctionDir <- zipResultsFiles[2]
+  # directory for analysis output
+  analysisOutputDir <- zipResultsFiles[3]
+  # config file
+  versionedConfigFile <- zipResultsFiles[4]
+  ########################
+  # setup results directories
+  myJobId <- convertNulls(myConfig["jobId",])
+  message("Populate needed files with default values")
+  neededFileDir <- dirname(versionedConfigFile)
+  populateNeededFiles(neededFileDir, myJobId)
+  ####################################################################
   rbnOnly <- as.logical(convertNulls(myConfig["RBN_Only",]))
-  mutBatchFlag <- as.logical(convertNulls(myConfig["mutBatchFlag",]))
   mutationsMutbatchFlag <- as.logical(convertNulls(myConfig["mutationsMutbatchFlag",]))
   if (isTRUE(rbnOnly))
   {
     #
     # RBN only
     #
-    runRBNfromConfig(theConfigFile, theOutputDir)
-  }
-  else if (isTRUE(mutBatchFlag))
-  {
-    #
-    # MutBatch single-dataset Flag
-    #
-    title <- myConfig["title",]
-    batchTypesForMBatch <- myConfig["batchTypesForMBatchArray",]
-    if (!is.null(batchTypesForMBatch))
-    {
-      batchTypesForMBatch <- strsplit(batchTypesForMBatch, ",")[[1]]
-    }
-    mutBatchMem <- myConfig["mutBatchMem",]
-    mutBatchThreads <- as.integer(myConfig["mutBatchThreads",])
-    mutBatchPvalueCutoff <- as.numeric(myConfig["mutBatchPvalueCutoff",])
-    mutBatchZscoreCutoff <- as.numeric(myConfig["mutBatchZscoreCutoff",])
-    message("title ", title)
-    message("mutBatchMem ", mutBatchMem)
-    message("batchTypesForMBatch ", paste(batchTypesForMBatch, sep=" , "))
-    message("mutBatchThreads ", mutBatchThreads)
-    message("mutBatchPvalueCutoff ", mutBatchPvalueCutoff)
-    message("mutBatchZscoreCutoff ", mutBatchZscoreCutoff)
-
-    sourceDir <- theDataDir
-    datFile <- cleanFilePath(sourceDir, "matrix_data.tsv")
-    batFile <- cleanFilePath(sourceDir, "batches.tsv")
-
-    mutBatchSingle(datFile, batFile, title, theOutputDir,
-                   theJavaArgs=c(paste(c("-Xms", "-Xmx"), mutBatchMem, sep=""), "-Djava.awt.headless=true"),
-                   theThreads=mutBatchThreads,
-                   thePvalueCutoff=mutBatchPvalueCutoff,
-                   theZScoreCutoff=mutBatchZscoreCutoff,
-                   theBatchTypes=batchTypesForMBatch)
+    runRBNfromConfig(versionedConfigFile, correctionDir, loggingDir,
+                     currentMatrixFile, currentMatrixFile2,
+                     myDataVersion, myTestVersion)
   }
   else if (isTRUE(mutationsMutbatchFlag))
   {
@@ -249,7 +352,6 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     {
       batchTypesForMBatch <- strsplit(batchTypesForMBatch, ",")[[1]]
     }
-    batchTypesForTRINOVA <- myConfig["batchTypesForTRINOVA",]
     filterMaxValue <- myConfig["filterMaxValue",]
     filterLogTransformFlag <- myConfig["filterLogTransformFlag",]
     filterLogTransformFlag2 <- myConfig["filterLogTransformFlag2",]
@@ -259,7 +361,6 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     message("title ", title)
     message("sampleidBatchType ", sampleidBatchType)
     message("batchTypesForMBatch ", paste(batchTypesForMBatch, sep = " = "))
-    message("batchTypesForTRINOVA ", batchTypesForTRINOVA)
     message("filterMaxValue ", filterMaxValue)
     message("filterLogTransformFlag ", filterLogTransformFlag)
     message("filterLogTransformFlag2 ", filterLogTransformFlag2)
@@ -308,6 +409,16 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     message("EBNPlus_GroupId2 ", EBNPlus_GroupId2)
     message("EBNPlus_Seed ", EBNPlus_Seed)
     message("EBNPlus_MinSamples ", EBNPlus_MinSamples)
+    # MutBatch run settings
+    # MutBatch single-dataset is now part of normal run
+    mutBatchMem <- myConfig["mutBatchMem",]
+    mutBatchThreads <- as.integer(myConfig["mutBatchThreads",])
+    mutBatchPvalueCutoff <- as.numeric(myConfig["mutBatchPvalueCutoff",])
+    mutBatchZscoreCutoff <- as.numeric(myConfig["mutBatchZscoreCutoff",])
+    message("mutBatchMem ", mutBatchMem)
+    message("mutBatchThreads ", mutBatchThreads)
+    message("mutBatchPvalueCutoff ", mutBatchPvalueCutoff)
+    message("mutBatchZscoreCutoff ", mutBatchZscoreCutoff)
     ####################################################################
     if("null"==filteringBatchType)
     {
@@ -336,15 +447,6 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     {
       filteringBatches <- strsplit(filteringBatches, ",")[[1]]
     }
-    if (!is.null(batchTypesForTRINOVA))
-    {
-      batchTypesForTRINOVA <- strsplit(batchTypesForTRINOVA, ",")[[1]]
-      if (length(batchTypesForTRINOVA)!=3)
-      {
-        message("WARNING: TRINOVA requires three batch types")
-        batchTypesForTRINOVA <- NULL
-      }
-    }
     filterMaxValue <- as.numeric(filterMaxValue)
     filterLogTransformFlag <- as.logical(convertNulls(convertNA(filterLogTransformFlag)))
     filterLogTransformFlag2 <- as.logical(convertNulls(convertNA(filterLogTransformFlag2)))
@@ -356,61 +458,49 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     selectedDSCMaxGeneCount <- as.numeric(selectedDSCMaxGeneCount)
     selectedBoxplotMaxGeneCount <- as.numeric(selectedBoxplotMaxGeneCount)
     ####################################################################
-    logFile <- cleanFilePath(theOutputDir, "mbatch.log")
-    sourceDir <- theDataDir
-    datFile <- cleanFilePath(sourceDir, "matrix_data.tsv")
-    batFile <- cleanFilePath(sourceDir, "batches.tsv")
-    datFile2 <- cleanFilePath(sourceDir, "matrix_data2.tsv")
-    batFile2 <- cleanFilePath(sourceDir, "batches2.tsv")
-    #############################################################################
     ngchmFeatureMapFile <- NULL
-    nmapFile <- cleanFilePath(sourceDir, "ngchm_link_map.tsv")
+    nmapFile <- cleanFilePath(loggingDir, "ngchm_link_map.tsv")
     if (file.exists(nmapFile))
     {
       ngchmFeatureMapFile <- nmapFile
     }
     #############################################################################
     # check directories
-    message("theOutputDir=", theOutputDir)
-    if(!dir.exists(theOutputDir))
+    message("analysisOutputDir=", analysisOutputDir)
+    if(!dir.exists(analysisOutputDir))
     {
-      message("create ", theOutputDir)
-      dir.create(theOutputDir, showWarnings=FALSE, recursive=TRUE)
+      message("create ", analysisOutputDir)
+      dir.create(analysisOutputDir, showWarnings=FALSE, recursive=TRUE)
     }
     #############################################################################
+    logFile <- cleanFilePath(loggingDir, "mbatch.log")
     setLogging(new("Logging", theFile=logFile))
     #############################################################################
     message("update data to use sample")
+    batchesFileToUse <- currentBatchesFile
+    batchesFileToUse2 <- currentBatchesFile2
     {
       # rename sample id column to Sample
       if("Sample"!=sampleidBatchType)
       {
-        origBatFileOne <- paste(batFile, ".bak2", sep="")
-        file.rename(batFile, origBatFileOne)
-        batchs <- readAsGenericDataframe(origBatFileOne)
+        batchs <- readAsGenericDataframe(currentBatchesFile)
         names(batchs)[names(batchs)==sampleidBatchType] <- "Sample"
-        writeAsGenericDataframe(batFile, batchs)
-        if(file.exists(datFile2))
+        batchesWithSampleColumn <- cleanFilePath(loggingDir, "BatchesWithSampleCol.tsv")
+        message("copy ", currentBatchesFile, " to ", batchesWithSampleColumn)
+        file.copy(currentBatchesFile, batchesWithSampleColumn, overwrite=TRUE)
+        writeAsGenericDataframe(batchesWithSampleColumn, batchs)
+        batchesFileToUse <- batchesWithSampleColumn
+        if(!is.null(currentBatchesFile2))
         {
-          origBatFileTwo <- paste(batFile2, ".bak2", sep="")
-          file.rename(batFile2, origBatFileTwo)
-          batchs <- readAsGenericDataframe(origBatFileTwo)
+          batchs <- readAsGenericDataframe(currentBatchesFile2)
           names(batchs)[names(batchs)==sampleidBatchType] <- "Sample"
-          writeAsGenericDataframe(batFile2, batchs)
+          batchesWithSampleColumn2 <- paste(loggingDir, "BatchesNewSampleCol2.tsv", sep="")
+          message("copy ", currentBatchesFile2, " to ", batchesWithSampleColumn2)
+          file.copy(currentBatchesFile2, batchesWithSampleColumn2, overwrite=TRUE)
+          writeAsGenericDataframe(batchesWithSampleColumn2, batchs)
+          batchesFileToUse2 <- batchesWithSampleColumn2
         }
       }
-    }
-    message("rename data")
-    origDatFile <- paste(datFile, ".bak", sep="")
-    origBatFile <- paste(batFile, ".bak", sep="")
-    origDatFile2 <- paste(datFile2, ".bak", sep="")
-    origBatFile2 <- paste(batFile2, ".bak", sep="")
-    file.rename(datFile, origDatFile)
-    file.rename(batFile, origBatFile)
-    if(file.exists(datFile2))
-    {
-      file.rename(datFile2, origDatFile2)
-      file.rename(batFile2, origBatFile2)
     }
     message("preprocess data")
     filterList <- list()
@@ -418,45 +508,53 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     {
       filterList <- lapply(filteringBatches, function(x) { c(filteringBatchType, x)})
     }
-    preprocessData(origDatFile, origBatFile, datFile, batFile, theSize=0, theTransformFlag=filterLogTransformFlag, theBatchTypeAndValuePairsToRemove=filterList)
-    if(file.exists(origDatFile2))
+    # also writes new matrix.tsv and batches.tsv files
+    preprocessData(currentMatrixFile, batchesFileToUse,
+                   pipelineMatrixFile, pipelineBatchesFile,
+                   theSize=0, theTransformFlag=filterLogTransformFlag,
+                   theBatchTypeAndValuePairsToRemove=filterList,
+                   theLogTransformFile=pipelineLogTransformFile,
+                   theReplaceNAs=replaceNAs)
+    if(!is.null(currentMatrixFile2))
     {
-      preprocessData(origDatFile2, origBatFile2, datFile2, batFile2, theSize=0, theTransformFlag=filterLogTransformFlag2)
+      preprocessData(currentMatrixFile2, batchesFileToUse2,
+                     pipelineMatrixFile2, pipelineBatchesFile2,
+                     theSize=0, theTransformFlag=filterLogTransformFlag2,
+                     theLogTransformFile=pipelineLogTransformFile2,
+                     theReplaceNAs=replaceNAs)
     }
     #############################################################################
     #### do data load
     #############################################################################
     message("load data as needed")
-    # TODO: HERE FIX FILES
     myOriginalData <- NULL
     myOriginalData2 <- NULL
     myMBatchData <- NULL
     myMBatchData2 <- NULL
-    file.exists(datFile)
     if ((!is.null(selectedCorrection)) && ( startsWith(selectedCorrection, "RBN_") ))
     {
       message("Read RBN data")
       if (isTRUE(RBN_UseFirstAsInvariant))
       {
         # TODO: use , theNaStrings=theNaStrings after changing pre-set values
-        myMBatchData <- mbatchLoadFiles(datFile, batFile)
-        myMBatchData2 <- mbatchLoadFiles(datFile2, batFile2)
+        myMBatchData <- mbatchLoadFiles(pipelineMatrixFile, pipelineBatchesFile)
+        myMBatchData2 <- mbatchLoadFiles(pipelineMatrixFile2, pipelineBatchesFile2)
       }
       else
       {
         # TODO: use , theNaStrings=theNaStrings after changing pre-set values
-        myMBatchData <- mbatchLoadFiles(datFile2, batFile2)
-        myMBatchData2 <- mbatchLoadFiles(datFile, batFile)
+        myMBatchData <- mbatchLoadFiles(pipelineMatrixFile, pipelineBatchesFile)
+        myMBatchData2 <- mbatchLoadFiles(pipelineMatrixFile2, pipelineBatchesFile2)
       }
     }
     else if ((!is.null(selectedCorrection)) && ( startsWith(selectedCorrection, "EBN_") ))
     {
       message("Read EBNplus data")
       # EBNplus cannot use the mbatchLoadFiles function, since it filters meaningfule data
-      matrix1 <- readAsGenericMatrix(datFile)
-      matrix2 <- readAsGenericMatrix(datFile2)
-      df1 <- readAsGenericDataframe(batFile)
-      df2 <- readAsGenericDataframe(batFile2)
+      matrix1 <- readAsGenericMatrix(pipelineMatrixFile)
+      matrix2 <- readAsGenericMatrix(pipelineMatrixFile2)
+      df1 <- readAsGenericDataframe(pipelineBatchesFile)
+      df2 <- readAsGenericDataframe(pipelineBatchesFile2)
       # make genes nice
       rownames(matrix1) <- trimGenes(rownames(matrix1))
       rownames(matrix2) <- trimGenes(rownames(matrix2))
@@ -470,10 +568,10 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     else
     {
       message("Read regular data")
-      message(datFile)
-      message(batFile)
+      message(pipelineMatrixFile)
+      message(pipelineBatchesFile)
       # TODO: use , theNaStrings=theNaStrings after changing pre-set values
-      myMBatchData <- mbatchLoadFiles(datFile, batFile)
+      myMBatchData <- mbatchLoadFiles(pipelineMatrixFile, pipelineBatchesFile)
     }
     newBatchTypesForMBatch <- c()
     goodBatchTypes <- names(myMBatchData@mBatches)
@@ -485,6 +583,12 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
       }
     }
     batchTypesForMBatch <- newBatchTypesForMBatch
+    # reduce size as desired
+    # myMBatchData@mData <- mbatchTrimData(myMBatchData@mData, filterMaxValue)
+    # if (!is.null(myMBatchData2))
+    # {
+    #   myMBatchData2@mData <- mbatchTrimData(myMBatchData2@mData, filterMaxValue)
+    # }
     #### do corrections
     if (isTRUE(CDP_Flag))
     {
@@ -496,7 +600,7 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
     }
     if (!is.null(selectedCorrection))
     {
-      myMBatchData <- doCorrectionsFromConfig(theOutputDir=theOutputDir,
+      myMBatchData <- doCorrectionsFromConfig(theOutputDir=correctionDir,
                                               theDataObject=myMBatchData,
                                               theDataObject2=myMBatchData2,
                                               theSelectedBatchToCorrect=selectedBatchToCorrect,
@@ -511,16 +615,18 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
                                               theEBNPlus_GroupId1=EBNPlus_GroupId1,
                                               theEBNPlus_GroupId2=EBNPlus_GroupId2,
                                               theEBNPlus_Seed=EBNPlus_Seed,
-                                              theEBNPlus_MinSamples=EBNPlus_MinSamples)
+                                              theEBNPlus_MinSamples=EBNPlus_MinSamples,
+                                              theDataVersion=myDataVersion,
+                                              theTestVersion=myTestVersion)
     }
     if ((!is.null(selectedCorrection))&&(is.null(myMBatchData)))
     {
       # correction not performed, one batch
-      # set flog for other than full success
+      # set flag for other than full success
       otherNote <- TRUE
       #############################################################################
-      message("Write completed note to '", cleanFilePath(theOutputDir, "MBATCH_COMPLETED.txt"), "'")
-      file.create(cleanFilePath(theOutputDir, "MBATCH_COMPLETED.txt"))
+      message("Write completed note to '", cleanFilePath(analysisOutputDir, "MBATCH_COMPLETED.txt"), "'")
+      file.create(cleanFilePath(analysisOutputDir, "MBATCH_COMPLETED.txt"))
     }
     else
     {
@@ -548,9 +654,19 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
                                          theMinSd=0,
                                          theMinMad=0)
       }
+      #
+      # MutBatch single-dataset is now part of normal run
+      #
+      mutBatchSingle(myMBatchData, title, analysisOutputDir, myDataVersion, myTestVersion,
+                     theThreads=mutBatchThreads,
+                     thePvalueCutoff=mutBatchPvalueCutoff,
+                     theZScoreCutoff=mutBatchZscoreCutoff,
+                     theBatchTypes=batchTypesForMBatch)
       #### do assessments
       # do not use sampleidBatchType, since that column has been changed to "Sample"
-      rdataHC <- doAssessmentsFromConfig(theOutputDir=theOutputDir,
+      rdataHCvector <- doAssessmentsFromConfig(theOutputDir=analysisOutputDir,
+                                         theDataVersion=myDataVersion,
+                                         theTestVersion=myTestVersion,
                               theDataObject=myMBatchData,
                               theTitle=title,
                               thePermutations=selectedDSCPermutations,
@@ -560,56 +676,59 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
                               theDSCMaxGenes=selectedDSCMaxGeneCount,
                               theBoxplotMaxGenes=selectedBoxplotMaxGeneCount,
                               theMinBatchSize=selectedDSCMinBatchSize,
-                              thePCAMem=thePCAMem,
-                              theBoxplotMem=theBoxplotMem,
-                              theTRINOVAtypes=batchTypesForTRINOVA,
                               theNgchmRowType=ngchmRowType,
-                              theNgchmColumnType =ngchmColumnType,
+                              theNgchmColumnType=ngchmColumnType,
                               theShaidyMapGen=theShaidyMapGen,
                               theNgchmWidgetJs=theNgchmWidgetJs,
                               theShaidyMapGenJava=theShaidyMapGenJava,
                               theNGCHMShaidyMem=theNGCHMShaidyMem,
                               theNgchmFeatureMapFile=ngchmFeatureMapFile)
+      message("rdataHCvector=", paste(rdataHCvector, sep=", ", collase=", "))
+      rdataHCsample <- rdataHCvector[[1]]
+      rdataHCfeature <- rdataHCvector[[2]]
+      message("rdataHCsample=", rdataHCsample)
+      message("rdataHCfeature=", rdataHCfeature)
       if(isTRUE(theRunPostFlag))
       {
-        buildDSCOverviewFile(theOutputDir, theOutputDir, theOutputDir, "DSCOverview.tsv", theOutputDir)
+        pcaOutputDir <- cleanFilePath(analysisOutputDir, "PCA")
+        dscOutputDir <- cleanFilePath(analysisOutputDir, "DSC")
+        dscOutputDir <- addVersionsIfNeeded(dscOutputDir, myDataVersion, myTestVersion)
+        message("buildDSCOverviewFile analysisOutputDir = ", analysisOutputDir)
+        message("buildDSCOverviewFile dscOutputDir = ", dscOutputDir)
+        buildDSCOverviewFile(pcaOutputDir, dscOutputDir, analysisOutputDir, "DSCOverview.tsv")
       }
       #############################################################################
       if (isTRUE(selectedNgchmFlag))
       {
-        if (!is.null(rdataHC))
-        {
-          warnLevel<-getOption("warn")
-          on.exit(options(warn=warnLevel))
-          options(warn=-1)
-          myBatchType <- "All"
-          message("title ", title)
-          message("myBatchType ", myBatchType)
-          message("theShaidyMapGen ", theShaidyMapGen)
-          message("theShaidyMapGenJava ", theShaidyMapGenJava)
-          message("dim(myMBatchData@mData) ", dim(myMBatchData@mData))
-          message("dim(myMBatchData@mBatches) ", dim(myMBatchData@mBatches))
-          message("trim to same size as hierarchical 1")
-          myMBatchData <- as.numericWithIssues(myMBatchData)
-          ngchmData <- mbatchTrimData(myMBatchData@mData, theMaxSize = (selectedBoxplotMaxGeneCount * ncol(myMBatchData@mData)))
-          buildBatchHeatMapFromHC_Structures(theMatrixData=ngchmData,
-                                       theBatchData=myMBatchData@mBatches,
-                                       theTitle=paste(title, myBatchType, sep=" "),
-                                       theOutputFile=cleanFilePath(cleanFilePath(theOutputDir, "NGCHM"), paste(myBatchType, "ngchm.ngchm", sep="_")),
-                                       theColDendRDataFile=rdataHC,
-                                       theRowDendRDataFile=NULL,
-                                       theNgchmFeatureMapFile=ngchmFeatureMapFile,
-                                       theRowType=ngchmRowType, theColType=ngchmColumnType,
-                                       theRowCluster=c("pearson", "ward.D2"),
-                                       theShaidyMapGen=theShaidyMapGen,
-                                       theNgchmWidgetJs=theNgchmWidgetJs,
-                                       theShaidyMapGenJava=theShaidyMapGenJava,
-                                       theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
-        }
-        else
-        {
-          message("no HC data, so skip NGCHM")
-        }
+        warnLevel<-getOption("warn")
+        on.exit(options(warn=warnLevel))
+        options(warn=-1)
+        myBatchType <- "All"
+        message("title ", title)
+        message("myBatchType ", myBatchType)
+        message("theShaidyMapGen ", theShaidyMapGen)
+        message("theShaidyMapGenJava ", theShaidyMapGenJava)
+        message("dim(myMBatchData@mData) ", dim(myMBatchData@mData))
+        message("dim(myMBatchData@mBatches) ", dim(myMBatchData@mBatches))
+        message("trim to same size as hierarchical 1")
+        myMBatchData <- as.numericWithIssues(myMBatchData)
+        ngchmData <- mbatchTrimData(myMBatchData@mData, theMaxSize = (selectedBoxplotMaxGeneCount * ncol(myMBatchData@mData)))
+        buildBatchHeatMapFromHC_Structures(theMatrixData=ngchmData,
+                                     theBatchData=myMBatchData@mBatches,
+                                     theTitle=paste(title, myBatchType, sep=" "),
+                                     theOutputDir=cleanFilePath(analysisOutputDir, "NGCHM"),
+                                     theDataVersion=myDataVersion,
+                                     theTestVersion=myTestVersion,
+                                     theOutputFilename=paste(myBatchType, "ngchm.ngchm", sep="_"),
+                                     theColDendRDataFile=rdataHCsample,
+                                     theRowDendRDataFile=NULL,
+                                     theNgchmFeatureMapFile=ngchmFeatureMapFile,
+                                     theRowType=ngchmRowType, theColType=ngchmColumnType,
+                                     theRowCluster=c("pearson", "ward.D2"),
+                                     theShaidyMapGen=theShaidyMapGen,
+                                     theNgchmWidgetJs=theNgchmWidgetJs,
+                                     theShaidyMapGenJava=theShaidyMapGenJava,
+                                     theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
       }
       #############################################################################
       if (isTRUE(CDP_Flag))
@@ -618,14 +737,15 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
         warnLevel<-getOption("warn")
         on.exit(options(warn=warnLevel))
         options(warn=-1)
-        if (!file.exists(cleanFilePath(theOutputDir, "CDP")))
+        outdir <- addVersionsIfNeeded(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion, myTestVersion)
+        if (!file.exists(outdir))
         {
-          dir.create(cleanFilePath(theOutputDir, "CDP"),showWarnings = FALSE, recursive = TRUE)
+          dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
         }
-        CDP_Structures(cleanFilePath(cleanFilePath(theOutputDir, "CDP"), "CDP_Plot_Data1_Diagram.PNG"), myOriginalData@mData, myMBatchData@mData, "CDP Output 1")
+        CDP_Structures(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion, myTestVersion, "CDP_Plot_Data1_Diagram.PNG", myOriginalData@mData, myMBatchData@mData, "CDP Output 1")
         if (!is.null(myOriginalData2))
         {
-          CDP_Structures(cleanFilePath(cleanFilePath(theOutputDir, "CDP"), "CDP_Plot_Data2_Diagram.PNG"), myOriginalData2@mData, myMBatchData@mData, "CDP Output 2")
+          CDP_Structures(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion, myTestVersion, "CDP_Plot_Data2_Diagram.PNG", myOriginalData2@mData, myMBatchData@mData, "CDP Output 2")
         }
       }
     }
@@ -633,17 +753,28 @@ mbatchRunFromConfig <- function(theConfigFile, theDataDir,
   if (isFALSE(otherNote))
   {
     #############################################################################
-    message("Write success note to '", cleanFilePath(theOutputDir, "MBATCH_SUCCESS.txt"), "'")
-    file.create(cleanFilePath(theOutputDir, "MBATCH_SUCCESS.txt"))
+    message("Write success note to '", cleanFilePath(analysisOutputDir, "MBATCH_SUCCESS.txt"), "'")
+    file.create(cleanFilePath(analysisOutputDir, "MBATCH_SUCCESS.txt"))
   }
+  # copy current ZIP-DATA to Versioned ZIP-DATA
+  # current original and pipeline directories
+  # zipDataCurrentOrigDir <- convertNulls(zipDataFiles[9])
+  # zipDataCurrentPipeDir <- convertNulls(zipDataFiles[10])
+  # directory to be created and populated with original and pipeline data files
+  # zipDataVersionDir <- convertNulls(zipDataFiles[10])
+  dir.create(zipDataVersionDir, recursive=TRUE, showWarnings=FALSE)
+  message("Copy from ", zipDataCurrentOrigDir, " to ", zipDataVersionDir)
+  file.copy(zipDataCurrentOrigDir, zipDataVersionDir, recursive=TRUE)
+  message("Copy from ", zipDataCurrentPipeDir, " to ", zipDataVersionDir)
+  file.copy(zipDataCurrentPipeDir, zipDataVersionDir, recursive=TRUE)
 }
 
 
-doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
+doAssessmentsFromConfig <- function(theOutputDir, theDataVersion, theTestVersion,
+                                    theDataObject, theTitle,
                                     thePermutations, thePermutationThreads, theMaxSize,
                                     theSeed, theDSCMaxGenes, theBoxplotMaxGenes,
-                                    theMinBatchSize, thePCAMem, theBoxplotMem,
-                                    theTRINOVAtypes,
+                                    theMinBatchSize,
                                     theNgchmRowType,
                                     theNgchmColumnType,
                                     theShaidyMapGen,
@@ -661,30 +792,24 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
   ####
   #### UMAP
   ####
-  callMBatch_UMAP_Structures(theOutputDir, theDataObject, theTitle)
+  callMBatch_UMAP_Structures(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle)
   ####
   #### PCAPlus
   ####
-  callMBatch_PCA_Structures(theOutputDir, theDataObject, theTitle,
+  callMBatch_PCA_Structures(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle,
                             theIsPcaTrendFunction=isTrendBatch,
                             theDSCPermutations=thePermutations,
                             theDSCThreads=thePermutationThreads,
                             theMinBatchSize=theMinBatchSize,
-                            theJavaParameters=c(paste(c("-Xms", "-Xmx"), thePCAMem, sep=""), "-Djava.awt.headless=true", "-Xss8m"),
                             theSeed=theSeed,
                             theMaxGeneCount=theDSCMaxGenes)
   ####
   #### HierarchicalClustering
   ####
-  rdataHC <- callMBatch_HierarchicalClustering_Structures(theOutputDir, theDataObject, theTitle, theBoxplotMaxGenes)
-  ####
-  #### TRINOVA
-  ####
-  # commented out: does not run reliably. In BEI, produces:
-  # ANOVA F-tests on an essentially perfect fit are unreliable
-  # Which claims to be a warning, but acts like an error
-  #message("call callMBatch_TRINOVA_Structures")
-  #callMBatch_TRINOVA_Structures(theOutputDir, theDataObject, theTitle, theTRINOVAtypes, theSampleType)
+  rdataHCVector <- callMBatch_HierarchicalClustering_Structures(theOutputDir, theDataVersion, theTestVersion,
+                                                          theDataObject, theTitle, theBoxplotMaxGenes)
+  rdataHCsample <- rdataHCVector[[1]]
+  rdataHCfeature <- rdataHCVector[[2]]
   ####
   #### SupervisedClustering
   ####
@@ -692,7 +817,7 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
   {
     superMatrix <- mbatchTrimData(theDataObject@mData, theMaxSize = (theBoxplotMaxGenes * ncol(theDataObject@mData)))
     mySuperData<-new("BEA_DATA", superMatrix, theDataObject@mBatches, data.frame())
-    callMBatch_SupervisedClustering_Structures(theOutputDir, mySuperData, theTitle,
+    callMBatch_SupervisedClustering_Structures(theOutputDir, theDataVersion, theTestVersion, mySuperData, theTitle,
                                                theShaidyMapGen, theNgchmWidgetJs, theShaidyMapGenJava, theNGCHMShaidyMem,
                                                theNgchmRowType,
                                                theNgchmColumnType,
@@ -705,29 +830,35 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataObject, theTitle,
   {
     mean(x, na.rm=TRUE)
   }
-  callMBatch_BoxplotAllSamplesData_Structures(theOutputDir, theDataObject, theTitle,
+  message("call callMBatch_BoxplotAllSamplesData_Structures")
+  print("call callMBatch_BoxplotAllSamplesData_Structures")
+  callMBatch_BoxplotAllSamplesData_Structures(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle,
                                               theMaxGeneCount=theBoxplotMaxGenes)
-  callMBatch_BoxplotAllSamplesRLE_Structures(theOutputDir, theDataObject, theTitle,
+  message("call callMBatch_BoxplotAllSamplesRLE_Structures")
+  print("call callMBatch_BoxplotAllSamplesRLE_Structures")
+  callMBatch_BoxplotAllSamplesRLE_Structures(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle,
                                              theMaxGeneCount=theBoxplotMaxGenes)
-  callMBatch_BoxplotGroup_Structures(theOutputDir, theDataObject, theTitle,
+  message("call callMBatch_BoxplotGroup_Structures")
+  print("call callMBatch_BoxplotGroup_Structures")
+  callMBatch_BoxplotGroup_Structures(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle,
                                      theMaxGeneCount=theBoxplotMaxGenes,
                                      theFunction=list(pipelineMean), theFunctionName=list("Mean"))
-  if (!file.exists(cleanFilePath(theOutputDir, "BatchData.tsv")))
-  {
-    writeAsGenericDataframe(cleanFilePath(theOutputDir, "BatchData.tsv"), theDataObject@mBatches)
-  }
   ####
   #### write success
   ###
   message("Processing success")
   mbatchWriteSuccessfulLog()
-  rdataHC
+  list(rdataHCsample, rdataHCfeature)
 }
 
 doCorrectionsFromConfig <- function(theOutputDir, theDataObject, theDataObject2,
-                                    theSelectedBatchToCorrect, theSelectedCorrection, thePermutationThreads, theNaStrings,
-                                    theRBN_InvariantId, theRBN_VariantId, theRBN_Matched, theRBN_InvariantReps, theRBN_VariantReps,
-                                    theEBNPlus_GroupId1, theEBNPlus_GroupId2, theEBNPlus_Seed, theEBNPlus_MinSamples)
+                                    theSelectedBatchToCorrect, theSelectedCorrection,
+                                    thePermutationThreads, theNaStrings,
+                                    theRBN_InvariantId, theRBN_VariantId, theRBN_Matched,
+                                    theRBN_InvariantReps, theRBN_VariantReps,
+                                    theEBNPlus_GroupId1, theEBNPlus_GroupId2,
+                                    theEBNPlus_Seed, theEBNPlus_MinSamples,
+                                    theDataVersion, theTestVersion)
 {
   processed <- FALSE
   myCorrectedFile <- NULL
@@ -870,7 +1001,7 @@ doCorrectionsFromConfig <- function(theOutputDir, theDataObject, theDataObject2,
   {
     #theDataObject, theDataObject2, theEBNPlus_Batch1, theEBNPlus_Batch2, theEBNPlus_GroupId1, theEBNPlus_GroupId2, theEBNPlus_Seed,
     processed <- TRUE
-    correctedFile <- cleanFilePath(theOutputDir, "ANY_Corrections-EBNPlus.tsv")
+    correctedFile <- cleanFilePath(theOutputDir, "corrected_matrix.tsv")
     print(dim(theDataObject@mData))
     print(dim(theDataObject2@mData))
     dataMatrix <- EBNPlus_Correction_Structures(theDataMatrix1=theDataObject@mData,
@@ -883,7 +1014,10 @@ doCorrectionsFromConfig <- function(theOutputDir, theDataObject, theDataObject2,
                                                 theEBNP_ParametricPriorsFlag=TRUE,
                                                 theSeed=theEBNPlus_Seed,
                                                 theEBNP_MinSampleNum=theEBNPlus_MinSamples,
-                                                theEBNP_PriorPlotsFile=cleanFilePath(theOutputDir, "priorplots_Diagram.PNG"))
+                                                theOutputDir=theOutputDir,
+                                                theDataVersion=theDataVersion,
+                                                theTestVersion=theTestVersion,
+                                                thePriorFile="priorplots_Diagram.PNG")
     writeAsGenericMatrix(correctedFile, dataMatrix)
     dataBatches <- EBNPlus_CombineBatches(theBeaBatches1=theDataObject@mBatches,
                                       theBeaBatches2=theDataObject2@mBatches,
@@ -896,7 +1030,20 @@ doCorrectionsFromConfig <- function(theOutputDir, theDataObject, theDataObject2,
   {
     stop("Unrecognized correction")
   }
-
+  if ((!is.null(dataMatrix))&&(TRUE==processed))
+  {
+    # if log transformed, save an untransformed version
+    # ../../../ZIP-DATA/current/pipeline/logTransform.txt
+    logTransformFile <- file.path(dirname(dirname(dirname(theOutputDir))), "ZIP-DATA", "current", "pipeline", "logTransform.txt")
+    if (file.exists(logTransformFile))
+    {
+      pquantile <- read_file(logTransformFile)
+      pquantile <- as.numeric(pquantile)
+      unlogt <- 2^dataMatrix
+      unlogt <- unlogt - pquantile
+      writeAsGenericDataframe(theFile=cleanFilePath(theOutputDir, "correction_unlogtransformed.tsv"), theDataframe=unlogt)
+    }
+  }
   if ((!is.null(dataMatrix))&&(TRUE==processed))
   {
     # if have data info and processing was done, return new data object

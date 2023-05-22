@@ -7,8 +7,9 @@ A function to perform Supervised Clustering for pairs of batch types
 from data in files.
 }
 \usage{
-SupervisedClustering_Pairs_Structures(theData, theTitle, theOutputPath,
+SupervisedClustering_Pairs_Structures(theData, theTitle, theOutputDir,
 theListOfBatchPairs,
+theDataVersion, theTestVersion,
 theBatchTypeAndValuePairsToRemove=list(),
 theBatchTypeAndValuePairsToKeep=list()
 )
@@ -18,11 +19,15 @@ theBatchTypeAndValuePairsToKeep=list()
   \item{theData}{An instance of BEA_DATA \code{\link{BEA_DATA-class}}}
   \item{theTitle}{Object of class \code{"character"}
   Title to use in PNG files. }
-  \item{theOutputPath}{Object of class \code{"character"}
+  \item{theOutputDir}{Object of class \code{"character"}
   Directory in which to place output PNG files. }
   \item{theListOfBatchPairs}{Object of class \code{"vector"}
   A list of strings, where pairs of strings give batch types
   to use for pairs assessment. Use c("") for empty set. }
+	\item{theDataVersion}{Object of class \code{"character"} Version of the data prefaced
+	with DATA_, such as DATA_2022-09-09-1600. Use empty string to not include. }
+	\item{theTestVersion}{Object of class \code{"character"} Version of the test prefaced
+	with TEST_, such as TEST_2022-10-10-1300. Use empty string to not include. }
   \item{theBatchTypeAndValuePairsToRemove}{Object of class \code{"list"}
   A list of vectors containing the batch type (or * for all types)
   and the value to remove.
@@ -57,5 +62,7 @@ theBatchTypeAndValuePairsToKeep=list()
 #	###
 #	SupervisedClustering_Pairs_Structures(myData, myTitle, myOutputPath, list(),
 #     list(),
+#     theDataVersion="DATA_2022-09-09-1600",
+#     theTestVersion="TEST_2022-10-10-1300",
 #     theListOfBatchPairs=c("PlateId", "TSS", "BatchId", "TSS"))
 }

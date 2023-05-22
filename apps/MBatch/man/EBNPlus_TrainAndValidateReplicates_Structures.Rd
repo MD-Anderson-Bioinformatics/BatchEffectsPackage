@@ -9,7 +9,9 @@ EBNPlus_TrainAndValidateReplicates_Structures(theDataMatrix1, theDataMatrix2,
 theBatchId1, theBatchId2, theEBNP_BatchWithZero, theEBNP_FixDataSet,
 theEBNP_CorrectForZero, theEBNP_ParametricPriorsFlag,
 theEBNP_ValidationRatio, theEBNP_TestRatio=0, theSeed = NULL,
-theEBNP_PriorPlotsFile=NULL, theEBNP_MinSampleNum = 3,
+thePriorPlotPath=NULL, theDataVersion=NULL,
+theTestVersion=NULL, thePriorPlotFile=NULL,
+theEBNP_MinSampleNum = 3,
 theEBNP_AddData1Rows = FALSE, theEBNP_AddData2Rows = FALSE,
 theTestSeed=NULL)
 }
@@ -42,9 +44,14 @@ theTestSeed=NULL)
   for the test set with 67 percent for training. }
   \item{theSeed}{NULL or a seed to use. Defaults to NULL.
   This is passed to the standard R set.seed function.}
-  \item{theEBNP_PriorPlotsFile}{Defaults to NULL and does not create PNG.
-  Non-NULL should be
-  the full path and filename for where to create the prior plots PNG.}
+  \item{thePriorPlotPath}{Defaults to NULL and does not create PNG.
+  Non-NULL path for where to create the prior plots PNG.}
+  \item{theDataVersion}{Object of class \code{"character"} Version of the data prefaced
+	with DATA_, such as DATA_2022-09-09-1600. Use empty string to not include. }
+	\item{theTestVersion}{Object of class \code{"character"} Version of the test prefaced
+	with TEST_, such as TEST_2022-10-10-1300. Use empty string to not include. }
+	\item{thePriorPlotFile}{Defaults to NULL and does not create PNG.
+  Filename for prior plots PNG.}
   \item{theEBNP_MinSampleNum}{Defaults to 3. Any row (gene) with less than
   this number of samples is dropped.}
   \item{theEBNP_AddData1Rows}{Defaults to FALSE. TRUE indicates rows in
@@ -56,6 +63,20 @@ theTestSeed=NULL)
   This is used only when creating Test Set.}
 }
 \details{
+Use EBNPlus_Correction_Structures for Corrections
+
+Use the EBNPlus_Correction_Structures function to performed
+corrections.
+
+For most users, the function EBNPlus_Correction_Structures
+is what you want to use for processing. It is designed
+specifically to do corrections. The EBNPlus_TrainAndValidate
+functions are for researchers interested in the internal
+workings of the EBNPlus algorithm.
+
+See the tests/EBNPlus_Correction_Structures.R or
+tests/EBNPlus_Correction_Files.R for details.
+
 Take two matrices and determine training and validation data sets.
 Using the EBNPlus algorithm and the provided arguments,
 performing the training and validation corrections.
@@ -67,10 +88,8 @@ A list of matrices.
   \item{TrainingSet1}{a matrix of the training set from data set 1}
   \item{TrainingSet2}{a matrix of the training set from data set 2}
   \item{TrainingResults}{a matrix of the corrected training data}
-  \item{ValidationSet1}{a matrix of the validation set from data set 1}
-  \item{ValidationSet2}{a matrix of the validation set from data set 2}
-  \item{ValidationResults}{a matrix of the corrected validation data}
-  \item{CorrectedResults}{If Validation Ratio is 0, the validation set values
-  will be 0 x 0 matrices, but this list member will contain a matrix of
-  corrected values, using all replicates.}
+  \item{ValidationSet1}{a matrix of the validation set from data set 1. May be NULL or 0x0 if doing corrections.}
+  \item{ValidationSet2}{a matrix of the validation set from data set 2. May be NULL or 0x0 if doing corrections.}
+  \item{ValidationResults}{a matrix of the corrected validation data. May be NULL or 0x0 if doing corrections.}
+  \item{CorrectedResults}{May be NULL or 0x0 if not doing corrections.}
 }

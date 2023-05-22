@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -46,22 +46,26 @@ if (!is.null(inputDir))
   # here, we take most defaults
   Boxplot_Group_Structures(theData=myData,
                            theTitle="Test",
-                           theOutputPath=theOutputDir,
+                           theOutputDir=theOutputDir,
                            theBatchTypeAndValuePairsToRemove=NULL,
                            theBatchTypeAndValuePairsToKeep=NULL,
                            theListOfGroupBoxFunction=list(function(x) {mean(x)}),
                            theListOfGroupBoxLabels=list("Mean"),
+                           theDataVersion="DATA_2022-09-09-1600",
+                           theTestVersion="TEST_2022-10-10-1300",
                            theMaxGeneCount=10000)
   ########################
-  correctedDataframe <- readAsGenericDataframe(cleanFilePath(cleanFilePath(theOutputDir, "Group-Mean"), "BoxPlot_Group-Mean_BoxData-TSS.tsv"))
+  resultsPath <- cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "Group-Mean"), "DATA_2022-09-09-1600"), "TEST_2022-10-10-1300")
+  ########################
+  correctedDataframe <- readAsGenericDataframe(cleanFilePath(resultsPath, "BoxPlot_Group-Mean_BoxData-TSS.tsv"))
   compareDataframe <- readAsGenericDataframe(theCompareFileBox)
   comparedBox <- compareTwoDataframes(correctedDataframe, compareDataframe)
   ########################
-  correctedDataframe <- readAsGenericDataframe(cleanFilePath(cleanFilePath(theOutputDir, "Group-Mean"), "BoxPlot_Group-Mean_Annotations-TSS.tsv"))
+  correctedDataframe <- readAsGenericDataframe(cleanFilePath(resultsPath, "BoxPlot_Group-Mean_Annotations-TSS.tsv"))
   compareDataframe <- readAsGenericDataframe(theCompareFileAnn)
   comparedAnn <- compareTwoDataframes(correctedDataframe, compareDataframe)
   ########################
-  correctedDataframe <- readAsGenericDataframe(cleanFilePath(cleanFilePath(theOutputDir, "Group-Mean"), "BoxPlot_Group-Mean_Histogram-TSS.tsv"))
+  correctedDataframe <- readAsGenericDataframe(cleanFilePath(resultsPath, "BoxPlot_Group-Mean_Histogram-TSS.tsv"))
   compareDataframe <- readAsGenericDataframe(theCompareFileHis)
   comparedHis <- compareTwoDataframes(correctedDataframe, compareDataframe)
   ########################

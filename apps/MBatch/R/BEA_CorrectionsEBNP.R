@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -25,7 +25,10 @@ BeaEBNPlus <- function(theBeaData1,
 											 theEBNP_ValidationRatio,
 											 theEBNP_TestRatio,
 											 theEBNP_ParametricPriorsFlag=TRUE,
-											 theEBNP_PriorPlotsFile=NULL,
+											 thePriorPlotPath=NULL,
+											 theDataVersion=NULL,
+											 theTestVersion=NULL,
+											 thePriorPlotFile=NULL,
 											 theEBNP_MinSampleNum=3,
 											 theEBNP_AddData1Rows=FALSE,
 											 theEBNP_AddData2Rows=FALSE,
@@ -35,6 +38,14 @@ BeaEBNPlus <- function(theBeaData1,
 	logDebug(getMBatchVersion())
 	logDebug("BeaEBNPlus theEBNP_AddData1Rows=", theEBNP_AddData1Rows)
 	logDebug("BeaEBNPlus theEBNP_AddData2Rows=", theEBNP_AddData2Rows)
+	priorPlotFile <- NULL
+	if (!is.null(thePriorPlotFile))
+	{
+	  priorPlotPath <- addVersionsIfNeeded(thePriorPlotPath, theDataVersion, theTestVersion)
+	  checkDirForCreation(priorPlotPath)
+	  priorPlotFile <- file.path(priorPlotPath, thePriorPlotFile)
+	}
+	logDebug("priorPlotFile=", priorPlotFile)
 	foo <- NULL
 	#tryCatch(
 		foo <- EBNPlus(
@@ -53,7 +64,7 @@ BeaEBNPlus <- function(theBeaData1,
 			theEBNP_ParametricPriorsFlag=theEBNP_ParametricPriorsFlag,
 			theEBNP_ValidationRatio=theEBNP_ValidationRatio,
 			theEBNP_TestRatio=theEBNP_TestRatio,
-			theEBNP_PriorPlotsFile=theEBNP_PriorPlotsFile,
+			theEBNP_PriorPlotsFile=priorPlotFile,
 			theEBNP_MinSampleNum=theEBNP_MinSampleNum,
 			theEBNP_AddData1Rows=theEBNP_AddData1Rows,
 			theEBNP_AddData2Rows=theEBNP_AddData2Rows,

@@ -1,14 +1,14 @@
 Package: MBatchUtils
 Title: MBatchUtils: Utility Functions for MBatch
-Version: 1.7.5
-Date: 2021-07-13
+Version: 2.0.0
+Date: 2022-02-22
 Author:			Rehan Akbani <rakbani@mdanderson.org>
 				Tod Casasent <tdcasasent@mdanderson.org>
 				Bradley Broom <bbroom@mdanderson.org>
 				John Weinstein <jweinstein@mdanderson.org>
 Maintainer: Rehan Akbani <rakbani@mdanderson.org>
-Depends: R (>= 4.0.2), MBatch, NGCHM
-Imports: methods, ClassDiscovery, dunn.test, rJava, Cairo
+Depends: R (>= 4.1), MBatch, NGCHM
+Imports: methods, ClassDiscovery, dunn.test, Cairo, reticulate, readr
 Suggests: knitr,
     rmarkdown
 Description: BEA_VERSION_TIMESTAMP MBatchUtils is an R package that adds utility functions and optional assessment algorithms for use with MBatch.

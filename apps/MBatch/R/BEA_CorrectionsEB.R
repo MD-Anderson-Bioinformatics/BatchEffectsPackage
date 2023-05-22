@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -66,7 +66,8 @@ EB <- function(dat, si, par.prior=TRUE, by='Batch', covariates=NULL, prior.plots
 	###############################
 	### End of loading functions
 	##############################
-	logDebug("EB start")
+  logDebug("EB start")
+  logDebug("EB theNumberOfThreads=", theNumberOfThreads)
   stopifnotWithLogging("Data sample ids must match batch sample ids and be in sorted order", all(colnames(dat)==rownames(si)))
   stopifnotWithLogging("requested batches and covariates should be in batch information", all(c(by, covariates) %in% colnames(si)))
 	if(any(apply(dat,2,mode)!='numeric'))
@@ -205,9 +206,10 @@ EB <- function(dat, si, par.prior=TRUE, by='Batch', covariates=NULL, prior.plots
 	gamma.star <- delta.star <- NULL
 	if(par.prior)
 	{
-		logDebug("Finding parametric adjustments")
 		for (i in 1:n.batch)
 		{
+		  logDebug("Finding parametric adjustments")
+		  logDebug("Parametric batch num ", i, " of ", n.batch)
 			temp <- it.sol(s.data[,batches[[i]], drop=FALSE],gamma.hat[i,],delta.hat[i,],gamma.bar[i],t2[i],a.prior[i],b.prior[i])
 			gamma.star <- rbind(gamma.star,temp[1,])
 			delta.star <- rbind(delta.star,temp[2,])
@@ -218,6 +220,7 @@ EB <- function(dat, si, par.prior=TRUE, by='Batch', covariates=NULL, prior.plots
 		logDebug("Finding nonparametric adjustments")
 		for (i in 1:n.batch)
 		{
+		  logDebug("Nonparametric batch num ", i, " of ", n.batch)
 			temp <- int.eprior(as.matrix(s.data[,batches[[i]]]), gamma.hat[i,], delta.hat[i,], theNumberOfThreads)
 			gamma.star <- rbind(gamma.star,temp[1,])
 			delta.star <- rbind(delta.star,temp[2,])

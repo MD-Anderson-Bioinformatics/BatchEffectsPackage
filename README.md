@@ -17,11 +17,6 @@ The new data repo is https://github.com/MD-Anderson-Bioinformatics/BatchEffectsP
 |MBatch (R)|R package for basic Batch Effects|
 |MBatchUtils (R)|R package for MutBatch, running from config, and making ZIP archives|
 |BEVIndex (app)|Used by MBatchUtils to make ZIP Archives|
-|DscJava (app)|Java code for computing DSC values, used by MBatch|
-|LegendJava (app)|Java code for writing legends, used by MBatch|
-|ReadRJava (app)|Java code for reading large TSVs, used by MBatch|
-|DebianRJava (docker)|Base image with R and Java|
-|MBatchImageSA (docker)|Image with MBatch R packages|
 
 # MBatch Stand-Alone Docker Image
 
@@ -36,11 +31,11 @@ Permissions or ownership of the directories may need to be changed or matched to
 
 In the directory with the docker-compose.yml file run:
 
-	docker-compose -f docker-compose.yml up --no-build -d
+	docker compose -f docker-compose.yml up --no-build -d
 
 You can stop it with:
 
-	docker-compose -f docker-compose.yml down
+	docker compose -f docker-compose.yml down
 
 To connect on the command line as the default user (2002) use:
 
@@ -60,38 +55,67 @@ The documentation directort contains several kinds of documentation for MBatch:
 
 Downloads and details on Standardized Data are available at http://bioinformatics.mdanderson.org/TCGA/databrowser/
 
+## MBatch Python Environment
+
+MBatch requires a Python environment with Anaconda.
+
+Something similar to this should allow setup on Linux.
+
+```
+wget https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh
+mkdir /home/bcbuser/conda
+# do not use unattended install so you can select automatic init
+bash /home/bcbuser/Anaconda3-2022.05-Linux-x86_64.sh /home/bcbuser/conda -f
+source /home/bcbuser/conda/bin/activate
+conda init
+conda update -y conda
+```
+
+Then do required installs, similar to this:
+
+```
+conda create -y -n gendev
+conda activate gendev
+conda install -y -c conda-forge python==3.9
+conda install -y -c conda-forge pandas
+conda install -y -c conda-forge numpy
+conda install -y -c conda-forge matplotlib
+conda install -y -c conda-forge pillow
+conda install -y -c conda-forge jsonpickle
+conda install -y -c conda-forge xmltodict
+```
+Then you can install the MBatch Python Package:
+
+```
+conda activate gendev
+pip install git+https://github.com/MD-Anderson-Bioinformatics/BatchEffectsPackage.git#egg=mbatch&subdirectory=apps/PyMBatch
+```
+
 ## MBatch R Package
 
-If you have the equivalent of Java 8 and R 4+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
+If you are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
 
 ```R
-# required CRAN packages
-install.packages(c("rJava", "devtools", "Cairo", "epiR", "gtools", "mclust", "squash", "httr", "eulerr"), dependencies=TRUE, repos = "http://cloud.r-project.org/")
+install.packages(c("BiasedUrn", "Cairo", "covr", "devtools", "dunn.test", "gert", "htmlwidgets", "httr", "jsonlite", "lubridate", "magick", "mclust", "pander", "reticulate", "rversions", "sf", "shiny", "squash", "usethis", "uwot"), dependencies=TRUE, repos = "http://cran.r-project.org")
 
-# required Bioconductor packages
-source("http://bioconductor.org/biocLite.R")
-biocLite(c("limma","RBGL","graph","Biobase"), ask="a")
-install.packages(c("oompaBase", "ClassDiscovery", "PreProcess"), dependencies=TRUE, repos=c("http://cloud.r-project.org", "http://silicovore.com/OOMPA/"))
+#Install version 2.0.40, anything newer fails to install
+install.packages("https://cran.r-project.org/src/contrib/Archive/epiR/epiR_2.0.40.tar.gz", dependencies=TRUE, repos = "http://cran.r-project.org")
+
+install.packages("BiocManager", dependencies=TRUE, repos = "http://cran.r-project.org")
+BiocManager::install(c("Biobase"), update=FALSE)
+
+install.packages(c("oompaBase", "ClassDiscovery", "PreProcess"), dependencies=TRUE, repos=c("http://cran.r-project.org", "http://silicovore.com/OOMPA/"))
+
+library(devtools)
+devtools::install_github("jlmelville/vizier")
+devtools::install_github('MD-Anderson-Bioinformatics/tsvio')
+devtools::install_github('MD-Anderson-Bioinformatics/NGCHMSupportFiles', ref='main')
+devtools::install_github('MD-Anderson-Bioinformatics/NGCHM-R')
 
 ## MBatch package
 devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MBatch")
 ```
-Test data has been moved to a different repository, to address the issue where GitHub throttling code causes the devtools::install_github command to fail.
-
-# MBatchUtils R Package
-
-If you have the equivalent of Java 8 and R 4+ installed on your machine, and are familiar with your OS prerequisites and R package installation, the following quickstart instructions may allow quick installation.
-
-
-First install MBatch, as provided above.
-
-```R
-
-# MBatchUtils package
-library(devtools)
-devtools::install_github("MD-Anderson-Bioinformatics/BatchEffectsPackage/apps/MBatchUtils")
-```
-Test data has been moved to a different repository, to address the issue where GitHub throttling code causes the devtools::install_github command to fail.
+Test data has been moved to a different repository, to address the issue where GitHub throttling code causes the devtools::install_github command to fail. See the Linux install documentation on using test data.
 
 **For educational and research purposes only.**
 

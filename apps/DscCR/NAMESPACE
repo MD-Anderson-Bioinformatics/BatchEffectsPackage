@@ -1,0 +1,20 @@
+# required for included C code
+useDynLib("DscCR")
+
+importFrom('methods', 'new')
+importFrom("MBatch", "pvalueDSC_scores")
+importFrom("MBatch", "setGlobalMBatchEnv", "getGlobalMBatchEnv", "setGlobalMBatchErrorTest")
+
+# utility functions
+export(cleanFilePath)
+export(getTestInputDirDscCR)
+export(getTestOutputDirDscCR)
+export(getTestCompareDirDscCR)
+# calling C DSC function
+# will need other options, but this is sufficient for now
+# TODO: add passing in SEED
+export(pvalueDSC_C)
+# wrapper around MBatch pvalueDSC function
+# keeps name collisions from happening when loading DscCD and MBatch together
+# fix before adopting use of C code
+export(pvalueDSC_R)

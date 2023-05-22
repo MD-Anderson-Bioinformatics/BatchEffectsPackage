@@ -79,6 +79,8 @@ The following code is adapted from the tests/AN_Unadjusted.R file. Data used is 
   outputFile <- AN_Unadjusted(theBeaData=myData,
                            theBatchType=theBatchType,
                            thePath=theOutputDir,
+                           theDataVersion="DATA_2022-09-09-1600",
+                           theTestVersion="TEST_2022-10-10-1300",
                            theWriteToFile=TRUE)
   correctedMatrix <- readAsGenericMatrix(outputFile)
   print(correctedMatrix[1:4, 1:4])
@@ -88,5 +90,5 @@ The following code is adapted from the tests/AN_Unadjusted.R file. Data used is 
 # Example File Output
 
 The above code creates the following output file. File is named using the following naming convention:
-ANY_Corrections-ANUnadjusted.tsv
+corrected_matrix.tsv
 The TSV file with the corrected dataset is written by the MBatch package. The end of the output shows a snippet from the corrected matrix.

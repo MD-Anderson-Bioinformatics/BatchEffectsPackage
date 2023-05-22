@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -14,6 +14,118 @@ mbatchUtilVersion <- function()
   return("MBatchUtils BEA_VERSION_TIMESTAMP")
 }
 
+
+####################################################################
+###
+####################################################################
+
+# index file
+# current
+# 	original	(matrix, batches, clinical, dataset info, etc)
+# 	pipeline	(same as above, but as used for processing)
+# versions	(broken up by versions)
+# 	DATA-YYYY-MM-DD-HHmm
+# 		original	(matrix, batches, clinical, dataset info, etc)
+# 		pipeline	(same as above, but as used for processing)
+
+setupZipDataDir <- function(theMatrixFile, theBatchFile, theNewDir, theDataVersion,
+                            theMatrixFile2=NULL, theBatchFile2=NULL)
+{
+  message("theMatrixFile=",theMatrixFile)
+  message("theBatchFile=",theBatchFile)
+  message("theNewDir=",theNewDir)
+  message("theDataVersion=",theDataVersion)
+  message("theMatrixFile2=",theMatrixFile2)
+  message("theBatchFile2=",theBatchFile2)
+  # make directories
+  currentDir <- cleanFilePath(theNewDir, "current")
+  versionsDir <- cleanFilePath(theNewDir, "versions")
+  dir.create(currentDir, recursive=TRUE, showWarnings=FALSE)
+  dir.create(versionsDir, recursive=TRUE, showWarnings=FALSE)
+  originalDir <- cleanFilePath(currentDir, "original")
+  pipelineDir <- cleanFilePath(currentDir, "pipeline")
+  unlink(originalDir, recursive=TRUE)
+  unlink(pipelineDir, recursive=TRUE)
+  dir.create(originalDir, recursive=TRUE, showWarnings=FALSE)
+  dir.create(pipelineDir, recursive=TRUE, showWarnings=FALSE)
+  dataVersDir <- addVersionsIfNeeded(versionsDir, theDataVersion, NULL)
+  dir.create(dataVersDir, recursive=TRUE, showWarnings=FALSE)
+  # copy files
+  currentMatrixFile <- file.path(originalDir, "matrix.tsv")
+  file.copy(theMatrixFile, currentMatrixFile)
+  currentBatchesFile <- ""
+  if (!is.null(theBatchFile))
+  {
+    currentBatchesFile <- file.path(originalDir, "batches.tsv")
+    file.copy(theBatchFile, currentBatchesFile)
+  }
+  currentMatrixFile2 <- ""
+  if (!is.null(theMatrixFile2))
+  {
+    currentMatrixFile2 <- file.path(originalDir, "matrix2.tsv")
+    file.copy(theMatrixFile2, currentMatrixFile2)
+  }
+  currentBatchesFile2 <- ""
+  if (!is.null(theBatchFile2))
+  {
+    currentBatchesFile2 <- file.path(originalDir, "batches2.tsv")
+    file.copy(theBatchFile2, currentBatchesFile2)
+  }
+  # pipeline versions
+  pipelineMatrixFile <- file.path(pipelineDir, "matrix.tsv")
+  pipelineBatchesFile <- file.path(pipelineDir, "batches.tsv")
+  pipelineMatrixFile2 <- file.path(pipelineDir, "matrix2.tsv")
+  pipelineBatchesFile2 <- file.path(pipelineDir, "batches2.tsv")
+  c(currentMatrixFile, currentBatchesFile,
+    pipelineMatrixFile, pipelineBatchesFile,
+    currentMatrixFile2, currentBatchesFile2,
+    pipelineMatrixFile2, pipelineBatchesFile2,
+    originalDir, pipelineDir, dataVersDir)
+}
+
+# Results Archive Directory Structure
+# index file
+# info
+# 	non-version dataset information file(s)
+# 	TEST-YYYY-MM-DD-HHmm
+# 		MBatchConfig used for processing by version
+# 		version-specific dataset info and log file(s)
+# correction
+# 	DATA-YYYY-MM-DD-HHmm
+# 		TEST-YYYY-MM-DD-HHmm
+# 			correction results files (info, matrix, and batches)
+# analysis
+# 	<analysis-type>
+# 		<sub directories>	(depends on analysis type)
+# 			DATA-YYYY-MM-DD-HHmm
+# 				TEST-YYYY-MM-DD-HHmm	(broken up by versions)
+# 					static	(static analysis results – png files)
+# 					dynamic	(dynamic analysis results – tsv files for JavaScript/D3)
+
+setupZipResultsDir <- function(theConfigDir, theNewDir, theDataVersion, theTestVersion)
+{
+  # make directories
+  infoDir <- cleanFilePath(theNewDir, "info")
+  analysisDir <- cleanFilePath(theNewDir, "analysis")
+  dir.create(infoDir, recursive=TRUE, showWarnings=FALSE)
+  dir.create(analysisDir, recursive=TRUE, showWarnings=FALSE)
+  infoTestVerDir <- addVersionsIfNeeded(infoDir, NULL, theTestVersion)
+  dir.create(infoTestVerDir, recursive=TRUE, showWarnings=FALSE)
+  # copy MBatchConfig.tsv
+  versionedConfigFile <- file.path(infoTestVerDir, "MBatchConfig.tsv")
+  file.copy(file.path(theConfigDir, "MBatchConfig.tsv"), versionedConfigFile)
+  # copy other files
+  file.copy(file.path(theConfigDir, "version_type.txt"), file.path(infoTestVerDir, "version_type.txt"))
+  file.copy(file.path(theConfigDir, "version_stamp.txt"), file.path(infoTestVerDir, "version_stamp.txt"))
+  file.copy(file.path(theConfigDir, "source_id.txt"), file.path(infoTestVerDir, "source_id.txt"))
+  file.copy(file.path(theConfigDir, "original_data.json"), file.path(infoTestVerDir, "original_data.json"))
+
+  # optional directory path for corrections
+  correctionDir <- cleanFilePath(theNewDir, "correction")
+  correctionDir <- addVersionsIfNeeded(correctionDir, NULL, theTestVersion)
+  c(infoTestVerDir, correctionDir,
+    analysisDir, versionedConfigFile)
+}
 
 ####################################################################
 ###
@@ -48,6 +160,16 @@ getTestInputDir <- function()
     baseDir <- "/BatchEffectsPackage_data/testing_static/MBatchUtils"
   }
   baseDir
+}
+
+getTestInputDirForMBatch <- function()
+{
+  value <- Sys.getenv("MBATCH_TEST_INPUT")
+  if (!isTRUE(file.exists(value)))
+  {
+    value <- "/BatchEffectsPackage_data/testing_static/MATRIX_DATA"
+  }
+  value
 }
 
 getTestOutputDir <- function()
@@ -148,9 +270,13 @@ removeSamplesWithListedBatches<-function(theDataframeFilteredSamplesToBatches, t
 preprocessData <- function(theInputMatrixFile, theInputBatchFile,
                            theOutputMatrixFile, theOutputBatchFile,
                            theSize, theTransformFlag,
-                           theBatchTypeAndValuePairsToRemove=NULL)
+                           theBatchTypeAndValuePairsToRemove=NULL,
+                           theLogTransformFile=NULL,
+                           theReplaceNAs=FALSE)
 {
+  print(paste("read ", theInputMatrixFile, sep=""))
   mymatrix <- readAsGenericMatrix(theInputMatrixFile)
+  print(paste("read ", theInputBatchFile, sep=""))
   batchs <- readAsGenericDataframe(theInputBatchFile)
   #############################################
   # add missing samples from matrix to batchs
@@ -158,6 +284,9 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile,
   matrixSamples <- colnames(mymatrix)
   batchsSamples <- batchs$Sample
   missingSamples <- setdiff(matrixSamples, batchsSamples)
+  print(paste("length(matrixSamples)=", length(matrixSamples), sep=""))
+  print(paste("length(batchsSamples)=", length(batchsSamples), sep=""))
+  print(paste("length(missingSamples)=", length(missingSamples), sep=""))
   for (newSample in missingSamples)
   {
     # assign Unknown to combined batches
@@ -189,6 +318,14 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile,
     print("preprocessData After removing requested batches, gene data has ", length(colnames(mymatrix)), " samples")
   }
   #############################################
+  # replace NAs with zeros
+  #############################################
+  if (isTRUE(theReplaceNAs))
+  {
+    print("****replace NAs with zeros****")
+    mymatrix[is.na(mymatrix)] <- 0.0
+  }
+  #############################################
   # log transform (normalize)
   #############################################
   if (isTRUE(theTransformFlag))
@@ -203,6 +340,7 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile,
     qt <- quantile(myVector, .1, na.rm=TRUE)
     print("****qt****")
     print(qt)
+    cat(qt, file=theLogTransformFile)
     # that gives us non-zero (and non-infinite) values
     # within the transformed matrix
     mymatrix <- log2(mymatrix+qt)
@@ -214,10 +352,12 @@ preprocessData <- function(theInputMatrixFile, theInputBatchFile,
   #############################################
   # write to files
   #############################################
-  #writeAsGenericMatrix(theOutputMatrixFile, mymatrix)
   print("****theOutputMatrixFile****")
   print(theOutputMatrixFile)
-  writeAsGenericMatrix(theOutputMatrixFile,mymatrix)
+  print(paste("dim ", dim(mymatrix), collapse=",", sep=""))
+  writeAsGenericMatrix(theOutputMatrixFile, mymatrix)
+  print(theOutputBatchFile)
+  print(paste("dim ", dim(batchs), collapse=",", sep=""))
   writeAsGenericDataframe(theOutputBatchFile, batchs)
 }
 

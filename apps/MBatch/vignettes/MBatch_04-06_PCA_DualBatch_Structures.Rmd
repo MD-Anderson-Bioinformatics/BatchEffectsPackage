@@ -31,11 +31,14 @@ Graphical output is a PCA-Plus plot, which is a PCA diagram with centroids marke
 
 PCA_DualBatch_Structures(theData, theTitle, theOutputPath,
 theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
-theListForDoCentroidDualBatchType, theIsPcaTrendFunction=function(...) {FALSE},
+theListForDoCentroidDualBatchType, 
+theDataVersion, 
+theTestVersion,
+theIsPcaTrendFunction=function(...) {FALSE},
 theDoDSCFlag=TRUE, theDoDscPermsFileFlag=FALSE, theDoSampleLocatorFlag=TRUE,
 theListOfComponentsToPlot=c(1, 2, 1, 3, 1, 4, 2, 3, 2, 4, 3, 4),
 theDSCPermutations=2000, theDSCThreads=1, theMinBatchSize=2,
-theJavaParameters="-Xms1200m", theSeed=NULL, theMaxGeneCount=20000)
+theSeed=NULL, theMaxGeneCount=20000)
 
 # Arguments
 
@@ -126,10 +129,6 @@ particularly on HPC systems.
 ##theMinBatchSize
 Minimum batch to allow in PCA calculations. Defaults to 2.
 
-##theJavaParameters
-Command line arguments to Java for DSC calculations--for example if memory needs
-to be more than "-Xms1200m".
-
 ##theSeed
 If non-zero, a seed to use when
 calling sample to select genes used in PCA plots. Default 0.
@@ -175,13 +174,16 @@ After the output is an explanation of files and directories created.
 	###
   # do two plots PlateId versus TSS and BatchId versus TSS
 	PCA_DualBatch_Structures(myData,
-		"Example Title for Test Data", theOutputDir, list(), list(),
+		"Example Title for Test Data", list(), list(),
+		theOutputDir=theOutputDir,
+    theDataVersion="DATA_2022-09-09-1600", 
+    theTestVersion="TEST_2022-10-10-1300",
 		theIsPcaTrendFunction=isTrendBatch,
 		theListForDoCentroidDualBatchType=c("PlateId", "TSS", "BatchId", "TSS"),
 		theDoDSCFlag=TRUE, theDoDscPermsFileFlag=TRUE, theDoSampleLocatorFlag=TRUE,
 		theListOfComponentsToPlot=c(1, 2, 1, 3), theDSCPermutations=100,
 		theDSCThreads=5, theMinBatchSize=0,
-		theJavaParameters="-Xms1000m", theSeed=0, theMaxGeneCount=0)
+		theSeed=0, theMaxGeneCount=0)
 	print(dir(theOutputDir, recursive=TRUE))
 }
 ```
@@ -201,6 +203,8 @@ drwxr-xr-x 3 linux linux 4096 Jun 14 09:34 PlateIdwithTSS
 
 Looking at the "BatchIdwithTSS" subdirectory, it contains another directory called DualBatch (a different function provides "ManyToMany" comparisons). 
 The DualBatch directory contains the following files and a PCA-Plus sub-directory.
+
+It then has a Data Version and a Test Version Directory
 
 DSC txt files are described above in theDoDscPermsFileFlag.
 
@@ -250,4 +254,4 @@ total 436
 
 Here is a diagram generated from this code.
 
-`r sprintf("![PCAPlus Output](%s)", cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "BatchIdwithTSS"), "DualBatch"), "PCA-Plus"), "BatchIdwithTSS_Comp1_Comp2_Diagram.png"))`
+`r sprintf("![PCAPlus Output](%s)", cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "BatchIdwithTSS"), "DualBatch"),"DATA_2022-09-09-1600"),"TEST_2022-10-10-1300"), "PCA-Plus"), "BatchIdwithTSS_Comp1_Comp2_Diagram.png"))`

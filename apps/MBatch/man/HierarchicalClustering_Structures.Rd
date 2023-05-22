@@ -6,15 +6,20 @@
 A function to perform Hierarchical Clustering analysis from data in files.
 }
 \usage{
-HierarchicalClustering_Structures(theData, theTitle, theOutputPath,
+HierarchicalClustering_Structures(theData, theTitle, theOutputDir,
+theDataVersion, theTestVersion,
 theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{theData}{An instance of BEA_DATA \code{\link{BEA_DATA-class}}}
   \item{theTitle}{Object of class \code{"character"} Title to use in PNG files. }
-  \item{theOutputPath}{Object of class \code{"character"}
+  \item{theOutputDir}{Object of class \code{"character"}
   Directory in which to place output PNG files. }
+  \item{theDataVersion}{Object of class \code{"character"} Version of the data prefaced
+  with DATA_, such as DATA_2022-09-09-1600. Use empty string to not include. }
+  \item{theTestVersion}{Object of class \code{"character"} Version of the test prefaced
+  with TEST_, such as TEST_2022-10-10-1300. Use empty string to not include. }
   \item{theBatchTypeAndValuePairsToRemove}{Object of class \code{"list"} A list of vectors
   containing the batch type (or * for all types) and the value to remove. list() indicates
   none while NULL will cause an error. }
@@ -46,5 +51,6 @@ theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep)
 #	myData <- mbatchLoadFiles(myGeneDataFile, myBatchFile, myCovariateFile)
 #	###
 #
-#	HierarchicalClustering_Structures(myData, myTitle, myOutputPath, list(), list())
+#	HierarchicalClustering_Structures(myData, myTitle, myOutputPath,
+# theDataVersion, theTestVersion, list(), list())
 }

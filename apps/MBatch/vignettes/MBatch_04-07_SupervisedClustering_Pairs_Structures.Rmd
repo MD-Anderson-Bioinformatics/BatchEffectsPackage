@@ -101,8 +101,10 @@ After the output is an explanation of files and directories created.
   # here, we take most defaults
   SupervisedClustering_Pairs_Structures(theData=myData, 
     theTitle="Test Data Title", 
-    theOutputPath=theOutputDir,
+    theOutputDir=theOutputDir,
     theListOfBatchPairs=c("PlateId", "TSS", "BatchId", "TSS"),
+    theDataVersion="DATA_2022-09-09-1600", 
+    theTestVersion="TEST_2022-10-10-1300",
     theBatchTypeAndValuePairsToRemove=list(),
     theBatchTypeAndValuePairsToKeep=list() )
 }
@@ -132,4 +134,5 @@ total 276
 
 Here is the diagram generated from this code.
 
-`r sprintf("![SupervisedClustering_Pairs_Structures Output](%s)", cleanFilePath(cleanFilePath(theOutputDir, "BatchId-TSS"), "SupervisedClust_Diagram.png"))`
+`r sprintf("![SupervisedClustering_Pairs_Structures Output](%s)", cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "BatchId-TSS"), "DATA_2022-09-09-1600"),"TEST_2022-10-10-1300"),
+    "SupervisedClust_Diagram.png"))`

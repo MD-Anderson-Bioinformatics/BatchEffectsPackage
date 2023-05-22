@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -17,13 +17,13 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 		theDoPlainMtoMFlag, theDoCentroidsMtoMFlag, theDoDSCFlag, theDoDscPermsFileFlag, theDoSampleLocatorFlag,
 		theIsPcaTrendFunction, theListOfComponentsToPlot,
 		theDSCPermutations, theDSCThreads, theMinBatchSize,
-		theOutputDir=getwd(), thePcaCentroidsBase="PCA-Plus", thePcaPlainBase="PCAPlain",
-		theSeed=NULL, theGeneLimit=0, theJavaParameters="-Xms2400m")
+		theDataVersion, theTestVersion,
+		theOutputDir, thePcaCentroidsBase="PCA-Plus", thePcaPlainBase="PCAPlain",
+		theSeed=NULL, theGeneLimit=0)
 		###theIsPcaTrendFunction=NULL, theListOfComponentsToPlot=c(1, 2),
 		###theDSCPermutations=2000, theDSCThreads=1, theMinBatchSize=2,
 {
 	logDebug("createBatchEffectsOutput_pca")
-  initJavaForPca(theJavaParameters) # , theJavaParameters="-Xms2400m"
   collateOrigValue<-Sys.getlocale("LC_COLLATE")
 	on.exit(Sys.setlocale("LC_COLLATE",collateOrigValue), add=TRUE)
 	Sys.setlocale("LC_COLLATE","C")
@@ -34,8 +34,18 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 	stopifnotWithLogging("The number of columns of gene data must equal the number of rows of batch data.", ncol(theMatrixGeneData)==nrow(theDataframeBatchData))
 	stopifnotWithLogging("createBatchEffectsOutput_pca - must have > 0 rows in theMatrixGeneData.", nrow(theMatrixGeneData)>0)
 	stopifnotWithLogging("createBatchEffectsOutput_pca - must have > 0 cols in theMatrixGeneData.", ncol(theMatrixGeneData)>0)
+	dscOutputDir <- NULL
+	vectorOfOutputDirs <- c()
 	if (TRUE==theDoDSCFlag)
 	{
+	  # make directory for later use
+	  #dscOutputDir <- addVersionsIfNeeded(cleanFilePath(theOutputDir, "DSC"), theDataVersion, theTestVersion)
+	  #checkDirForCreation(dscOutputDir)
+	  #file.create(file.path(dscOutputDir, "DSCOverview.tsv"))
+	  #logDebug("make future dir", dscOutputDir)
+	  # write complist file
+	  # NOTE - MUST BE AT TOP LEVEL FOR DSC OVERVIEW FUNCTION TO WORK
+	  logDebug("write ALL__CompListDSC.RData", theOutputDir)
 		saveCompListDscData(cleanFilePath(theOutputDir, "ALL__CompListDSC.RData"), theListOfComponentsToPlot)
 	}
 	###logDebug("createBatchEffectsOutput_pca - rows in theMatrixGeneData=", nrow(theMatrixGeneData))
@@ -49,8 +59,10 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 		pca <- doSamplePcaCall(theMatrixGeneData, theMinBatchSize, batchIdsForSamples, theListOfComponentsToPlot, theSeed, theGeneLimit)
 		if (is.null(pca))
 		{
-			batchTypeOutputDir <- checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), "ManyToMany")
-			openAndWriteIssuesLogFile(batchTypeOutputDir)
+			dscOutputDir <- checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), "ManyToMany")
+			dscOutputDir <- addVersionsIfNeeded(dscOutputDir, theDataVersion, theTestVersion)
+			checkDirForCreation(dscOutputDir)
+			openAndWriteIssuesLogFile(dscOutputDir)
 		}
 		else
 		{
@@ -64,23 +76,27 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 			stopifnotWithLogging("createBatchEffectsOutput_pca - Number of rownames for pca score (sample ids) should match length of batch ids for samples", (length(rownames(pca@scores))==length(batchIdsForSamples)))
 			sortedListOfBatchIds <- sortBatchesBasedOnSize(unique(batchIdsForSamples), batchIdsForSamples)
 			###logDebug("sortBatchesBasedOnSize(sortedListOfBatchIds) = ", paste(sortedListOfBatchIds, collapse=","))
-			batchTypeOutputDir <- NULL
 			batchTypeOutputDir <- checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), "ManyToMany")
+			batchTypeOutputDir <- addVersionsIfNeeded(batchTypeOutputDir, theDataVersion, theTestVersion)
+			vectorOfOutputDirs <- c(vectorOfOutputDirs, batchTypeOutputDir)
+			checkDirForCreation(batchTypeOutputDir)
 			centroidsOutputDir <- ""
 			if((TRUE==theDoCentroidsMtoMFlag)||(TRUE==theDoSampleLocatorFlag))
 			{
-				centroidsOutputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), "ManyToMany"), thePcaCentroidsBase)
+				centroidsOutputDir <- checkCreateDir(batchTypeOutputDir, thePcaCentroidsBase)
+				checkDirForCreation(centroidsOutputDir)
 			}
 			plainOutputDir <- ""
 			if(TRUE==theDoPlainMtoMFlag)
 			{
-				plainOutputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), "ManyToMany"), thePcaPlainBase)
+			  plainOutputDir <- checkCreateDir(batchTypeOutputDir, thePcaPlainBase)
+				checkDirForCreation(plainOutputDir)
 			}
 			dscAllResults <- NULL
 			if(TRUE==theDoDSCFlag)
 			{
 				logDebug("call pvalueDSC")
-				dscAllResults <- pvalueDSC(pca, batchIdsForSamples, theDSCPermutations, 0, 0, theDSCThreads)
+				dscAllResults <- pvalueDSC(pca, batchIdsForSamples, theDSCPermutations, 0, 0, theDSCThreads, theSeed)
 				###logDebug("openAndWriteDscAllFile")
 				openAndWriteDscAllFile(pca, dscAllResults, batchTypeOutputDir, "ANY", "NA", "NA")
 				if (TRUE==theDoDscPermsFileFlag)
@@ -89,7 +105,8 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 				}
 				###logDebug("after openAndWriteDscAllFile")
 			}
-			writePcaDataFilesForDataset(cleanFilePath(cleanFilePath(theOutputDir, batchTypeName), "ManyToMany"), theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot)
+			logDebug("Write PCA Files 1 ", batchTypeOutputDir)
+			writePcaDataFilesForDataset(batchTypeOutputDir, theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot)
 			####
 			logDebug("write writeSharedFveWeightScoresFiles")
 			writeSharedFveWeightScoresFiles(theDoSampleLocatorFlag, batchTypeOutputDir, pca, theSampleIds=rownames(theMatrixGeneData), theGeneIds=colnames(theMatrixGeneData))
@@ -101,8 +118,8 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 				componentB <- theListOfComponentsToPlot[[i+1]]
 				###
 				dscTxtFile <- makePcaFileName_TXT(batchTypeOutputDir, "ANY", componentA, componentB, "DSC")
+				errorFile <- file.path(batchTypeOutputDir, "error.log")
 				###
-				errorFileCentroids <- makePcaFileName_TXT(centroidsOutputDir, "ALL", componentA, componentB, "ERROR")
 				tempCentroids <- makePcaFileName_PNG(centroidsOutputDir, "ALL", componentA, componentB, "Diagram")
 				centrLegendAll <- makePcaFileName_PNG(centroidsOutputDir, "ALL", componentA, componentB, "Legend", "ALL")
 				centrLegendDSC <- makePcaFileName_PNG(centroidsOutputDir, "ALL", componentA, componentB, "Legend", "DSC")
@@ -110,7 +127,6 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 				centrLegendPoints <- makePcaFileName_PNG(centroidsOutputDir, "ALL", componentA, componentB, "Legend", "Points")
 				centroidsImageTitle <- paste(theTitle, "ALL", componentA, componentB)
 				###
-				errorFilePlain <- makePcaFileName_TXT(plainOutputDir, "ALL", componentA, componentB, "ERROR")
 				tempPlain <- makePcaFileName_PNG(plainOutputDir, "ALL", componentA, componentB, "Diagram")
 				plainLegendAll <- makePcaFileName_PNG(plainOutputDir, "ALL", componentA, componentB, "Legend", "ALL")
 				plainLegendDSC <- makePcaFileName_PNG(plainOutputDir, "ALL", componentA, componentB, "Legend", "DSC")
@@ -119,26 +135,34 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 				plainImageTitle <- paste(theTitle, "ALL", componentA, componentB)
 				###
 				### TODO: MAny2Many DSC objects returned from doInternalPCa need to be writen to Calc.RData file
-				doInternalPca(pca, dscAllResults, componentA, componentB, theMatrixGeneData, theDoPlainMtoMFlag, theDoCentroidsMtoMFlag, theDoDSCFlag,
+				doInternalPca(pca, dscAllResults, componentA, componentB, theMatrixGeneData,
+				    theDoPlainMtoMFlag, theDoCentroidsMtoMFlag, theDoDSCFlag,
 						theDoDscPermsFileFlag, tempCentroids, tempPlain, dscTxtFile,
 						centrLegendAll, centrLegendDSC, centrLegendRays, centrLegendPoints,
 						plainLegendAll, plainLegendDSC, plainLegendRays, plainLegendPoints,
 						centroidsImageTitle, plainImageTitle,
 						batchIdsForSamples, NULL, sortedListOfBatchIds, NULL, batchTypeName, NULL,
 						theIsPcaTrendFunction, theDSCPermutations, theDSCThreads, theMinBatchSize, colnames(theMatrixGeneData),
-						errorFileCentroids, errorFilePlain)
+						errorFile, theSeed, dscOutputDir)
 			}
 		}
 	}
-	return(NULL)
+	vectorOfOutputDirs
 }
 
-createBatchEffectsOutput_pca_dualBatch<-function(theMatrixGeneData, theDataframeBatchData, theListForDoCentroidDualBatchType,
+even <- function(theVal)
+{
+  return ((theVal%%2) == 0)
+}
+
+createBatchEffectsOutput_pca_dualBatch<-function(theMatrixGeneData, theDataframeBatchData,
+    theListForDoCentroidDualBatchType,
 		theTitle, theDoDSCFlag, theDoDscPermsFileFlag, theDoSampleLocatorFlag,
 		theIsPcaTrendFunction, theListOfComponentsToPlot,
 		theDSCPermutations, theDSCThreads, theMinBatchSize,
-		theOutputDir=getwd(), theFileBase="PCA-Plus",
-		theSeed=NULL, theGeneLimit=0, theJavaParameters="-Xms2400m")
+		theOutputDir, theDataVersion, theTestVersion,
+		theFileBase="PCA-Plus",
+		theSeed=NULL, theGeneLimit=0)
 		###theIsPcaTrendFunction=NULL, theListOfComponentsToPlot=c(1, 2),
 		###theDSCPermutations=2000, theDSCThreads=1, theMinBatchSize=2,
 {
@@ -147,7 +171,6 @@ createBatchEffectsOutput_pca_dualBatch<-function(theMatrixGeneData, theDataframe
 	stopifnotWithLogging("createBatchEffectsOutput_pca_dualBatch - Must have an even number of batch types to plot.", even(length(theListForDoCentroidDualBatchType)))
 	stopifnotWithLogging("createBatchEffectsOutput_pca_dualBatch - must have > 0 rows in theMatrixGeneData.", nrow(theMatrixGeneData)>0)
 	stopifnotWithLogging("createBatchEffectsOutput_pca_dualBatch - must have > 0 cols in theMatrixGeneData.", ncol(theMatrixGeneData)>0)
-	initJavaForPca(theJavaParameters) # , theJavaParameters="-Xms2400m"
 	includedBatchTypes <- as.vector(unlist(names(theDataframeBatchData)[2:length(theDataframeBatchData)]))
 	for (xx in 1:length(theListForDoCentroidDualBatchType))
 	{
@@ -158,9 +181,19 @@ createBatchEffectsOutput_pca_dualBatch<-function(theMatrixGeneData, theDataframe
 	Sys.setlocale("LC_COLLATE","C")
 	logDebug("Changing LC_COLLATE to C for duration of run")
 	checkPackageSettings()
+	dscOutputDir <- NULL
+	vectorOfOutputDirs <- c()
 	if (TRUE==theDoDSCFlag)
 	{
-		saveCompListDscData(cleanFilePath(theOutputDir, "ALL__CompListDSC.RData"), theListOfComponentsToPlot)
+	  # make directory for later user
+	  dscOutputDir <- addVersionsIfNeeded(cleanFilePath(theOutputDir, "DSC"), theDataVersion, theTestVersion)
+	  checkDirForCreation(dscOutputDir)
+	  file.create(file.path(dscOutputDir, "DSCOverview.tsv"))
+	  logDebug("make future dir", dscOutputDir)
+	  # write complist file
+	  # NOTE - MUST BE AT TOP LEVEL FOR DSC OVERVIEW FUNCTION TO WORK
+	  logDebug("write ALL__CompListDSC.RData", theOutputDir)
+	  saveCompListDscData(cleanFilePath(theOutputDir, "ALL__CompListDSC.RData"), theListOfComponentsToPlot)
 	}
 	logDebug("createBatchEffectsOutput_pca_dualBatch - start loop")
 	for(x in seq(from=1, to=(length(theListForDoCentroidDualBatchType)-1), by=2 ))
@@ -182,18 +215,25 @@ createBatchEffectsOutput_pca_dualBatch<-function(theMatrixGeneData, theDataframe
 			sortedListOfBatchIdsB <- sort(unique(batchIdsForSamplesB))
 			###logDebug("createBatchEffectsOutput_pca_dualBatch - loop pvalueDSC")
 			tempBatchTypes <- paste(batchTypeA, "with", batchTypeB, sep="")
-			outputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, tempBatchTypes), "DualBatch"), theFileBase)
+			outputDir <- checkCreateDir(checkCreateDir(theOutputDir, tempBatchTypes), "DualBatch")
+			outputDir <- addVersionsIfNeeded(outputDir, theDataVersion, theTestVersion)
+			outputDir <- checkCreateDir(outputDir, theFileBase)
+			checkDirForCreation(outputDir)
+			vectorOfOutputDirs <- c(vectorOfOutputDirs, outputDir)
 			datafilesOutputDir <- checkCreateDir(checkCreateDir(theOutputDir, tempBatchTypes), "DualBatch")
+			datafilesOutputDir <- addVersionsIfNeeded(datafilesOutputDir, theDataVersion, theTestVersion)
+			checkDirForCreation(datafilesOutputDir)
 			dscAllResults <- NULL
 			if(TRUE==theDoDSCFlag)
 			{
-				dscAllResults <- pvalueDSC(pca, batchIdsForSamplesA, theDSCPermutations, 0, 0, theDSCThreads)
+				dscAllResults <- pvalueDSC(pca, batchIdsForSamplesA, theDSCPermutations, 0, 0, theDSCThreads, theSeed)
 				openAndWriteDscAllFile(pca, dscAllResults, datafilesOutputDir, "ANY", "NA", "NA")
 				if(TRUE==theDoDscPermsFileFlag)
 				{
 					openAndWriteDscPermsFile(dscAllResults, datafilesOutputDir, "ANY", "NA", "NA")
 				}
 			}
+			logDebug("Write PCA Files 2 ", datafilesOutputDir)
 			writePcaDataFilesForDataset(datafilesOutputDir, theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot)
 			####
 			writeSharedFveWeightScoresFiles(theDoSampleLocatorFlag, datafilesOutputDir, pca, theSampleIds=rownames(theMatrixGeneData), theGeneIds=colnames(theMatrixGeneData))
@@ -203,8 +243,8 @@ createBatchEffectsOutput_pca_dualBatch<-function(theMatrixGeneData, theDataframe
 				componentB <- theListOfComponentsToPlot[[i+1]]
 				###
 				dscTxtFile <- makePcaFileName_TXT(datafilesOutputDir, "ANY", componentA, componentB, "DSC")
+				errorFile <- file.path(outputDir, "error.log")
 				###
-				errorFileCentroids <- makePcaFileName_TXT(outputDir, tempBatchTypes, componentA, componentB, "ERROR")
 				tempCentroids <- makePcaFileName_PNG(outputDir, tempBatchTypes, componentA, componentB, "Diagram")
 				centrLegendAll <- makePcaFileName_PNG(outputDir, tempBatchTypes, componentA, componentB, "Legend", "ALL")
 				centrLegendDSC <- makePcaFileName_PNG(outputDir, tempBatchTypes, componentA, componentB, "Legend", "DSC")
@@ -228,7 +268,7 @@ createBatchEffectsOutput_pca_dualBatch<-function(theMatrixGeneData, theDataframe
 						centroidsImageTitle, plainImageTitle,
 						batchIdsForSamplesA, batchIdsForSamplesB, sortedListOfBatchIdsA, sortedListOfBatchIdsB, batchTypeA, batchTypeB,
 						theIsPcaTrendFunction, theDSCPermutations, theDSCThreads, theMinBatchSize, colnames(theMatrixGeneData),
-						errorFileCentroids, errorFilePlain)
+						errorFile, theSeed, dscOutputDir)
 			}
 		}
 	}
@@ -240,13 +280,13 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 		theDoPlainOtoMFlag, theDoCentroidsOtoMFlag, theDoDSCFlag, theDoDscPermsFileFlag, theDoSampleLocatorFlag,
 		theIsPcaTrendFunction, theListOfComponentsToPlot,
 		theDSCPermutations, theDSCThreads, theMinBatchSize,
-		###theIsPcaTrendFunction=NULL, theListOfComponentsToPlot=c(1, 2),
-		###theDSCPermutations=2000, theDSCThreads=1, theMinBatchSize=2,
-		theOutputDir=getwd(), thePcaCentroidsBase="PCA-Plus", thePcaPlainBase="PCAPlain",
-		theSeed=NULL, theGeneLimit=0, theJavaParameters="-Xms2400m")
+		theOutputDir, theDataVersion, theTestVersion,
+		thePcaCentroidsBase="PCA-Plus", thePcaPlainBase="PCAPlain",
+		theSeed=NULL, theGeneLimit=0)
 {
+  ###theIsPcaTrendFunction=NULL, theListOfComponentsToPlot=c(1, 2),
+  ###theDSCPermutations=2000, theDSCThreads=1, theMinBatchSize=2,
 	logDebug("createBatchEffectsOutput_pca_one2many")
-  initJavaForPca(theJavaParameters) # , theJavaParameters="-Xms2400m"
   collateOrigValue<-Sys.getlocale("LC_COLLATE")
 	on.exit(Sys.setlocale("LC_COLLATE",collateOrigValue), add=TRUE)
 	Sys.setlocale("LC_COLLATE","C")
@@ -255,9 +295,18 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 	stopifnotWithLogging("The number of columns of gene data must equal the number of rows of batch data.", ncol(theMatrixGeneData)==nrow(theDataframeBatchData))
 	stopifnotWithLogging("createBatchEffectsOutput_pca_one2many - must have > 0 rows in theMatrixGeneData.", nrow(theMatrixGeneData)>0)
 	stopifnotWithLogging("createBatchEffectsOutput_pca_one2many - must have > 0 cols in theMatrixGeneData.", ncol(theMatrixGeneData)>0)
+	dscOutputDir <- NULL
 	if (TRUE==theDoDSCFlag)
 	{
-		saveCompListDscData(cleanFilePath(theOutputDir, "ALL__CompListDSC.RData"), theListOfComponentsToPlot)
+	  # make directory for later user
+	  dscOutputDir <- addVersionsIfNeeded(cleanFilePath(theOutputDir, "OneToMany-DSC"), theDataVersion, theTestVersion)
+	  checkDirForCreation(dscOutputDir)
+	  file.create(file.path(dscOutputDir, "DSCOverview.tsv"))
+	  logDebug("make future dir", dscOutputDir)
+	  # write complist file
+	  # NOTE - MUST BE AT TOP LEVEL FOR DSC OVERVIEW FUNCTION TO WORK
+	  logDebug("write ALL__CompListDSC.RData", theOutputDir)
+	  saveCompListDscData(cleanFilePath(theOutputDir, "ALL__CompListDSC.RData"), theListOfComponentsToPlot)
 	}
 	for(batchTypeIndex in c(2:length(theDataframeBatchData)))
 	{
@@ -292,22 +341,28 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 				o2mUniqueListOfBatchIds <- sortBatchesBasedOnSize(unique(o2mBatchIdsForSamples), o2mBatchIdsForSamples)
 				batchIdentifiersWithCount <- getListOfBatchNamesWithCounts(o2mBatchIdsForSamples, c(batchId, "Other Batches"))
 				batchIdFilename <- compressIntoFilename(batchId)
-				batchTypeOutputDir <- checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), paste("OneToMany", batchId, sep="-"))
+				batchTypeOutputDir <- cleanFilePath(cleanFilePath(theOutputDir, batchTypeName), paste("OneToMany", batchId, sep="-"))
+				batchTypeOutputDir <- addVersionsIfNeeded(batchTypeOutputDir, theDataVersion, theTestVersion)
+				checkDirForCreation(batchTypeOutputDir)
 				centroidsOutputDir <- ""
 				if((TRUE==theDoCentroidsOtoMFlag)||(TRUE==theDoSampleLocatorFlag))
 				{
-					centroidsOutputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), paste("OneToMany", batchId, sep="-")), thePcaCentroidsBase)
+				  centroidsOutputDir <- cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, batchTypeName), paste("OneToMany", batchId, sep="-")), thePcaCentroidsBase)
+				  centroidsOutputDir <- addVersionsIfNeeded(batchTypeOutputDir, theDataVersion, theTestVersion)
+				  checkDirForCreation(centroidsOutputDir)
 				}
 				plainOutputDir <- ""
 				if(TRUE==theDoPlainOtoMFlag)
 				{
-					plainOutputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), paste("OneToMany", batchId, sep="-")), thePcaPlainBase)
+					plainOutputDir <- cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, batchTypeName), paste("OneToMany", batchId, sep="-")), thePcaPlainBase)
+					plainOutputDir <- addVersionsIfNeeded(batchTypeOutputDir, theDataVersion, theTestVersion)
+					checkDirForCreation(plainOutputDir)
 				}
 				pcaTitle <- paste(batchIdentifiersWithCount, sep="", collapse=" versus ")
 				dscAllResults <- NULL
 				if(TRUE==theDoDSCFlag)
 				{
-					dscAllResults <- pvalueDSC(pca, o2mBatchIdsForSamples, theDSCPermutations, 0, 0, theDSCThreads)
+					dscAllResults <- pvalueDSC(pca, o2mBatchIdsForSamples, theDSCPermutations, 0, 0, theDSCThreads, theSeed)
 					openAndWriteDscAllFile(pca, dscAllResults, batchTypeOutputDir, "ANY", "NA", "NA")
 					if(TRUE==theDoDscPermsFileFlag)
 					{
@@ -315,6 +370,7 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 					}
 				}
 				### RData output here for one2many, write pca (scores has Principle Component and Sample ids), dscAllResults and batchTypeName and batchIdsForSamples
+				logDebug("Write PCA Files 3 ", batchTypeOutputDir)
 				writePcaDataFilesForDataset(batchTypeOutputDir, theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot)
 				####
 				writeSharedFveWeightScoresFiles(theDoSampleLocatorFlag, batchTypeOutputDir, pca, theSampleIds=rownames(theMatrixGeneData), theGeneIds=colnames(theMatrixGeneData))
@@ -324,8 +380,8 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 					componentB <- theListOfComponentsToPlot[[i+1]]
 					###
 					dscTxtFile <- makePcaFileName_TXT(batchTypeOutputDir, "ANY", componentA, componentB, "DSC")
+					errorFile <- file.path(batchTypeOutputDir, "error.log")
 					###
-					errorFileCentroids <- makePcaFileName_TXT(centroidsOutputDir, batchIdFilename, componentA, componentB, "ERROR")
 					tempCentroids <- makePcaFileName_PNG(centroidsOutputDir, batchIdFilename, componentA, componentB, "Diagram")
 					centrLegendAll <- makePcaFileName_PNG(centroidsOutputDir, batchIdFilename, componentA, componentB, "Legend", "ALL")
 					centrLegendDSC <- makePcaFileName_PNG(centroidsOutputDir, batchIdFilename, componentA, componentB, "Legend", "DSC")
@@ -333,7 +389,6 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 					centrLegendPoints <- makePcaFileName_PNG(centroidsOutputDir, batchIdFilename, componentA, componentB, "Legend", "Points")
 					centroidsImageTitle <- paste(thePcaCentroidsTitle, batchIdFilename, componentA, componentB)
 					###
-					errorFilePlain <- makePcaFileName_TXT(plainOutputDir, batchIdFilename, componentA, componentB, "ERROR")
 					tempPlain <- makePcaFileName_PNG(plainOutputDir, batchIdFilename, componentA, componentB, "Diagram")
 					plainLegendAll <- makePcaFileName_PNG(plainOutputDir, batchIdFilename, componentA, componentB, "Legend", "ALL")
 					plainLegendDSC <- makePcaFileName_PNG(plainOutputDir, batchIdFilename, componentA, componentB, "Legend", "DSC")
@@ -349,7 +404,7 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 							centroidsImageTitle, plainImageTitle,
 							o2mBatchIdsForSamples, NULL, o2mUniqueListOfBatchIds, NULL, batchTypeName, NULL,
 							theIsPcaTrendFunction, theDSCPermutations, theDSCThreads, theMinBatchSize, colnames(theMatrixGeneData),
-							errorFileCentroids, errorFilePlain)
+							errorFile, theSeed, dscOutputDir)
 				}
 			}
 		}
@@ -360,14 +415,6 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 ####################################################################
 ### shared functions
 ####################################################################
-
-initJavaForPca <- function(theJavaParameters="-Xms2400m")
-{
-  myJavaJars <- getJarsFromDir(dirname(system.file("DscJava", "DscJava.jar", package="MBatch")))
-  logDebug("Calling .jinit for PCA")
-  logDebug(c("classpath=",myJavaJars,"parameters=", theJavaParameters))
-  .jinit(classpath=myJavaJars, force.init = TRUE, parameters=updateJavaParameters(theJavaParameters))
-}
 
 syncBatchIdsAndPcaResults<-function(theBatchIdsForSamples, thePcaSamples, theOriginalSamples)
 {
@@ -446,7 +493,7 @@ doSamplePcaCall<-function(theMatrixGeneData, theMinBatchSize, theBatchIds, theCo
 		##pca<-SamplePCA(theMatrixGeneData[!is.na(rowSums(theMatrixGeneData)),], usecor=FALSE, center=TRUE),
 		##to fix the routine error code 1 in Lapack 9/1/11 by Nianxiang
 		pca <- try( SamplePCA(myMatrixGeneData[!is.na(rowSums(myMatrixGeneData)),], usecor=FALSE, center=TRUE) )
-		if(class(pca)=='try-error')
+		if(is(pca,'try-error'))
 		{
 			logDebug("SamplePCA first call threw a problem -- dropping outlier and retrying")
 			myNoMissingMatrixGeneData<-myMatrixGeneData[!is.na(rowSums(myMatrixGeneData)),]
@@ -456,7 +503,7 @@ doSamplePcaCall<-function(theMatrixGeneData, theMinBatchSize, theBatchIds, theCo
 			###logDebug("pca =", pca)
 			logDebug("myOutlierNumber =", myOutlierNumber)
 			###logDebug("nrow(sortedGeneVar) =", length(sortedGeneVar))
-			while((class(pca)=='try-error')&&(myOutlierNumber<length(sortedGeneVar)))
+			while((is(pca,'try-error'))&&(myOutlierNumber<length(sortedGeneVar)))
 			{
 				logDebug("SamplePCA subsequent call generated a failed (not necessarily a problem yet) ", myOutlierNumber)
 				pca<-try(SamplePCA(myNoMissingMatrixGeneData[myGeneVar<sortedGeneVar[myOutlierNumber],], usecor=FALSE, center=TRUE))
@@ -489,26 +536,92 @@ doSamplePcaCall<-function(theMatrixGeneData, theMinBatchSize, theBatchIds, theCo
 	}
 	else if (ncol(pca@scores)<max(theCompPairList))
 	{
-		logWarn("doSamplePcaCall - pca set to null, since number of components calculated is less than components requested")
+	  logDebug("doSamplePcaCall - max(theCompPairList)=", max(theCompPairList))
+	  logDebug("doSamplePcaCall - ncol(pca@scores)=", ncol(pca@scores))
+	  logWarn("doSamplePcaCall - pca set to null, since number of components calculated is less than components requested")
 		pca <- NULL
 	}
 	else
 	{
-		logDebug("doSamplePcaCall - max(theCompPairList)=", max(theCompPairList))
-		logDebug("doSamplePcaCall - pca scores size=", paste(dim(pca@scores),collapse=","))
+	  logDebug("doSamplePcaCall - max(theCompPairList)=", max(theCompPairList))
+	  logDebug("doSamplePcaCall - ncol(pca@scores)=", ncol(pca@scores))
+	  logDebug("doSamplePcaCall - pca scores size=", paste(dim(pca@scores),collapse=","))
 	}
 	return(pca)
 }
 
+pcaErrorNormal <- function(theOutputFile, theDscResultsDir)
+{
+  myFile <- file(theOutputFile, "w+")
+  on.exit(close(myFile))
+  cat("Unable to Generate PCA Results\n", file=myFile, append=TRUE)
+}
+
+pcaErrorDSC <- function(theOutputFile, theDscResultsDir)
+{
+  unlink(file.path(theDscResultsDir, "DSCOverview.tsv"))
+  myFile <- file(file.path(theDscResultsDir, "error.log"), "w+")
+  on.exit(close(myFile))
+  cat("Unable to Generate PCA Results\n", file=myFile, append=TRUE)
+}
+
+
+openAndWriteIssuesLogFilePCA<-function(theOutputFile, theDscResultsDir)
+{
+  pcaErrorNormal(theOutputFile, theDscResultsDir)
+  pcaErrorDSC(theOutputFile, theDscResultsDir)
+}
+
 doInternalPca<-function(thePca, theDscAllResults, theComponentA, theComponentB, theMatrixGeneData,
-		theDoPlainMtoMFlag, theDoCentroidsMtoMFlag, theDoDSCFlag, theDoDscPermsFileFlag,
-		theCentroidFile, thePlainFile, theDSCFile,
-		theCentrLegendAll, theCentrLegendDSC, theCentrLegendRays, theCentrLegendPoints,
-		thePlainLegendAll, thePlainLegendDSC, thePlainLegendRays, thePlainLegendPoints,
-		theCentroidTitle, thePlainTitle,
-		batchIdsForSamplesA, batchIdsForSamplesB, sortedListOfBatchIdsA, sortedListOfBatchIdsB, batchTypeNameA, batchTypeNameB,
-		theIsPcaTrendFunction, theDSCPermutations, theDSCThreads, theMinBatchSize, theSampleIds,
-		theCentroidsErrorFile, thePlainErrorFile)
+                        theDoPlainMtoMFlag, theDoCentroidsMtoMFlag, theDoDSCFlag, theDoDscPermsFileFlag,
+                        theCentroidFile, thePlainFile, theDSCFile,
+                        theCentrLegendAll, theCentrLegendDSC, theCentrLegendRays, theCentrLegendPoints,
+                        thePlainLegendAll, thePlainLegendDSC, thePlainLegendRays, thePlainLegendPoints,
+                        theCentroidTitle, thePlainTitle,
+                        batchIdsForSamplesA, batchIdsForSamplesB, sortedListOfBatchIdsA, sortedListOfBatchIdsB, batchTypeNameA, batchTypeNameB,
+                        theIsPcaTrendFunction, theDSCPermutations, theDSCThreads, theMinBatchSize, theSampleIds,
+                        theErrorFile, theSeed, theDscResultsDir)
+{
+  returnValue <- NULL
+  tryCatch({
+    checkIfTestError()
+    doInternalPcaThrowable(thePca, theDscAllResults, theComponentA, theComponentB, theMatrixGeneData,
+                           theDoPlainMtoMFlag, theDoCentroidsMtoMFlag, theDoDSCFlag, theDoDscPermsFileFlag,
+                           theCentroidFile, thePlainFile, theDSCFile,
+                           theCentrLegendAll, theCentrLegendDSC, theCentrLegendRays, theCentrLegendPoints,
+                           thePlainLegendAll, thePlainLegendDSC, thePlainLegendRays, thePlainLegendPoints,
+                           theCentroidTitle, thePlainTitle,
+                           batchIdsForSamplesA, batchIdsForSamplesB, sortedListOfBatchIdsA, sortedListOfBatchIdsB, batchTypeNameA, batchTypeNameB,
+                           theIsPcaTrendFunction, theDSCPermutations, theDSCThreads, theMinBatchSize, theSampleIds,
+                           theSeed)
+  },
+  warning=function(e)
+  {
+    logWarn("1 Unable to generate PCA")
+    logDebug("1 write error to ", theErrorFile)
+    # unlink(dirname(theErrorFile), recursive = TRUE, force = TRUE)
+    # dir.create(dirname(theErrorFile), showWarnings=FALSE, recursive=TRUE)
+    openAndWriteIssuesLogFilePCA(theErrorFile, theDscResultsDir)
+  },
+  error=function(e)
+  {
+    logWarn("2 Unable to generate PCA")
+    logDebug("2 write error to ", theErrorFile)
+    # unlink(dirname(theErrorFile), recursive = TRUE, force = TRUE)
+    # dir.create(dirname(theErrorFile), showWarnings=FALSE, recursive=TRUE)
+    openAndWriteIssuesLogFilePCA(theErrorFile, theDscResultsDir)
+  })
+}
+
+doInternalPcaThrowable<-function(thePca, theDscAllResults, theComponentA, theComponentB, theMatrixGeneData,
+                                 theDoPlainMtoMFlag, theDoCentroidsMtoMFlag, theDoDSCFlag, theDoDscPermsFileFlag,
+                                 theCentroidFile, thePlainFile, theDSCFile,
+                                 theCentrLegendAll, theCentrLegendDSC, theCentrLegendRays, theCentrLegendPoints,
+                                 thePlainLegendAll, thePlainLegendDSC, thePlainLegendRays, thePlainLegendPoints,
+                                 theCentroidTitle, thePlainTitle,
+                                 batchIdsForSamplesA, batchIdsForSamplesB, sortedListOfBatchIdsA, sortedListOfBatchIdsB, batchTypeNameA, batchTypeNameB,
+                                 theIsPcaTrendFunction, theDSCPermutations, theDSCThreads, theMinBatchSize, theSampleIds,
+                                 theSeed)
 {
 	doTrending<-FALSE
 	if(!is.null(theIsPcaTrendFunction))
@@ -569,7 +682,7 @@ doInternalPca<-function(thePca, theDscAllResults, theComponentA, theComponentB, 
 	{
 		logDebug("doInternalPca - pvalueDSC")
 		### TODO: make calls to doInternalPca return the list of DSC objects created here
-		results <- pvalueDSC(thePca, batchIdsForSamplesA, theDSCPermutations, theComponentA, theComponentB, theDSCThreads)
+		results <- pvalueDSC(thePca, batchIdsForSamplesA, theDSCPermutations, theComponentA, theComponentB, theDSCThreads, theSeed)
 		if(TRUE==theDoDscPermsFileFlag)
 		{
 			openAndWriteDscPermsFile(results, dirname(theDSCFile), "ANY", theComponentA, theComponentB)
@@ -612,6 +725,7 @@ doInternalPca<-function(thePca, theDscAllResults, theComponentA, theComponentB, 
 		### save value objects for later reuse in making DSC summary / passing in PCA-PVALUE-DSC / file is *__CompDSC.RData
 		saveCompDscData(paste(theDSCFile, "__CompDSC.RData", sep=""), results, theComponentA, theComponentB)
 	}
+	logDebug("write PCA file direct 1 ", dirname(dirname(theCentroidFile)))
 	writePCAAnnotations(dirname(dirname(theCentroidFile)), theDSCPermutations, thePca, NULL, results, theComponentA, theComponentB )
 	### calculate batch id color list - list with names set to batch ids
 	batchIdColorsA <- calculateBatchIdColors(sortedListOfBatchIdsA)
@@ -942,8 +1056,10 @@ openAndWritePcaAnalysisImage_Diagram<-function(thePcaFile, thePca, theComponentA
 
 openAndWriteDSCFile <- function(theExtraLegend, theDSCFile)
 {
-	###logDebug("openAndWriteDSCFile -- start")
-	if (!file.exists(theDSCFile))
+  #logDebug("openAndWriteDSCFile -- start")
+  #logDebug(paste(theDSCFile, sep=" + ", collapse=" | "))
+  #logDebug(theExtraLegend)
+  if (!file.exists(theDSCFile))
 	{
 		myFile <- file(theDSCFile, "w+")
 		on.exit(close(myFile))
@@ -953,7 +1069,7 @@ openAndWriteDSCFile <- function(theExtraLegend, theDSCFile)
 			cat("\n", file=myFile)
 		}
 	}
-	###logDebug("openAndWriteDSCFile -- end")
+	#logDebug("openAndWriteDSCFile -- end")
 }
 
 openAndWriteFveFile <- function(thePca, theOutputDir)

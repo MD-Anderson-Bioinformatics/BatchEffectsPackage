@@ -1,13 +1,15 @@
 
 # once you are done, I'll show you how to add the R man page for this
-runRBNfromConfig <- function(theConfigFile, theOutputDir)
+runRBNfromConfig <- function(theConfigFile, theOutputDir, theLogDir,
+                             theMatrixFile, theMatrixFile2,
+                             theDataVersion, theTestVersion)
 {
   collateOrigValue<-Sys.getlocale("LC_COLLATE")
   on.exit(Sys.setlocale("LC_COLLATE",collateOrigValue), add=TRUE)
   Sys.setlocale("LC_COLLATE","C")
   message("Changing LC_COLLATE to C for duration of run")
   ####################################################################
-  myConfig <- read.csv(theConfigFile, header=FALSE, sep="\t", as.is=TRUE, row.names=1 )
+  myConfig <- read.csv(theConfigFile, header=FALSE, sep="\t", as.is=TRUE, row.names=1, quote="" )
   ####################################################################
   RBN_UseFirstAsInvariant <- as.logical(convertNulls(convertNA(myConfig["RBN_UseFirstAsInvariantFlag",])))
   RBN_InvariantId <- convertNulls(myConfig["RBN_InvariantId",])
@@ -26,20 +28,18 @@ runRBNfromConfig <- function(theConfigFile, theOutputDir)
   message("RBN_InvariantReps ", RBN_InvariantReps)
   message("RBN_VariantReps ", RBN_VariantReps)
   ####################################################################
-  sourceDir <-dirname(theConfigFile)
-  logFile <- cleanFilePath(sourceDir, "mbatch.log")
-  datFile <- cleanFilePath(sourceDir, "matrix_data.tsv")
-  datFile2 <- cleanFilePath(sourceDir, "matrix_data2.tsv")
-  #############################################################################
-  # check directories
-  message("theOutputDir=", theOutputDir)
-  if(!dir.exists(theOutputDir))
-  {
-    message("create ", theOutputDir)
-    dir.create(theOutputDir, showWarnings=FALSE, recursive=TRUE)
-  }
-  #############################################################################
+  logFile <- cleanFilePath(theLogDir, "mbatch.log")
   setLogging(new("Logging", theFile=logFile))
   ####################################################################
-  # don't forget to call the RBN function
+  matrix1 <- readAsGenericMatrix(theMatrixFile)
+  matrix2 <- readAsGenericMatrix(theMatrixFile2)
+  RBN_Replicates(matrix1, matrix2,
+                 theInvariantGroupId=RBN_InvariantId,
+                 theVariantGroupId=RBN_VariantId,
+                 theMatchedReplicatesFlag=RBN_Matched,
+                 theCombineOnlyFlag=FALSE,
+                 thePath=theOutputDir,
+                 theDataVersion=theDataVersion,
+                 theTestVersion=theTestVersion,
+                 theWriteToFile=TRUE)
 }

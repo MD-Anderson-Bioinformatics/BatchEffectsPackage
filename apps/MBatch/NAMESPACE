@@ -1,19 +1,15 @@
 importFrom("grDevices", "col2rgb", "colorRampPalette", "dev.off", "dev.set", "rainbow", "rgb", "pdf")
 importFrom("graphics", "abline", "arrows", "axis", "box", "boxplot", "frame", "layout", "lines", "mtext", "par", "plot.new", "points", "rect", "segments", "text", "title", "hist", "image", "plot", "legend")
-importFrom("stats", "IQR", "as.dendrogram", "as.dist", "cor", "cor.test", "density", "dist", "dnorm", "hclust", "lm", "mad", "median", "medpolish", "order.dendrogram", "qqline", "qqnorm", "qqplot", "quantile", "reorder", "rgamma", "sd", "var", "fivenum", "manova", "prcomp", "heatmap")
+importFrom("stats", "IQR", "as.dendrogram", "as.dist", "cor", "cor.test", "density", "dist", "dnorm", "hclust", "lm", "mad", "median", "medpolish", "order.dendrogram", "qqline", "qqnorm", "qqplot", "quantile", "reorder", "rgamma", "sd", "var", "fivenum", "prcomp", "heatmap")
 importFrom("utils", "URLencode", "dump.frames", "glob2rx", "installed.packages", "packageDescription", "read.csv", "sessionInfo", "write.table")
-importFrom("epiR", "epi.ccc")
-importFrom("methods", "callNextMethod", "new", "show")
+importFrom("methods", "callNextMethod", "new", "show", "is")
 importFrom("utils", "head")
 importFrom("Cairo", "CairoPNG")
-importFrom("rJava", ".jnew", ".jcall", ".jinit", ".jarray", ".jcastToArray")
-importFrom("gtools", "even", "odd")
 importFrom("squash", "dendromat")
-importFrom("eulerr", "euler")
 importFrom("parallel", "makePSOCKcluster", "stopCluster", "parLapply")
 importFrom("uwot", "umap")
 importFrom("vizier", "embed_plot")
-
+importFrom("reticulate", "use_condaenv", "import", "r_to_py", "np_array")
 importFrom("ClassDiscovery", "distanceMatrix", "SamplePCA")
 
 # Utility classes
@@ -36,9 +32,20 @@ export(readAsGenericMatrix)
 export(readAsGenericDataframe)
 export(mbatchWriteSuccessfulLog)
 export(as.numericWithIssues)
-export(updateJavaParameters)
 export(writeAsGenericMatrix)
 export(writeAsGenericDataframe)
+export(getGlobalMBatchEnv)
+export(setGlobalMBatchEnv)
+export(getGlobalMBatchLogger)
+export(setGlobalMBatchLogger)
+export(getGlobalMBatchVersionTest)
+export(setGlobalMBatchVersionTest)
+export(getGlobalMBatchVersionData)
+export(setGlobalMBatchVersionData)
+export(addVersionsIfNeeded)
+export(getGlobalMBatchErrorTest)
+export(setGlobalMBatchErrorTest)
+export(checkIfTestError)
 
 # Assessments
 export(SupervisedClustering_Pairs_Structures)
@@ -52,7 +59,6 @@ export(Boxplot_AllSamplesData_Structures)
 export(CDP_Plot)
 export(CDP_Files)
 export(CDP_Structures)
-export(TRINOVA_Structures)
 export(UMAP_Structures)
 
 # Corrections
@@ -80,3 +86,9 @@ export(getTestCompareDir)
 # used in MBatchUtils
 export(setGenesToSameAsSamples)
 export(removeBatchAndValue)
+
+# temp testing
+export(mbatchStandardCombineLegends)
+
+# used for comapring DSC computation times
+export(pvalueDSC_scores)

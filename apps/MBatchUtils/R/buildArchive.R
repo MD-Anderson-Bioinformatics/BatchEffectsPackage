@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -27,25 +27,21 @@ getJarsFromDir <- function(theDir)
 ## exported
 #############################################################################
 
-# the SourceDir should contain a single directory, the data for which to build an archive
-buildSingleArchive <- function(theMbatchID, theResultDir, theDataDir, theZipDir)
+buildSingleArchive <- function(theResultDir, theDataDir, theZipDir)
 {
   ########
-  message("buildSingleArchive::theMbatchID=", theMbatchID)
   message("buildSingleArchive::theResultDir=", theResultDir)
   message("buildSingleArchive::theDataDir=", theDataDir)
   message("buildSingleArchive::theZipDir=", theZipDir)
   ########
-  # jinit for BEVIndex
-  myJavaJars <- getJarsFromDir(dirname(system.file("BEVIndex", "BEVIndex.jar", package="MBatchUtils")))
-  .jinit(classpath=myJavaJars, force.init = TRUE, parameters=updateJavaParameters(c("-Xms4800m", "-Djava.awt.headless=true")))
-  ########
-  # String theMbatchID, String theResultDir, String theDataDir, String theZipDir
-  .jcall("edu/mda/bcb/bevindex/BEVIndex", returnSig = "V",
-         method='runBEVIndex',
-         .jnew("java/lang/String",theMbatchID),
-         .jnew("java/lang/String",theResultDir),
-         .jnew("java/lang/String",theDataDir),
-         .jnew("java/lang/String",theZipDir))
+  # :param the_results_dir: directory with MBatch results
+  # :param the_data_dir: directory with actual data
+  # :param the_zip_dir: directory in which to place ZIP file
+  # :return: full pathname for ZIP file
+  message("buildSingleArchive - import(mbatch.index.index)")
+  calc <- import("mbatch.index.index")
+  zipFile <- calc$create_index_archive(theResultDir, theDataDir, theZipDir)
+  message("buildSingleArchive - after Python")
+  zipFile
 }
 

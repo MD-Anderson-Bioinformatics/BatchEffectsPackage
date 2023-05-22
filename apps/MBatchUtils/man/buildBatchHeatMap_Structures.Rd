@@ -9,7 +9,8 @@ theOutputFile, theSortByType, theRowType = "scholar",
 theColType = "bio.tcga.barcode.sample", theRowCluster = NULL,
 theColCluster = NULL,
 theShaidyMapGen, theNgchmWidgetJs,
-theShaidyMapGenJava = "/usr/bin/java", theShaidyMapGenArgs = "-Xmx16G")
+theShaidyMapGenJava = "/usr/bin/java", theShaidyMapGenArgs = "-Xmx16G",
+theEncoding="en_US.UTF-8")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,6 +28,7 @@ theShaidyMapGenJava = "/usr/bin/java", theShaidyMapGenArgs = "-Xmx16G")
   \item{theNgchmWidgetJs}{Full path to ngchmWidget-min.js. Required by NGCHM package.}
   \item{theShaidyMapGenJava}{Full path to Java. Required by NGCHM package.}
   \item{theShaidyMapGenArgs}{Java run-time arguments, like -Xmx16G".}
+  \item{theEncoding}{Text encoding, defaults to "en_US.UTF-8". Other encodings may not work properly.}
 }
 \details{
 Build an NGCHM from data structures.

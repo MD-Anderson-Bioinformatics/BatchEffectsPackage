@@ -6,9 +6,10 @@
 A function to perform Box Plot group analysis from data in files.
 }
 \usage{
-Boxplot_Group_Structures(theData,theTitle, theOutputPath,
+Boxplot_Group_Structures(theData,theTitle, theOutputDir,
 theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
 theListOfGroupBoxFunction, theListOfGroupBoxLabels,
+theDataVersion, theTestVersion,
 theMaxGeneCount=20000)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -16,7 +17,7 @@ theMaxGeneCount=20000)
   \item{theData}{An instance of BEA_DATA \code{\link{BEA_DATA-class}}}
   \item{theTitle}{Object of class \code{"character"}
   Title to use in PNG files. }
-  \item{theOutputPath}{Object of class \code{"character"}
+  \item{theOutputDir}{Object of class \code{"character"}
   Directory in which to place output PNG files. }
   \item{theBatchTypeAndValuePairsToRemove}{Object of class \code{"list"}
   A list of vectors containing the batch type (or * for all types) and
@@ -29,6 +30,10 @@ theMaxGeneCount=20000)
   A list of functions to use for group assessments. }
   \item{theListOfGroupBoxLabels}{Object of class \code{"vector"}
   A list of strings giving strings for labels to use for group assessments. }
+	\item{theDataVersion}{Object of class \code{"character"} Version of the data prefaced
+	with DATA_, such as DATA_2022-09-09-1600. Use empty string to not include. }
+	\item{theTestVersion}{Object of class \code{"character"} Version of the test prefaced
+	with TEST_, such as TEST_2022-10-10-1300. Use empty string to not include. }
   \item{theMaxGeneCount}{Integer giving maximum number of features (genes) to keep. Default is 20000. 0 means keep all.}
 }
 \details{

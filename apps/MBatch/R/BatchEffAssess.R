@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -28,6 +28,7 @@ sortMatrix <- function(theMatrix)
       if (dim(theMatrix)[2]>0)
       {
         # order rows, columns
+        Sys.setlocale("LC_COLLATE", "C")
         theMatrix <- theMatrix[order(rownames(theMatrix)), order(colnames(theMatrix))]
       }
     }
@@ -43,6 +44,7 @@ sortDataframe <- function(theDataframe)
     {
       if (dim(theDataframe)[2]>0)
       {
+        Sys.setlocale("LC_COLLATE", "C")
         theDataframe <- theDataframe[order(theDataframe$Sample),]
       }
     }
@@ -372,6 +374,16 @@ breakIntoTitle<-function(theString, theOldChar=.Platform$file.sep, theNewChar=" 
   	theString <- gsub(theNewChar, theOldChar, theString, fixed=TRUE)
   }
 	return(theString)
+}
+
+even <- function(theVal)
+{
+  return ((theVal%%2) == 0)
+}
+
+odd <- function(theVal)
+{
+  return ((theVal%%2) != 0)
 }
 
 beaRainbow<-function(theNumberOfColors, v=1.0, s=1.0, shuffle=FALSE)
@@ -750,7 +762,7 @@ filterTheGeneDataOnBatchSize<-function(theMatrixGeneData, theMinBatchSize, theBa
 {
 	### filter by batch size
 	###logDebug("filterTheGeneDataOnBatchSize start")
-	if (theMinBatchSize>=1)
+	if (theMinBatchSize>1)
 	{
 		logDebug("filterTheGeneDataOnBatchSize theMinBatchSize=", theMinBatchSize)
 		threshHoldList<-batchTreshold(theBatchIds, theMinBatchSize)
@@ -983,17 +995,15 @@ filterBasedOnGeneLimit<-function(theMatrixGeneData, theSeed, theGeneLimit)
 
 mbatchStandardLegend <- function(theTitle, theVersion, theLegendNames, theLegendColors, theLegendSymbols, theFilenamePath)
 {
-	myJavaJars <- getJarsFromDir(dirname(system.file("LegendJava", "LegendJava.jar", package="MBatch")))
-	logDebug("mbatchStandardLegend - Calling .jinit ", myJavaJars)
-	.jinit(classpath=myJavaJars, force.init = TRUE, parameters=updateJavaParameters("-Xms4800m"))
-	logDebug("mbatchStandardLegend - .jinit complete")
 	logDebug("mbatchStandardLegend - theTitle ", theTitle)
 	logDebug("mbatchStandardLegend - theVersion ", theVersion)
 	logDebug("mbatchStandardLegend - theFilenamePath ", theFilenamePath)
 	logDebug("mbatchStandardLegend - theLegendNames ", paste(theLegendNames, collapse=", "))
-	logDebug("mbatchStandardLegend - theLegendNames ", length(theLegendNames))
-	logDebug("mbatchStandardLegend - theLegendColors ", length(theLegendColors))
-	logDebug("mbatchStandardLegend - theLegendSymbols ", length(theLegendSymbols))
+	logDebug("mbatchStandardLegend - theLegendNames length ", length(theLegendNames))
+	logDebug("mbatchStandardLegend - theLegendColors ", paste(theLegendColors, collapse=", "))
+	logDebug("mbatchStandardLegend - theLegendColors length ", length(theLegendColors))
+	logDebug("mbatchStandardLegend - theLegendSymbols ", paste(theLegendSymbols, collapse=", "))
+	logDebug("mbatchStandardLegend - theLegendSymbols length ", length(theLegendSymbols))
 	myColors <- NULL
 	if (!is.null(theLegendColors))
 	{
@@ -1010,46 +1020,54 @@ mbatchStandardLegend <- function(theTitle, theVersion, theLegendNames, theLegend
 	logDebug("mbatchStandardLegend - theTitle UTF-8 = ", theTitle)
 	logDebug("mbatchStandardLegend - theVersion UTF-8 = ", theVersion)
 	logDebug("mbatchStandardLegend - theFilenamePath UTF-8 = ", theFilenamePath)
-	logDebug("mbatchStandardLegend before java")
-	result <- .jcall("edu/mda/bcb/legendjava/LegendJava", returnSig = "Z",
-													method='writeLegend',
-													.jnew("java/lang/String",theTitle),
-													.jnew("java/lang/String",theVersion),
-													.jarray(as.vector(as.character(theLegendNames))),
-									 				.jarray(as.vector(as.character(myColors))),
-									 				.jarray(as.vector(as.integer(theLegendSymbols)), contents.class="[I"),
-													.jnew("java/lang/String",theFilenamePath))
-	if(FALSE==result)
+	logDebug("mbatchStandardLegend before Python")
+	# logDebug("mbatchStandardLegend - use_condaenv = ", getGlobalMBatchEnv())
+	# use_condaenv(getGlobalMBatchEnv())
+	logDebug("mbatchStandardLegend - getGlobalMBatchEnv() = ", getGlobalMBatchEnv())
+	logDebug("mbatchStandardLegend - import(mbatch.legend.legend)")
+	legend <- import("mbatch.legend.legend")
+	colorList <- as.list(as.vector(as.character(myColors)))
+	if (length(myColors)<1)
 	{
-		stop("Failed to write legend")
+	  colorList <- list()
 	}
-	logDebug("mbatchStandardLegend after java")
+	symbolList <- as.list(as.vector(as.character(theLegendSymbols)))
+	if (length(theLegendSymbols)<1)
+	{
+	  symbolList <- list()
+	}
+	legendNameList <- as.list(as.vector(as.character(theLegendNames)))
+	myTitle <- paste(theTitle, theVersion, sep=" ")
+	logDebug("mbatchStandardLegend - colorList = ", colorList)
+	logDebug("mbatchStandardLegend - symbolList = ", symbolList)
+	logDebug("mbatchStandardLegend - legendNameList = ", legendNameList)
+	logDebug("mbatchStandardLegend - myTitle = ", myTitle)
+	logDebug("mbatchStandardLegend - theFilenamePath = ", theFilenamePath)
+	legend$export_legend_convert_shapes(colorList,
+	                                    symbolList,
+	                                    legendNameList,
+	                                    myTitle,
+	                                    theFilenamePath)
+	logDebug("mbatchStandardLegend after Python")
 }
 
 mbatchStandardCombineLegends<-function(theTitle, theFilenamePath, theListOfFiles)
 {
-	myJavaJars <- getJarsFromDir(dirname(system.file("LegendJava", "LegendJava.jar", package="MBatch")))
-	logDebug("mbatchStandardCombineLegends - Calling .jinit ", myJavaJars)
-	.jinit(classpath=myJavaJars, force.init = TRUE, parameters=updateJavaParameters("-Xms4800m"))
-	logDebug("mbatchStandardCombineLegends - .jinit complete")
 	logDebug("mbatchStandardCombineLegends - theTitle ", theTitle)
 	logDebug("mbatchStandardCombineLegends - theFilenamePath ", theFilenamePath)
 	logDebug("mbatchStandardCombineLegends - theListOfFiles ", paste(theListOfFiles, collapse=", "))
 	Encoding(theTitle) <- "UTF-8"
 	Encoding(theFilenamePath) <- "UTF-8"
-	logDebug("mbatchStandardLegend - theTitle UTF-8 = ", theTitle)
-	logDebug("mbatchStandardLegend - theFilenamePath UTF-8 = ", theFilenamePath)
-	logDebug("mbatchStandardLegend before java")
-	result <- .jcall("edu/mda/bcb/legendjava/LegendJava", returnSig = "Z",
-									 method='combineLegends',
-									 .jnew("java/lang/String",theTitle),
-									 .jarray(as.vector(as.character(theListOfFiles))),
-									 .jnew("java/lang/String",theFilenamePath))
-	if(FALSE==result)
-	{
-		stop("Failed to write combined legend")
-	}
-	logDebug("mbatchStandardLegend after java")
+	logDebug("mbatchStandardCombineLegends - theTitle UTF-8 = ", theTitle)
+	logDebug("mbatchStandardCombineLegends - theFilenamePath UTF-8 = ", theFilenamePath)
+	logDebug("mbatchStandardCombineLegends before Python")
+	# title not used anymore
+  # logDebug("mbatchStandardCombineLegends - use_condaenv = ", getGlobalMBatchEnv())
+	# use_condaenv(getGlobalMBatchEnv())
+	logDebug("mbatchStandardCombineLegends - import(mbatch.legend.legend)")
+	legend <- import("mbatch.legend.legend")
+	legend$combine_legends(as.list(as.vector(as.character(theListOfFiles))), theFilenamePath)
+	logDebug("mbatchStandardCombineLegends after Python")
 }
 
 ####################################################################
@@ -1107,6 +1125,7 @@ compareTwoMatrices <- function(theCorrected, theCompare)
   print(dim(theCompare))
   print(theCompare[1:min(4,compareRows),1:min(3,compareCols)])
 
+  message("start iterating")
   for(myCol in 1:correctedCols)
   {
     if (!(colnames(theCorrected)[myCol]==colnames(theCompare)[myCol]))
@@ -1199,26 +1218,6 @@ compareTwoDataframes <- function(theCorrected, theCompare)
     }
   }
   return(TRUE)
-}
-
-####################################################################
-###
-####################################################################
-
-getJarsFromDir <- function(theDir)
-{
-  allJars <- dir(theDir, "*.jar", full.names=TRUE)
-  paste(allJars, collapse=.Platform$path.sep)
-}
-
-updateJavaParameters <- function(thePars)
-{
-  if (!("-Djava.awt.headless=true" %in% thePars))
-  {
-    message("Force -Djava.awt.headless=true for jinit")
-    thePars <- c(thePars, "-Djava.awt.headless=true")
-  }
-  thePars
 }
 
 ####################################################################

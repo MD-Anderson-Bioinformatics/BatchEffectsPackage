@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -18,8 +18,30 @@ embed_img <- function(X, Y, k = 15, ...)
   do.call(vizier::embed_plot, args)
 }
 
+writeErrorsForAllBatchTypesUMAP<-function(theMessage, theDataframeBatchData, theUmapOutputDir,
+                                          theTitle, theDataVersion, theTestVersion)
+{
+  unlink(theUmapOutputDir, recursive = TRUE, force = TRUE)
+  dir.create(theUmapOutputDir, showWarnings=FALSE, recursive=TRUE)
+  for(batchTypeIndex in c(2:length(theDataframeBatchData)))
+  {
+    ### compile data and information for display
+    batchTypeName <- names(theDataframeBatchData)[batchTypeIndex]
+    logInfo("createBatchEffectsOutput_umap batchTypeName=", batchTypeName)
+    umapBatchDir <- checkCreateDir(theUmapOutputDir, batchTypeName)
+    umapBatchDir <- addVersionsIfNeeded(umapBatchDir, theDataVersion, theTestVersion)
+    # do errors for each batch type
+    dir.create(umapBatchDir, showWarnings=FALSE, recursive=TRUE)
+    mesg=paste("No UMAP -", theMessage, " - ", theTitle, sep="")
+    openAndWriteIssuesUmap(umapBatchDir, mesg)
+  }
+}
+
 createBatchEffectsOutput_umap<-function(theMatrix, theDataframeBatchData, theTitle,
-                                             theUmapOutputDir=getwd(), theUmapFileBase="UMAP")
+                                        theDataVersion, theTestVersion,
+                                        theUmapOutputDir,
+                                        theDoDSCFlag, theDSCPermutations,
+                                        theDSCThreads, theDoDscPermsFileFlag, theSeed)
 {
   logDebug("createBatchEffectsOutput_umap")
   collateOrigValue<-Sys.getlocale("LC_COLLATE")
@@ -28,42 +50,162 @@ createBatchEffectsOutput_umap<-function(theMatrix, theDataframeBatchData, theTit
   logDebug("Changing LC_COLLATE to C for duration of run")
   checkPackageSettings()
   stopifnotWithLogging("The number of columns of gene data must equal the number of rows of batch data.", ncol(theMatrix)==nrow(theDataframeBatchData))
-  umapOutputDir <- checkDirForCreation(theUmapOutputDir)
   rdataFiles <- NULL
-  pca_data <- doPrcompCall(theMatrix)
-  if (is.null(pca_data))
-  {
-    mesg=paste("Unable to calculate--too many NAs, Infinities or NaNs in data - ", theTitle, sep="")
-    openAndWriteIssuesUmap(umapOutputDir, mesg)
-  }
-  else
-  {
-    umap_data <- uwot::umap(pca_data$x)
-    # do not recast to dataframe, it changes the column names in a way that breaks UTF-8 characters
-    #myDF <- data.frame(theDataframeBatchData, stringsAsFactors=FALSE)
-    samplesIds <- as.vector(unlist(theDataframeBatchData[1]))
-    for(batchTypeIndex in c(2:length(theDataframeBatchData)))
+  tryCatch({
+    pca_data <- doPrcompCall(theMatrix)
+    if (is.null(pca_data))
     {
-      ### compile data and information for display
-      batchTypeName <- names(theDataframeBatchData)[batchTypeIndex]
-      logInfo("createBatchEffectsOutput_umap batchTypeName=", batchTypeName)
-      umapBatchDir <- checkCreateDir(umapOutputDir, batchTypeName)
-      logInfo("createBatchEffectsOutput_umap umapBatchDir=", umapBatchDir)
-      batchIdsForSamples <- theDataframeBatchData[batchTypeName]
-      # needs to be factors for embed_img/embed_plot to work
-      batchIdsForSamples <- as.vector(unlist(batchIdsForSamples))
-      uniqueBatchIds <- sort(unique(sort(batchIdsForSamples)))
-      batchIdsForSamples <- factor(batchIdsForSamples, levels=uniqueBatchIds)
-      diagramFilename = createDirPlusFilename(umapBatchDir, "UMAP_Diagram.png")
-      legendFilename = createDirPlusFilename(umapBatchDir, "UMAP_Legend.png")
-      color <- beaRainbow(length(uniqueBatchIds), v=0.7)
-      title <- paste(theTitle, "UMAP (PCA)", batchTypeName, sep=" ")
-      umapDiagram(diagramFilename, batchIdsForSamples, umap_data, color, title, levels(batchIdsForSamples))
-      umapLegend(legendFilename, title, color, uniqueBatchIds, as.vector(unlist(batchIdsForSamples)))
-      rdataFiles <- c(rdataFiles, writeUmapDataTSVs(samplesIds, batchIdsForSamples,
-                                                    umap_data, umapBatchDir, "UMAP_Data-"))
+      stop("Unable to calculate--too many NAs, Infinities or NaNs in data")
     }
-  }
+    else
+    {
+      neighbors <- 15
+      if (neighbors > (dim(pca_data$x)[2]))
+      {
+        neighbors <- dim(pca_data$x)[2] -1
+        if (neighbors < 1)
+        {
+          neighbors <- 1
+        }
+      }
+      dscOutputDir <- NULL
+      if (TRUE==theDoDSCFlag)
+      {
+        # make directory for later use
+        dscOutputDir <- addVersionsIfNeeded(cleanFilePath(theUmapOutputDir, "DSC"), theDataVersion, theTestVersion)
+        checkDirForCreation(dscOutputDir)
+        file.create(file.path(dscOutputDir, "DSCOverview.tsv"))
+        logDebug("make future dir", dscOutputDir)
+        # write complist file
+        # NOTE - MUST BE AT TOP LEVEL FOR DSC OVERVIEW FUNCTION TO WORK
+        logDebug("write ALL__CompListDSC.RData", theUmapOutputDir)
+        saveCompListDscData(cleanFilePath(theUmapOutputDir, "ALL__CompListDSC.RData"), c("PC1", "PC2", "PC3", "PC4"))
+      }
+      logInfo("createBatchEffectsOutput_umap neighbors=", neighbors)
+      umap_data <- uwot::umap(pca_data$x, n_neighbors = neighbors)
+      # do not recast to dataframe, it changes the column names in a way that breaks UTF-8 characters
+      #myDF <- data.frame(theDataframeBatchData, stringsAsFactors=FALSE)
+      samplesIds <- as.vector(unlist(theDataframeBatchData[1]))
+      for(batchTypeIndex in c(2:length(theDataframeBatchData)))
+      {
+        ### compile data and information for display
+        batchTypeName <- names(theDataframeBatchData)[batchTypeIndex]
+        logInfo("createBatchEffectsOutput_umap batchTypeName=", batchTypeName)
+        umapBatchDir <- checkCreateDir(theUmapOutputDir, batchTypeName)
+        umapBatchDir <- addVersionsIfNeeded(umapBatchDir, theDataVersion, theTestVersion)
+        checkDirForCreation(umapBatchDir)
+        logInfo("createBatchEffectsOutput_umap umapBatchDir=", umapBatchDir)
+        batchIdsForSamples <- theDataframeBatchData[batchTypeName]
+        # needs to be factors for embed_img/embed_plot to work
+        batchIdsForSamples <- as.vector(unlist(batchIdsForSamples))
+        uniqueBatchIds <- sort(unique(sort(batchIdsForSamples)))
+        batchIdsForSamples <- factor(batchIdsForSamples, levels=uniqueBatchIds)
+        # ############################
+        dscAllResults <- NULL
+        if(TRUE==theDoDSCFlag)
+        {
+          logDebug("call pvalueDSC")
+          pca_scores <- SamplePCA(t(umap_data))
+          dscAllResults <- pvalueDSC(pca_scores, batchIdsForSamples, theDSCPermutations, 0, 0, theDSCThreads, theSeed)
+          logDebug("openAndWriteDscAllFile 2")
+          openAndWriteDscAllFile(pca_scores, dscAllResults, umapBatchDir, "ANY", "NA", "NA")
+          if (TRUE==theDoDscPermsFileFlag)
+          {
+            openAndWriteDscPermsFile(dscAllResults, umapBatchDir, "ANY", "NA", "NA")
+          }
+          logDebug("after openAndWriteDscAllFile 2")
+        }
+        # ############################
+        logDebug("UMAP diagrams")
+        diagramFilename = createDirPlusFilename(umapBatchDir, "UMAP_Diagram.png")
+        legendFilename = createDirPlusFilename(umapBatchDir, "UMAP_Legend.png")
+        color <- beaRainbow(length(uniqueBatchIds), v=0.7)
+        title <- paste(theTitle, "UMAP (PCA)", batchTypeName, sep=" ")
+        umapDiagram(diagramFilename, batchIdsForSamples, umap_data, color, title, levels(batchIdsForSamples))
+        umapLegend(legendFilename, title, color, uniqueBatchIds, as.vector(unlist(batchIdsForSamples)))
+        meta <- data.frame(key=c("neighbors"), value=c(neighbors))
+        rdataFiles <- c(rdataFiles, writeUmapDataTSVs(samplesIds, as.vector(unlist(batchIdsForSamples)),
+                                                      umap_data, umapBatchDir, "UMAP_Data-", meta))
+        for(i in seq(from=1, to=2, by=2))
+        {
+          componentA <- colnames(pca_data$x)[[i]]
+          componentB <- colnames(pca_data$x)[[i+1]]
+          ###
+          dscTxtFile <- makePcaFileName_TXT(umapBatchDir, "ANY", componentA, componentB, "DSC")
+          errorFile <- file.path(umapBatchDir, "error.log")
+          ###
+          results <- NULL
+          if (TRUE==theDoDSCFlag)
+          {
+            logDebug("doInternalPca - pvalueDSC 2")
+            ### TODO: make calls to doInternalPca return the list of DSC objects created here
+            pca_scores <- SamplePCA(t(umap_data))
+            # use i and i+1, since component variables are strings here
+            compA <- i
+            compB <- i+1
+            results <- pvalueDSC(pca_scores, batchIdsForSamples, theDSCPermutations, compA, compB, theDSCThreads, theSeed)
+            if(TRUE==theDoDscPermsFileFlag)
+            {
+              openAndWriteDscPermsFile(results, dirname(dscTxtFile), "ANY", compA, compB)
+            }
+            diagramLabelDsc <- dscAllResults@mDSC
+            diagramLabelDscXY <- results@mDSC
+            DSCLabels <- c(
+              "First PCA Component:",
+              "First Component FVE (%):",
+              "Second PCA Component:",
+              "Second Component FVE (%):",
+              "",
+              paste("Disp. Sep. Crit. (DSC) (", compA, ",", compB, "):", sep=""),
+              paste("Disp. within groups (Dw) (", compA, ",", compB, "):", sep=""),
+              paste("Disp. between groups (Db) (", compA, ",", compB, "):", sep=""),
+              paste("DSC pvalue(", compA, ",", compB, "):", sep=""),
+              "",
+              "Disp. Sep. Crit. (DSC):",
+              "Disp. within groups (Dw):",
+              "Disp. between groups (Db):",
+              "DSC pvalue:")
+            DSCvalues <- c(
+              componentA,
+              calculateFVEForSingleComponent(pca_scores, compA)*100,
+              componentB,
+              calculateFVEForSingleComponent(pca_scores, compB)*100,
+              "",
+              results@mDSC,
+              results@mDW,
+              results@mDB,
+              results@mPvalue,
+              "",
+              dscAllResults@mDSC,
+              dscAllResults@mDW,
+              dscAllResults@mDB,
+              dscAllResults@mPvalue)
+            ### combine DSC and DSC pvalue data
+            extraLegend <- combineStringPairs(DSCLabels, DSCvalues, " ", FALSE, FALSE, FALSE)
+            combineForFile <- combineStringPairs(DSCLabels, DSCvalues, "\t", FALSE, FALSE, FALSE)
+            ### save value objects for later reuse in making DSC summary / passing in PCA-PVALUE-DSC / file is *__CompDSC.RData
+            saveCompDscData(paste(dscTxtFile, "__CompDSC.RData", sep=""), results, compA, compB)
+          }
+          if(TRUE==theDoDSCFlag)
+          {
+            openAndWriteDSCFile(combineForFile, dscTxtFile)
+          }
+        }
+      }
+    }
+  }, warning = function(err)
+  {
+    logError("1 createBatchEffectsOutput_umap caught an error", err)
+    rdataFiles <- NULL
+    writeErrorsForAllBatchTypesUMAP(err, theDataframeBatchData, theUmapOutputDir,
+                                    theTitle, theDataVersion, theTestVersion)
+  }, error = function(err)
+  {
+    logError("2 createBatchEffectsOutput_umap caught an error", err)
+    rdataFiles <- NULL
+    writeErrorsForAllBatchTypesUMAP(err, theDataframeBatchData, theUmapOutputDir,
+                                    theTitle, theDataVersion, theTestVersion)
+  })
   rdataFiles
 }
 
@@ -94,6 +236,7 @@ umapDiagram <- function(theFilename, theBatches, theUmap, theColors, theTitle, t
 doPrcompCall<-function(theMatrixGeneData, theRank=50)
 {
   logDebug("doPrcompCall - start")
+  checkIfTestError()
   pca <- NULL
   if (sum(!is.na(rowSums(theMatrixGeneData)))<2)
   {
@@ -107,8 +250,8 @@ doPrcompCall<-function(theMatrixGeneData, theRank=50)
     myData <- theMatrixGeneData[!is.na(rowSums(theMatrixGeneData)),]
     logOutput("remove zero variance")
     myData <- myData[apply(myData, 1, var)!=0,]
-    pca <- try( prcomp(t(myData), scale.=TRUE, center=TRUE, rank=theRank) )
-    if(class(pca)=='try-error')
+    pca <- try( prcomp(t(myData), scale=TRUE, center=TRUE, rank=theRank) )
+    if(is(pca, 'try-error'))
     {
       logDebug("prcomp first call threw a problem -- dropping outliers and retrying")
       myNoMissingMatrixGeneData<-theMatrixGeneData[!is.na(rowSums(theMatrixGeneData)),]
@@ -116,11 +259,11 @@ doPrcompCall<-function(theMatrixGeneData, theRank=50)
       sortedGeneVar<-sort(myGeneVar, decreasing=TRUE)
       myOutlierNumber<-1
       logDebug("myOutlierNumber =", myOutlierNumber)
-      while((class(pca)=='try-error')&&(myOutlierNumber<length(sortedGeneVar)))
+      while((is(pca,'try-error'))&&(myOutlierNumber<length(sortedGeneVar)))
       {
         logDebug("prcomp subsequent call generated a failed (not necessarily a problem yet) ", myOutlierNumber)
         subMatrix <- myNoMissingMatrixGeneData[myGeneVar<sortedGeneVar[myOutlierNumber],]
-        pca<-try(prcomp(t(subMatrix), scale.=TRUE, center=TRUE, rank=theRank))
+        pca<-try(prcomp(t(subMatrix), scale=TRUE, center=TRUE, rank=theRank))
         myOutlierNumber<-myOutlierNumber+1
       }
       if (myOutlierNumber>=length(sortedGeneVar))
@@ -170,7 +313,6 @@ umapPCA_calc<-function(theMatrix)
   }
 }
 
-
 openAndWriteIssuesUmap<-function(theOutputDir, theMessage)
 {
   myFile <- file(cleanFilePath(theOutputDir, "error.log"), "w+")
@@ -181,7 +323,8 @@ openAndWriteIssuesUmap<-function(theOutputDir, theMessage)
 ####################################################################
 ####################################################################
 
-writeUmapDataTSVs<-function(theSamplesIds, theBatchIdsForSamples, theUmapData, theOutputDir, theOutFilePrefix)
+writeUmapDataTSVs<-function(theSamplesIds, theBatchIdsForSamples, theUmapData,
+                            theOutputDir, theOutFilePrefix, theMeta)
 {
   #rdataFile <- cleanFilePath(theOutputDir, paste(theOutFilePrefix, "all.RData", sep=""))
   # build dataframe from theUmapData with theSamplesIds in front
@@ -195,6 +338,8 @@ writeUmapDataTSVs<-function(theSamplesIds, theBatchIdsForSamples, theUmapData, t
   colnames(writeBatchData) <- c("Samples", "Batches")
   batcFile <- cleanFilePath(theOutputDir, paste(theOutFilePrefix, "batc.tsv", sep=""))
   write.table(writeBatchData, file=batcFile, row.names = FALSE, sep = "\t", quote = FALSE)
+  metaFile <- cleanFilePath(theOutputDir, paste(theOutFilePrefix, "meta.tsv", sep=""))
+  write.table(theMeta, file=metaFile, row.names = FALSE, sep = "\t", quote = FALSE)
   #write.table(data, file = cleanFilePath(theHierClustOutputDir,theOutputHCOrderFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
   # write udend RData file
   #save(theSamplesIds, theBatchIdsForSamples, theUmapData, file=rdataFile)

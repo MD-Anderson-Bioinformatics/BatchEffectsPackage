@@ -25,7 +25,8 @@ The primary output method for MBatch is to view results in the Batch Effects Web
 
 # Usage
 
-AN_Adjusted(theBeaData, theBatchType, thePath = NULL, theWriteToFile = FALSE)
+AN_Adjusted(theBeaData, theBatchType, thePath = NULL,
+theDataVersion=NULL, theTestVersion=NULL, theWriteToFile = FALSE)
 
 # Arguments
 
@@ -80,6 +81,8 @@ The following code is adapted from the tests/AN_Adjusted.R file. Data used is fr
   outputFile <- AN_Adjusted(theBeaData=myData,
                            theBatchType=theBatchType,
                            thePath=theOutputDir,
+                           theDataVersion="DATA_2022-09-09-1600",
+                           theTestVersion="TEST_2022-10-10-1300",
                            theWriteToFile=TRUE)
   correctedMatrix <- readAsGenericMatrix(outputFile)
   print(correctedMatrix[1:4, 1:4])
@@ -89,5 +92,5 @@ The following code is adapted from the tests/AN_Adjusted.R file. Data used is fr
 # Example File Output
 
 The above code creates the following output file. File is named using the following naming convention:
-ANY_Corrections-ANAdjusted.tsv
+corrected_matrix.tsv
 The TSV file with the corrected dataset is written by the MBatch package. The end of the output shows a snippet from the corrected matrix.

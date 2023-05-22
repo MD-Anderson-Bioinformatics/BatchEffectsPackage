@@ -11,6 +11,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+# Use EBNPlus_Correction_Structures for Corrections
+
+***Use the EBNPlus_Correction_Structures function to performed corrections.***
+
+For most users, the function EBNPlus_Correction_Structures is what you want to use for processing. It is designed specifically to do corrections. The EBNPlus_TrainAndValidate functions are for researchers interested in the internal workings of the EBNPlus algorithm.
+
+See the tests/EBNPlus_Correction_Structures.R or tests/EBNPlus_Correction_Files.R for details.
+
 # Introduction
 
 These instructions are aimed at people familiar with R and familiar with TCGA/GDC platforms and data types. They are intended to introduce the reader to producing the given assessment. These instructions will only rarely, if ever, touch on the appropriateness of the assessment algorithm or interpretation of output. See MBatch_01_InstallLinux for instructions on downloading test data.
@@ -97,7 +105,7 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
   
   theDataFile1=cleanFilePath(inputDir, "brca_rnaseq2_matrix_data.tsv")
   theDataFile2=cleanFilePath(inputDir, "brca_agi4502_matrix_data.tsv")
-  theOutputDir=cleanFilePath(outputDir, "EBNPlus_TrainAndValidateReplicates_Structures")
+  theOutputDir=cleanFilePath(outputDir, "EBNPlus_TrainAndValidateReplicates_Structures1")
   theBatchId1="RNASeqV2"
   theBatchId2="Agilent4502"
   theRandomSeed=314
@@ -196,7 +204,10 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
       theEBNP_TestRatio=0.3,
       theSeed=theRandomSeed,
       theTestSeed=theRandomSeed,
-      theEBNP_PriorPlotsFile=cleanFilePath(theOutputDir, "priorplots.PNG"))
+			thePriorPlotPath=theOutputDir,
+      theDataVersion="DATA_2022-09-09-1600", 
+      theTestVersion="TEST_2022-10-10-1300",
+			thePriorPlotFile="priorplots.PNG")
     print("TestSet1")
     printMatrix(resultsList$TestSet1)
     print("TestSet2")
@@ -252,6 +263,4 @@ If Validation Ratio is 0, the validation set values will be 0 x 0 matrices, but 
 
 This also generates the prior plots output file like this one.
 
-`r sprintf("![Prior Plots File](%s)", cleanFilePath(theOutputDir, "priorplots.PNG"))`
-
-
+`r sprintf("![Prior Plots File](%s)", cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "DATA_2022-09-09-1600"), "TEST_2022-10-10-1300"), "priorplots.PNG"))`

@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -17,15 +17,7 @@ calculateCDP_correllation <- function(theData1, theData2, theSamples1, theSample
     result <- sapply(1:length(theSamples1), function(theIndex)
     {
       myCorr <- NA
-      if ("concordance"==theMethod)
-      {
-        myCorr <- epi.ccc(theData1[,theSamples1[theIndex]], theData2[,theSamples2[theIndex]])
-        myCorr <- myCorr$rho.c$est
-      }
-      else
-      {
-        myCorr <- cor(theData1[,theSamples1[theIndex]], theData2[,theSamples2[theIndex]], method=theMethod, use=theUse)
-      }
+      myCorr <- cor(theData1[,theSamples1[theIndex]], theData2[,theSamples2[theIndex]], method=theMethod, use=theUse)
       myCorr
     })
   }
@@ -44,11 +36,7 @@ calculateCDP_density <- function(theCorrelations)
 
 convertCDPsubtitle <- function(theName)
 {
-  if ("concordance"==theName)
-  {
-    theName <- "Concordance Correlation"
-  }
-  else if ("pearson"==theName)
+  if ("pearson"==theName)
   {
     theName <- "Pearson's Correlation"
   }
@@ -63,16 +51,19 @@ convertCDPsubtitle <- function(theName)
   theName
 }
 
-CDP_Plot <- function(theFilePath, theData1, theData2,
+CDP_Plot <- function(thePath, theDataVersion, theTestVersion, theFileName,
+                     theData1, theData2,
                      theData1PairedReplicates, theData2PairedReplicates,
                      theData1UnmatchedReplicates, theData2UnmatchedReplicates,
                      theSubTitle,
                      theMethod="pearson", theUse="pairwise.complete.obs", theSeed=NULL,
                      theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL)
 {
+  newOutputDir <- addVersionsIfNeeded(thePath, theDataVersion, theTestVersion)
+  myFilePath <- file.path(newOutputDir, theFileName)
   stopifnotWithLogging("paired replicates must match in length", (length(theData1PairedReplicates)==length(theData2PairedReplicates)))
   stopifnotWithLogging("unpaired replicates must match in length", (length(theData1UnmatchedReplicates)==length(theData2UnmatchedReplicates)))
-  logInfo("CDP_Plot theFilePath=", theFilePath)
+  logInfo("CDP_Plot myFilePath=", myFilePath)
   logInfo("CDP_Plot theData1PairedReplicates=", length(theData1PairedReplicates))
   #logInfo("CDP_Plot theData1PairedReplicates=", paste(theData1PairedReplicates, collapse=", ", sep=","))
   logInfo("CDP_Plot theData2PairedReplicates=", length(theData2PairedReplicates))
@@ -80,6 +71,7 @@ CDP_Plot <- function(theFilePath, theData1, theData2,
   logInfo("CDP_Plot theData1UnmatchedReplicates=", length(theData1UnmatchedReplicates))
   logInfo("CDP_Plot theData2UnmatchedReplicates=", length(theData2UnmatchedReplicates))
   tryCatch({
+    checkIfTestError()
     theSubTitle <- breakIntoTitle(theSubTitle)
     # make rows the same
     theData1 <- theData1[rownames(theData1)[rownames(theData1) %in% rownames(theData2)],]
@@ -128,7 +120,7 @@ CDP_Plot <- function(theFilePath, theData1, theData2,
     #xRange <- c(-1, 1)
     # plot!
     pdf(NULL)
-    CairoPNG(filename=theFilePath, width = 480, height = 480 )
+    CairoPNG(filename=myFilePath, width = 480, height = 480 )
     on.exit(dev.off())
     on.exit(par("oma"), add=TRUE)
     par(oma=c(3,0,0,0))
@@ -207,14 +199,14 @@ CDP_Plot <- function(theFilePath, theData1, theData2,
   warning=function(e)
   {
     logWarn("1 Unable to calculate CDP--too many NAs, Infinities or NaNs in data")
-    unlink(theFilePath)
-    openAndWriteIssuesLogFileCDP(dirname(theFilePath))
+    unlink(myFilePath)
+    openAndWriteIssuesLogFileCDP(dirname(myFilePath))
   },
   error=function(e)
   {
     logWarn("2 Unable to calculate CDP--too many NAs, Infinities or NaNs in data")
-    unlink(theFilePath)
-    openAndWriteIssuesLogFileCDP(dirname(theFilePath))
+    unlink(myFilePath)
+    openAndWriteIssuesLogFileCDP(dirname(myFilePath))
   })
 }
 
@@ -225,7 +217,8 @@ openAndWriteIssuesLogFileCDP<-function(theOutputDir)
   cat("Correlation not possible\n", file=myFile, append=TRUE)
 }
 
-CDP_Structures <- function(theFilePath, theData1, theData2, theSubTitle, theUnmatchedCount=1000,
+CDP_Structures <- function(thePath, theDataVersion, theTestVersion, theFileName,
+                           theData1, theData2, theSubTitle, theUnmatchedCount=1000,
                            theMethod="pearson", theUse="pairwise.complete.obs", theSeed=NULL, theUseReplicatesUnpaired=FALSE,
                            theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL)
 {
@@ -259,11 +252,13 @@ CDP_Structures <- function(theFilePath, theData1, theData2, theSubTitle, theUnma
       unpairedSamples2 <- sample(data2samples, theUnmatchedCount, replace=TRUE)
     }
   }
-  CDP_Plot(theFilePath, theData1, theData2, pairedSamples, pairedSamples, unpairedSamples1, unpairedSamples2,
+  CDP_Plot(thePath, theDataVersion, theTestVersion, theFileName,
+           theData1, theData2, pairedSamples, pairedSamples, unpairedSamples1, unpairedSamples2,
            theSubTitle, theMethod, theUse, theSeed, theLinePlot=theLinePlot, theHistPlot=theHistPlot, theBinWidth=theBinWidth)
 }
 
-CDP_Files <- function(theFilePath, theDataFile1, theDataFile2, theSubTitle, theUnmatchedCount=1000,
+CDP_Files <- function(thePath, theDataVersion, theTestVersion, theFileName,
+                      theDataFile1, theDataFile2, theSubTitle, theUnmatchedCount=1000,
                       theMethod="pearson", theUse="pairwise.complete.obs", theSeed=NULL, theUseReplicatesUnpaired=FALSE,
                       theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL)
 {
@@ -271,7 +266,8 @@ CDP_Files <- function(theFilePath, theDataFile1, theDataFile2, theSubTitle, theU
   myData1 <- readAsGenericMatrix(theDataFile1)
   logInfo(paste("CDP_Files -- theDataFile2=", theDataFile2))
   myData2 <- readAsGenericMatrix(theDataFile2)
-  CDP_Structures(theFilePath, myData1, myData2, theSubTitle=theSubTitle, theUnmatchedCount=theUnmatchedCount,
+  CDP_Structures(thePath, theDataVersion, theTestVersion, theFileName,
+                 myData1, myData2, theSubTitle=theSubTitle, theUnmatchedCount=theUnmatchedCount,
                  theMethod=theMethod, theUse=theUse, theSeed=theSeed, theUseReplicatesUnpaired=theUseReplicatesUnpaired,
                  theLinePlot=theLinePlot, theHistPlot=theHistPlot, theBinWidth=theBinWidth)
 }

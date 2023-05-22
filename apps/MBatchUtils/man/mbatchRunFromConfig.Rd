@@ -5,18 +5,20 @@
 \description{Run MBatch from a configuration file. This is for
 reproduciblity or for use with Batch Effects Interface}
 \usage{
-mbatchRunFromConfig(theConfigFile, theDataDir, theOutputDir, theNaStrings,
-    theShaidyMapGen, theNgchmWidgetJs, theShaidyMapGenJava,
-    theNGCHMShaidyMem = "16G", thePCAMem = "4800m",
-    theBoxplotMem = "16G", theRunPostFlag=FALSE)
+mbatchRunFromConfig(theConfigFile, theMatrixFile, theBatchesFile,
+  theZipDataDir, theZipResultsDir, theNaStrings,
+  theShaidyMapGen, theNgchmWidgetJs, theShaidyMapGenJava,
+  theNGCHMShaidyMem="16G", theRunPostFlag=FALSE,
+  theMatrixFile2=NULL, theBatchesFile2=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{theConfigFile}{Full path to the configuration file.
   Documentation will be in the MBatch release documentation.}
-  \item{theDataDir}{Full path to directory with data files.}
-  \item{theOutputDir}{Full path to directory to create output, and the
-  function attempts to create the directory.}
+  \item{theMatrixFile}{Full path to data file.}
+  \item{theBatchesFile}{Full path to batch file.}
+  \item{theZipDataDir}{Full path to directory for DATA directory.}
+  \item{theZipResultsDir}{Full path to directory for RESULTS directory.}
   \item{theNaStrings}{This is the argument to mbatchLoadFiles,
   and should generally be "NA".}
   \item{theShaidyMapGen}{Full path to ShaidyMapGen.jar.
@@ -25,9 +27,9 @@ mbatchRunFromConfig(theConfigFile, theDataDir, theOutputDir, theNaStrings,
   Required by NGCHM package.}
   \item{theShaidyMapGenJava}{Full path to Java. Required by NGCHM package.}
   \item{theNGCHMShaidyMem}{16G default}
-  \item{thePCAMem}{4800m default.}
-  \item{theBoxplotMem}{16G default.}
   \item{theRunPostFlag}{FALSE default. If TRUE, build DSC Overview file.}
+  \item{theMatrixFile2}{Full path to secondary data file.}
+  \item{theBatchesFile2}{Full path to secondary batch file.}
 }
 \details{
 Does not return any meaningful value, but creates an empty file

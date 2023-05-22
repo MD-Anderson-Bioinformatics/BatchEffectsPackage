@@ -11,6 +11,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+# Use EBNPlus_Correction_Structures for Corrections
+
+***Use the EBNPlus_Correction_Structures function to performed corrections.***
+
+For most users, the function EBNPlus_Correction_Structures is what you want to use for processing. It is designed specifically to do corrections. The EBNPlus_TrainAndValidate functions are for researchers interested in the internal workings of the EBNPlus algorithm.
+
+See the tests/EBNPlus_Correction_Structures.R or tests/EBNPlus_Correction_Files.R for details.
+
 # Introduction
 
 These instructions are aimed at people familiar with R and familiar with TCGA/GDC platforms and data types. They are intended to introduce the reader to producing the given assessment. These instructions will only rarely, if ever, touch on the appropriateness of the assessment algorithm or interpretation of output. See MBatch_01_InstallLinux for instructions on downloading test data.
@@ -84,11 +92,14 @@ Defaults to NULL and does not create PNG. Non-NULL should be the full path and f
 ##theEBNP_MinSampleNum	
 Defaults to 3. Any row (gene) with less than this number of samples is dropped.
 
+#theEBNP_TestRatio
+If you are doing corrections, this should be set to 0. Any other number is doing training and validation tests, to allow viewing of internal diagnostics.
+
 # Example Call
 
 The following code is adapted from the tests/EB_withNonParametricPriors.R file. Data used is from the testing data as per the MBatch_01_InstallLinux document. In the future, we plan to make the output from MBatch more user friendly, but currently, this produces the following output at the command line.
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, message=TRUE}
 {
   require(MBatch)
 
@@ -98,7 +109,7 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
   
   theDataFile1=cleanFilePath(inputDir, "brca_rnaseq2_matrix_data.tsv")
   theDataFile2=cleanFilePath(inputDir, "brca_agi4502_matrix_data.tsv")
-  theOutputDir=cleanFilePath(outputDir, "EBNPlus_TrainAndValidateReplicates_Structures")
+  theOutputDir=cleanFilePath(outputDir, "EBNPlus_TrainAndValidateReplicates_Structures2")
   theBatchId1="RNASeqV2"
   theBatchId2="Agilent4502"
   theRandomSeed=314
@@ -152,13 +163,14 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
   
   printMatrix <- function(theMatrix)
   {
+    print("printMatrix")
     print(is.matrix(theMatrix))
     print(dim(theMatrix))
     rowMax <- dim(theMatrix)[1]
     colMax <- dim(theMatrix)[2]
     rowMax <- min(rowMax, 4)
     colMax <- min(colMax, 4)
-    print(theMatrix[1:rowMax, 1:colMax])
+    #print(theMatrix[1:rowMax, 1:colMax])
   }
   
   if ((!dir.exists(theDataFile1))&&(!dir.exists(theDataFile2)))
@@ -195,9 +207,9 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
     print("EBNPlus_TrainAndValidateReplicates_Structures")
     resultsList <- EBNPlus_TrainAndValidateFromVector_Structures(theDataMatrix1, theDataMatrix2,
           theBatchId1, theBatchId2,
-          theEBNP_PsuedoReplicates1Train, 
+          theEBNP_PsuedoReplicates1Train,
           theEBNP_PsuedoReplicates2Train,
-          theEBNP_PsuedoReplicates1Validation, 
+          theEBNP_PsuedoReplicates1Validation,
           theEBNP_PsuedoReplicates2Validation,
           theEBNP_BatchWithZero="1",
           theEBNP_FixDataSet=as.numeric(NA),
@@ -206,7 +218,10 @@ The following code is adapted from the tests/EB_withNonParametricPriors.R file. 
           theEBNP_TestRatio=0.3,
           theSeed=theRandomSeed,
           theTestSeed=theRandomSeed,
-          theEBNP_PriorPlotsFile=cleanFilePath(theOutputDir, "priorplots.PNG"))
+      		thePriorPlotPath=theOutputDir,
+          theDataVersion="DATA_2022-09-09-1600", 
+          theTestVersion="TEST_2022-10-10-1300",
+      		thePriorPlotFile="priorplots.PNG")
     print("TestSet1")
     printMatrix(resultsList$TestSet1)
     print("TestSet2")
@@ -258,9 +273,9 @@ a matrix of the validation set from data set 2
 a matrix of the corrected validation data
 
 ##CorrectedResults	
-If Validation Ratio is 0, the validation set values will be 0 x 0 matrices, but this list member will contain a matrix of corrected values, using all replicates.
+If corrections are done, this list member will contain a matrix of corrected values using all available replicates. In that case, the ValidationResults list member will be NULL or contain 0 x 0 matrices.
 
 This also generates the prior plots output file like this one.
 
+`r sprintf("![Prior Plots File](%s)", cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "DATA_2022-09-09-1600"), "TEST_2022-10-10-1300"), "priorplots.PNG"))`
 
-`r sprintf("![Prior Plots File](%s)", cleanFilePath(theOutputDir, "priorplots.PNG"))`

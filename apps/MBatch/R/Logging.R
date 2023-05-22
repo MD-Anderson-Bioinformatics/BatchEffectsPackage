@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -62,16 +62,7 @@ getLogDir <- function()
 ### Write to the console and/or the default log file or the console and/or a specified log file
 logOutput<-function(theLevelName="INFO", ..., theLogFile=NULL)
 {
-	if (FALSE==exists("logger", inherits=TRUE))
-	{
-		assign("logger", NULL, inherits=TRUE)
-	}
-	logger<-get("logger", inherits=TRUE)
-	if (is.null(logger)==TRUE)
-	{
-		logger<-new("Logging")
-		assign("logger", logger, inherits=TRUE)
-	}
+  logger <- getGlobalMBatchLogger()
 	if (length(which(logger@mLevelNames == theLevelName))>0)
 	{
 		if (length(which(logger@mLevelNamesToLog == theLevelName))>0)
@@ -87,8 +78,6 @@ logOutput<-function(theLevelName="INFO", ..., theLogFile=NULL)
 			{
 				logFileName <- logger@mFile
 			}
-
-
 			if(is.null(logFileName) || logFileName=="" || logger@mConsole == TRUE)
 			{
 				####cat(paste(format(Sys.time(), "%Y %m %d %H:%M:%OS3"), theLevelName, Sys.info()['nodename'], paste(lapply(..., function(x) (return(paste(x, collapse=", ")))), collapse="; "), sep=logger@mSeparator), "\n" )
@@ -105,10 +94,10 @@ logOutput<-function(theLevelName="INFO", ..., theLogFile=NULL)
 
 setLogging<-function(theLogger)
 {
-	assign("logger", theLogger, inherits=TRUE);
+  setGlobalMBatchLogger(theLogger)
 }
 
-stopWithLogging<-function(msg )
+stopWithLogging<-function(msg)
 {
 	###last.function.name <- as.list(sys.call(which=-1)[1])
  	###full.message = paste(last.function.name, "():", msg, sep="")

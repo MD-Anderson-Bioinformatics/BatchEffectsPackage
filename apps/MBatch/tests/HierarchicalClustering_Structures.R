@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -42,9 +42,16 @@ if (!is.null(inputDir))
   myData@mData <- mbatchTrimData(myData@mData, 100000)
   # here, we take most defaults
   HierarchicalClustering_Structures(theData=myData,
+                                    theDataVersion="DATA_2022-09-09-1600",
+                                    theTestVersion="TEST_2022-10-10-1300",
                                     theTitle="Test PCA",
-                                    theOutputPath=theOutputDir)
-  correctedMatrix <- readAsGenericMatrix(cleanFilePath(theOutputDir, "HCData.tsv"))
+                                    theOutputDir=theOutputDir)
+  ########################
+  resultsDataPath <- cleanFilePath(cleanFilePath(theOutputDir, "DATA_2022-09-09-1600"), "TEST_2022-10-10-1300")
+  correctedMatrix <- readAsGenericMatrix(cleanFilePath(resultsDataPath, "HCData.tsv"))
+  ########################
+  message("theCompareFile")
+  print(theCompareFile)
   compareMatrix <- readAsGenericMatrix(theCompareFile)
   message("correctedMatrix")
   print(dim(correctedMatrix))

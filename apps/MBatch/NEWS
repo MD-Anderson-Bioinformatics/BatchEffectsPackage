@@ -1,9 +1,23 @@
 
 	**************************************************
 	*						 *
-	*	       1.7 SERIES NEWS			 *
+	*	       2.0 SERIES NEWS			 *
 	*						 *
 	**************************************************
+
+		CHANGES IN R VERSION 2.0.0
+
+NEW FEATURES
+
+    o Removed Java dependencies for Legend, DSC, and reading.
+    o Added Python dependencies for Legend and DSC.
+
+		CHANGES IN R VERSION 1.8.0
+
+NEW FEATURES
+
+    o Added MANOVA support - updated to handle correlated datasets (new algorithm)
+    o Added additional error handling to prevent errors stopping complete run
 
 		CHANGES IN R VERSION 1.7.6
 

@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -20,9 +20,33 @@ setClass("PCA-PVALUE-DSC", representation(
 				mDB="numeric",
 				mDW="numeric"))
 
-pvalueDSC <- function(thePca, theBatchIdsForSamples, thePermutations, theComponentA, theComponentB, theThreads)
+pvalueDSC_scores <- function(thePcaScores, theBatchIdsForSamples, thePermutations, theComponentA, theComponentB, theThreads, theSeed)
+{
+  logDebug("pvalueDSC_scores start")
+  stopifnotWithLogging("Component A should be a number", is.numeric(theComponentA))
+  stopifnotWithLogging("Component B should be a number", is.numeric(theComponentB))
+  pcaDataExcerpt <- NULL
+  if (theComponentA < 1)
+  {
+    logDebug("pvalueDSC_scores component A < 1")
+    pcaDataExcerpt <- t(thePcaScores)
+  }
+  else
+  {
+    logDebug("pvalueDSC_scores transpose")
+    pcaDataExcerpt <- t(thePcaScores[,((1:ncol(thePcaScores))==theComponentA)|((1:ncol(thePcaScores))==theComponentB)])
+  }
+  logDebug("pvalueDSC_scores call pvalueDSCwithExcerpt")
+  results <- pvalueDSCwithExcerpt(pcaDataExcerpt, theBatchIdsForSamples, theSeed, thePermutations, theThreads)
+  ###logDebug(" DSC=", results[[1]], " dbValue=", results[[2]], " dwValue=", results[[3]], " pvalue=", results[[4]])
+  return(results)
+}
+
+pvalueDSC <- function(thePca, theBatchIdsForSamples, thePermutations, theComponentA, theComponentB, theThreads, theSeed)
 {
 	logDebug("pvalueDSC start")
+  stopifnotWithLogging("Component A should be a number", is.numeric(theComponentA))
+  stopifnotWithLogging("Component B should be a number", is.numeric(theComponentB))
 	pcaDataExcerpt <- NULL
 	if (theComponentA < 1)
 	{
@@ -35,38 +59,56 @@ pvalueDSC <- function(thePca, theBatchIdsForSamples, thePermutations, theCompone
 	  pcaDataExcerpt <- t(thePca@scores[,((1:ncol(thePca@scores))==theComponentA)|((1:ncol(thePca@scores))==theComponentB)])
 	}
 	logDebug("pvalueDSC call pvalueDSCwithExcerpt")
-	results <- pvalueDSCwithExcerpt(pcaDataExcerpt, theBatchIdsForSamples, thePermutations, theThreads)
+	results <- pvalueDSCwithExcerpt(pcaDataExcerpt, theBatchIdsForSamples, theSeed, thePermutations, theThreads)
 	###logDebug(" DSC=", results[[1]], " dbValue=", results[[2]], " dwValue=", results[[3]], " pvalue=", results[[4]])
 	return(results)
 }
 
-doDscPerms <- function(thePcaDataExcerpt, theBatchIdsForSamples, thePermutations, theThreads)
+doDscPerms <- function(thePcaDataExcerpt, theBatchIdsForSamples, theSeed, thePermutations, theThreads)
 {
-  # package edu.mda.bcb.dscjava;
-  # public class DscJava
-  # public PcaDsc[] doDscPerms(double[] theValues, int[] theDim, String[] theBatchIds, int thePerms, int theThreads)
-	dscJavaObj <- .jnew("edu/mda/bcb/dscjava/DscJava")
-	logDebug("doDscPerms before java")
-	javaPcaDscObjList <- .jcall(dscJavaObj, "[Ledu/mda/bcb/dscjava/PcaDsc;", "doDscPerms",
-	                            as.vector(thePcaDataExcerpt), dim(thePcaDataExcerpt), as.vector(theBatchIdsForSamples),
-	                            as.integer(thePermutations), as.integer(theThreads))
-	logDebug("doDscPerms after java")
-	resultsList <- lapply(javaPcaDscObjList, function(javaPcaDscObj)
-			{
-				results <- new("PCA-DSC")
-				results@mListOfDSCbyGene <-  .jcall(javaPcaDscObj, "[D", "getmListOfGeneDSC")
-				results@mListOfDWbyGene <-  .jcall(javaPcaDscObj, "[D", "getmListOfGeneDW")
-				results@mListOfDBbyGene <-  .jcall(javaPcaDscObj, "[D", "getmListOfGeneDB")
-				results@mDSC <- .jcall(javaPcaDscObj, "D", "getmDSC")
-				results@mDB <- .jcall(javaPcaDscObj, "D", "getmDB")
-				results@mDW <- .jcall(javaPcaDscObj, "D", "getmDW")
-				results
-			})
+  # set names for list of batch ids
+  # special build of list for python
+  python_vector <- as.character(as.vector(unlist(theBatchIdsForSamples)))
+  names(python_vector) <- colnames(thePcaDataExcerpt)
+  # use_condaenv(getGlobalMBatchEnv())
+  logDebug("doDscPerms - import(mbatch.dsc.dsc_perm)")
+  calc <- import("mbatch.dsc.dsc_perm")
+  # the_df: pandas.DataFrame, the_batches: pandas.Series, the_seed: int, the_threads: int
+  logDebug("doDscPerms thePcaDataExcerpt dim")
+  logDebug(dim(thePcaDataExcerpt))
+  logDebug("doDscPerms python_vector length")
+  logDebug(length(python_vector))
+  logDebug("doDscPerms theSeed")
+  logDebug(theSeed)
+  logDebug("doDscPerms thePermutations")
+  logDebug(thePermutations)
+  logDebug("doDscPerms theThreads")
+  logDebug(theThreads)
+  # as.data.frame needed for proper R to Python conversion
+  # same with as.integer
+  logDebug("doDscPerms before Python")
+  calcInfoList <- calc$dsc_perm_calc_count(r_to_py(thePcaDataExcerpt),
+                                           np_array(python_vector),
+                                           as.integer(theSeed),
+                                           as.integer(thePermutations),
+                                           as.integer(theThreads))
+  logDebug("doDscPerms after Python")
+	resultsList <- lapply(calcInfoList, function(pythonDscObj)
+	  {
+  	  results <- new("PCA-DSC")
+  	  results@mListOfDSCbyGene <- pythonDscObj$m_list_of_feature_dsc
+  	  results@mListOfDWbyGene <-  pythonDscObj$m_list_of_feature_dw
+  	  results@mListOfDBbyGene <-  pythonDscObj$m_list_of_feature_db
+  	  results@mDSC <- pythonDscObj$m_dsc
+  	  results@mDB <-  pythonDscObj$m_db
+  	  results@mDW <-  pythonDscObj$m_dw
+			results
+		})
 	logDebug("doDscPerms length(resultsList)=", length(resultsList))
 	return(resultsList)
 }
 
-pvalueDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples, thePermutations, theThreads)
+pvalueDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples, theSeed, thePermutations, theThreads)
 {
   logDebug("pvalueDSCwithExcerpt start")
 	### get initial DSC values
@@ -90,7 +132,7 @@ pvalueDSCwithExcerpt <- function(thePcaDataExcerpt, theBatchIdsForSamples, thePe
 		### this part can be multi-threaded if needed
 		startTime <- Sys.time()
 		logDebug("pvalueDSCwithExcerpt call doDscPerms")
-		permResults <- doDscPerms(thePcaDataExcerpt, theBatchIdsForSamples, thePermutations, theThreads)
+		permResults <- doDscPerms(thePcaDataExcerpt, theBatchIdsForSamples, theSeed, thePermutations, theThreads)
 		logDebug("pvalueDSCwithExcerpt length(permResults)=", length(permResults))
 		for(DSCPermObj in permResults)
 		{

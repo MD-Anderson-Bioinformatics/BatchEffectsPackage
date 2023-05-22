@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -41,11 +41,11 @@ if (!is.null(getTestOutputDir()))
   dir.create(gdcMinOut, showWarnings=FALSE, recursive=TRUE)
   ########################################################
   ########################################################
-  mutationBatchAssess(theTypeCountDir=dccMinMut, theOutputDir=dccMinOut, theJavaArgs=c("-Xms16000m", "-Djava.awt.headless=true"), theThreads=5,
+  mutationBatchAssess(theTypeCountDir=dccMinMut, theOutputDir=dccMinOut, theThreads=5,
                       thePvalueCutoff=.00001, theZScoreCutoff=1.96, thePCAflag=TRUE,
                       theBatchTypes=c("BatchId"),
                       theMutationTypes=c("FrameShiftIns", "Total"))
-  mutationBatchAssess(theTypeCountDir=gdcMinMut, theOutputDir=gdcMinOut, theJavaArgs=c("-Xms16000m", "-Djava.awt.headless=true"), theThreads=5,
+  mutationBatchAssess(theTypeCountDir=gdcMinMut, theOutputDir=gdcMinOut, theThreads=5,
                       thePvalueCutoff=.00001, theZScoreCutoff=1.96, thePCAflag=TRUE,
                       theBatchTypes=c("PlateId"),
                       theMutationTypes=c("FrameShiftIns", "Total"))

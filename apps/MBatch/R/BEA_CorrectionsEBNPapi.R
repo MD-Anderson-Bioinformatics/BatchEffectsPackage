@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -26,7 +26,10 @@ doEBNPlus_internal <- function(theBeaData1Matrix,
                       theEBNP_CorrectForZero,
                       theSeed,
                       theEBNP_ValidationRatio,
-                      theEBNP_PriorPlotsFile,
+                      thePriorPlotPath,
+                      theDataVersion,
+                      theTestVersion,
+                      thePriorPlotFile,
                       theEBNP_MinSampleNum=3,
                       theEBNP_AddData1Rows=FALSE,
                       theEBNP_AddData2Rows=FALSE)
@@ -49,7 +52,10 @@ doEBNPlus_internal <- function(theBeaData1Matrix,
                             theSeed=theSeed,
                             theEBNP_ValidationRatio=theEBNP_ValidationRatio,
                             theEBNP_TestRatio=0,
-                            theEBNP_PriorPlotsFile=theEBNP_PriorPlotsFile,
+                            thePriorPlotPath=thePriorPlotPath,
+                            theDataVersion=theDataVersion,
+                            theTestVersion=theTestVersion,
+                            thePriorPlotFile=thePriorPlotFile,
                             theEBNP_MinSampleNum=theEBNP_MinSampleNum,
                             theEBNP_AddData1Rows=theEBNP_AddData1Rows,
                             theEBNP_AddData2Rows=theEBNP_AddData2Rows)[["CorrectedResults"]]
@@ -59,7 +65,7 @@ doEBNPlus_internal <- function(theBeaData1Matrix,
   if (!is.null(corrections))
   {
     checkDirForCreation(thePath)
-    correctFile <- cleanFilePath(thePath, paste("ANY_Corrections-", theType, ".tsv", sep=""))
+    correctFile <- cleanFilePath(thePath, "corrected_matrix.tsv")
     writeDataToFile(corrections, correctFile)
   }
   else
@@ -73,22 +79,19 @@ doEBNPlus_internal <- function(theBeaData1Matrix,
 }
 
 EBNPlus_Correction_Files <- function(theDataFile1, theDataFile2, theOutputDir,
-																	 theBatchId1, theBatchId2, theSeed=NULL,
-																	 theEBNP_PriorPlotsFlag=FALSE,
-																	 theEBNP_MinSampleNum=3,
-																	 theEBNP_AddData1Rows=FALSE,
-																	 theEBNP_AddData2Rows=FALSE)
+                                     theDataVersion, theTestVersion,
+                                     theBatchId1, theBatchId2, theSeed=NULL,
+  																	 theEBNP_PriorPlotsFlag=FALSE,
+  																	 theEBNP_MinSampleNum=3,
+  																	 theEBNP_AddData1Rows=FALSE,
+  																	 theEBNP_AddData2Rows=FALSE)
 {
+  # do not update theOutputDir, as update is done via internal function call
 	#############################################################################
 	#############################################################################
 	#### SETTINGS: working, log directory
 	setwd(theOutputDir)
-	ebnp_PriorPlotsFile <- NULL
-	if (theEBNP_PriorPlotsFlag)
-	{
-		ebnp_PriorPlotsFile <- cleanFilePath(theOutputDir, "ENBPlus_PriorPlots.PNG")
-	}
-	#setLogging(new("Logging", theFile=cleanFilePath(theOutputDir, "logENBplusTest.log")))
+	ebnp_PriorPlotsFile <- "ENBPlus_PriorPlots.PNG"
 	logInfo("ebnp_PriorPlotsFile=", ebnp_PriorPlotsFile)
 	logInfo(getMBatchVersion())
 	#############################################################################
@@ -117,7 +120,10 @@ EBNPlus_Correction_Files <- function(theDataFile1, theDataFile2, theOutputDir,
 																																	theEBNP_CorrectForZero=TRUE,
 																																	theSeed=theSeed,
 																																	theEBNP_ValidationRatio=0,
-																																	theEBNP_PriorPlotsFile=ebnp_PriorPlotsFile,
+																																	thePriorPlotPath=theOutputDir,
+																																	theDataVersion=theDataVersion,
+																																	theTestVersion=theTestVersion,
+																																	thePriorPlotFile=ebnp_PriorPlotsFile,
 																																	theEBNP_MinSampleNum=theEBNP_MinSampleNum,
 																																	theEBNP_AddData1Rows=theEBNP_AddData1Rows,
 																																	theEBNP_AddData2Rows=theEBNP_AddData2Rows)
@@ -160,7 +166,10 @@ EBNPlus_Correction_Structures <- function(theDataMatrix1, theDataMatrix2, theBat
 																					theEBNP_BatchWithZero, theEBNP_FixDataSet, theEBNP_CorrectForZero,
 																					theEBNP_ParametricPriorsFlag,
 																					theSeed=NULL,
-																					theEBNP_PriorPlotsFile=NULL,
+																					theOutputDir=NULL,
+																					theDataVersion=NULL,
+																					theTestVersion=NULL,
+																					thePriorFile=NULL,
 																					theEBNP_MinSampleNum=3,
 																					theEBNP_AddData1Rows=FALSE,
 																					theEBNP_AddData2Rows=FALSE)
@@ -183,7 +192,10 @@ EBNPlus_Correction_Structures <- function(theDataMatrix1, theDataMatrix2, theBat
 						 theEBNP_ValidationRatio=0,
 						 theEBNP_TestRatio=0,
 						 theEBNP_ParametricPriorsFlag=theEBNP_ParametricPriorsFlag,
-						 theEBNP_PriorPlotsFile=theEBNP_PriorPlotsFile,
+						 thePriorPlotPath=theOutputDir,
+						 theDataVersion=theDataVersion,
+						 theTestVersion=theTestVersion,
+						 thePriorPlotFile=thePriorFile,
 						 theEBNP_MinSampleNum=theEBNP_MinSampleNum,
 						 theEBNP_AddData1Rows=theEBNP_AddData1Rows,
 						 theEBNP_AddData2Rows=theEBNP_AddData2Rows)[["CorrectedResults"]]
@@ -192,10 +204,14 @@ EBNPlus_Correction_Structures <- function(theDataMatrix1, theDataMatrix2, theBat
 
 EBNPlus_TrainAndValidateReplicates_Structures <- function(theDataMatrix1, theDataMatrix2, theBatchId1, theBatchId2,
 																													theEBNP_BatchWithZero, theEBNP_FixDataSet, theEBNP_CorrectForZero,
-																													theEBNP_ParametricPriorsFlag, theEBNP_ValidationRatio,
+																													theEBNP_ParametricPriorsFlag,
+																													theEBNP_ValidationRatio,
 																													theEBNP_TestRatio=0,
 																													theSeed=NULL,
-																													theEBNP_PriorPlotsFile=NULL,
+																													thePriorPlotPath=NULL,
+																													theDataVersion=NULL,
+																													theTestVersion=NULL,
+																													thePriorPlotFile=NULL,
 																													theEBNP_MinSampleNum=3,
 																													theEBNP_AddData1Rows=FALSE,
 																													theEBNP_AddData2Rows=FALSE,
@@ -220,7 +236,10 @@ EBNPlus_TrainAndValidateReplicates_Structures <- function(theDataMatrix1, theDat
 						 theEBNP_ValidationRatio=theEBNP_ValidationRatio,
 						 theEBNP_TestRatio=theEBNP_TestRatio,
 						 theEBNP_ParametricPriorsFlag=theEBNP_ParametricPriorsFlag,
-						 theEBNP_PriorPlotsFile=theEBNP_PriorPlotsFile,
+						 thePriorPlotPath=thePriorPlotPath,
+						 theDataVersion=theDataVersion,
+						 theTestVersion=theTestVersion,
+						 thePriorPlotFile=thePriorPlotFile,
 						 theEBNP_MinSampleNum=theEBNP_MinSampleNum,
 						 theEBNP_AddData1Rows=theEBNP_AddData1Rows,
 						 theEBNP_AddData2Rows=theEBNP_AddData2Rows,
@@ -239,10 +258,21 @@ EBNPlus_TrainAndValidateFromVector_Structures <- function(theDataMatrix1, theDat
 																													theEBNP_TestRatio=0,
 																													theSeed=NULL,
 																													theTestSeed=NULL,
-																													theEBNP_PriorPlotsFile=NULL,
+																													thePriorPlotPath=NULL,
+																													theDataVersion=NULL,
+																													theTestVersion=NULL,
+																													thePriorPlotFile=NULL,
 																													theEBNP_MinSampleNum=3)
 {
   logDebug("EBNPlus_TrainAndValidateFromVector_Structures - start")
+
+  myPriorPlotsFile <- NULL
+  if (!is.null(thePriorPlotFile))
+  {
+    priorPlotPath <- addVersionsIfNeeded(thePriorPlotPath, theDataVersion, theTestVersion)
+    checkDirForCreation(priorPlotPath)
+    myPriorPlotsFile <- file.path(priorPlotPath, thePriorPlotFile)
+  }
   # changes here may need to be reflected in both BEA_CorrectionsEBNP.R (EBNPlus) and BEA_EBNPapi.R (EBNPlus_TrainAndValidateFromVector_Structures)
   # if training is null, validation should also be null (training=NULL means use all for training)
   stopifnotWithLogging("if training is null, both validation replicate vectors should also be null (training=NULL means use all for training)",
@@ -271,7 +301,7 @@ EBNPlus_TrainAndValidateFromVector_Structures <- function(theDataMatrix1, theDat
 	  logWarn("theEBNP_PsuedoReplicates2Train is null, so using all samples for training set")
 	  theEBNP_PsuedoReplicates2Train <- colnames(theDataMatrix2)
 	}
-	logDebug("EBNPlus theEBNP_PriorPlotsFile=", theEBNP_PriorPlotsFile)
+	logDebug("EBNPlus myPriorPlotsFile=", myPriorPlotsFile)
 	resultList <- list()
 	logDebug(paste("dim(theDataMatrix1)=", paste(dim(theDataMatrix1), sep = " ", collapse = " "), sep = ""))
 	printMatrix(theDataMatrix1)
@@ -384,7 +414,8 @@ EBNPlus_TrainAndValidateFromVector_Structures <- function(theDataMatrix1, theDat
 	{
 	  testFlag <- TRUE
 	}
-	objafterEB <- train(ebObj, par.prior = theEBNP_ParametricPriorsFlag, test = testFlag, theEBNP_PriorPlotsFile=theEBNP_PriorPlotsFile, minSampleNum=theEBNP_MinSampleNum)
+	objafterEB <- train(ebObj, par.prior = theEBNP_ParametricPriorsFlag, test = testFlag,
+	                    theEBNP_PriorPlotsFile=myPriorPlotsFile, minSampleNum=theEBNP_MinSampleNum)
 	logDebug("after train")
 
 	logDebug("EBadj")

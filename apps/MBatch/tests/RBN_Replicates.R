@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -36,34 +36,18 @@ readRPPAdataAsMatrix_WithTab <- function(theFile)
   # column rppaDF[,1] contains row names that may contain duplicates
   rppaDF <- readAsGenericDataframe(theFile)
   # resolve duplicates in row names here
-  myRownames <- rppaDF[,1]
-  myRownames <- resolveDuplicates(myRownames)
+  sampleIds <- rppaDF[,1]
+  sampleIds <- resolveDuplicates(sampleIds)
+  # save features here, since as.data.frame does "r-conversion" on the strings
+  # drop leading empty string
+  featureIds <- colnames(rppaDF)[-1]
+  featureIds <- resolveDuplicates(featureIds)
   # convert to numeric, since in R4+ data.matrix converts character(string) to factor, and then to integer
   numDF <- as.data.frame(lapply(rppaDF[,-1], as.numeric))
   # convert to matrix
-  ## data.matrix from data.frame converts character to factor to integer in R4+
   myMatrix <- data.matrix(numDF)
-  rownames(myMatrix) <- myRownames
-  t(myMatrix)
-}
-
-readRPPAdataAsMatrix_NoInitialTab <- function(theFile)
-{
-  # read RPPA data as a dataframe
-  # column rppaDF[,1] contains row names that may contain duplicates
-  rppaDF <- read.table(theFile, header=TRUE, sep="\t", as.is=TRUE,
-                       check.names=FALSE, stringsAsFactors=FALSE,
-                       colClasses="character", na.strings="NA",
-                       row.names=NULL)
-  # resolve duplicates in row names here
-  myRownames <- rppaDF[,1]
-  myRownames <- resolveDuplicates(myRownames)
-  # convert to numeric, since in R4+ data.matrix converts character(string) to factor, and then to integer
-  numDF <- as.data.frame(lapply(rppaDF[,-1], as.numeric))
-  # convert to matrix
-  ## data.matrix from data.frame converts character to factor to integer in R4+
-  myMatrix <- data.matrix(numDF)
-  rownames(myMatrix) <- myRownames
+  rownames(myMatrix) <- sampleIds
+  colnames(myMatrix) <- featureIds
   t(myMatrix)
 }
 
@@ -92,8 +76,10 @@ if (!is.null(inputDir))
                              theMatchedReplicatesFlag=TRUE,
                              theCombineOnlyFlag=FALSE,
                              thePath=theOutputDir,
+                             theDataVersion="DATA_2022-09-09-1600",
+                             theTestVersion="TEST_2022-10-10-1300",
                              theWriteToFile=TRUE)
-  correctedMatrix <- readAsGenericMatrix(cleanFilePath(theOutputDir, "ANY_Corrections-RBN_Replicates.tsv"))
+  correctedMatrix <- readAsGenericMatrix(cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "DATA_2022-09-09-1600"), "TEST_2022-10-10-1300"), "corrected_matrix.tsv"))
   compareMatrix <- readAsGenericMatrix(theCompareFile)
   message("correctedMatrix")
   print(dim(correctedMatrix))

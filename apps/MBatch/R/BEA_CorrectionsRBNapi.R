@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -14,6 +14,8 @@ RBN_internal <- function(theInvariantMatrix, theVariantMatrix,
                          theInvariantGroupId, theVariantGroupId,
                          theMatchedReplicatesFlag,
                          thePath,
+                         theDataVersion,
+                         theTestVersion,
                          theWriteToFile,
                          theRBNType,
                          theCombineOnlyFlag)
@@ -25,6 +27,7 @@ RBN_internal <- function(theInvariantMatrix, theVariantMatrix,
   myPath <- thePath
   if (TRUE==theWriteToFile)
   {
+    myPath <- addVersionsIfNeeded(myPath, theDataVersion, theTestVersion)
     checkDirForCreation(myPath)
   }
   results <- BeaRBN(t(theInvariantMatrix), t(theVariantMatrix),
@@ -36,7 +39,7 @@ RBN_internal <- function(theInvariantMatrix, theVariantMatrix,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- cleanFilePath(myPath, paste("ANY_Corrections-", theRBNType, ".tsv", sep=""))
+    correctFile <- cleanFilePath(myPath, "corrected_matrix.tsv")
     writeDataToFile(results, correctFile)
     results <- correctFile
   }
@@ -55,6 +58,8 @@ RBN_Replicates <- function(theInvariantMatrix, theVariantMatrix,
                            theMatchedReplicatesFlag=TRUE,
                            theCombineOnlyFlag=FALSE,
                            thePath=NULL,
+                           theDataVersion=NULL,
+                           theTestVersion=NULL,
                            theWriteToFile=FALSE)
 {
   invariantReplicates <- getReplicatesForRBN(theInvariantMatrix, theVariantMatrix)
@@ -67,6 +72,8 @@ RBN_Replicates <- function(theInvariantMatrix, theVariantMatrix,
                theVariantGroupId=theVariantGroupId,
                theMatchedReplicatesFlag=theMatchedReplicatesFlag,
                thePath=thePath,
+               theDataVersion=theDataVersion,
+               theTestVersion=theTestVersion,
                theWriteToFile=theWriteToFile,
                theRBNType="RBN_Replicates",
                theCombineOnlyFlag=theCombineOnlyFlag)
@@ -78,6 +85,8 @@ RBN_Pseudoreplicates <- function(theInvariantMatrix, theVariantMatrix,
                                  theMatchedReplicatesFlag=TRUE,
                                  theCombineOnlyFlag=FALSE,
                                  thePath=NULL,
+                                 theDataVersion=NULL,
+                                 theTestVersion=NULL,
                                  theWriteToFile=FALSE)
 {
   RBN_internal(theInvariantMatrix=theInvariantMatrix,
@@ -88,6 +97,8 @@ RBN_Pseudoreplicates <- function(theInvariantMatrix, theVariantMatrix,
                theVariantGroupId=theVariantGroupId,
                theMatchedReplicatesFlag=theMatchedReplicatesFlag,
                thePath=thePath,
+               theDataVersion=theDataVersion,
+               theTestVersion=theTestVersion,
                theWriteToFile=theWriteToFile,
                theRBNType="RBN_Pseudoreps",
                theCombineOnlyFlag=theCombineOnlyFlag)

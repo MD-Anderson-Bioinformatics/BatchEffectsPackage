@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -9,20 +9,30 @@
 # MD Anderson Cancer Center Bioinformatics on GitHub <https://github.com/MD-Anderson-Bioinformatics>
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
+
+boxplot_openAndWriteIssuesLogFile<-function(theOutputDir)
+{
+  myFile <- file(cleanFilePath(theOutputDir, "error.log"), "w+")
+  on.exit(close(myFile))
+  cat("Unable to calculate boxplot\n", file=myFile, append=TRUE)
+}
+
 ###########################################################################################
 ###########################################################################################
 
 createBatchEffectsOutput_BoxPlot_AllSampleRLE<-function(theMatrixGeneData, theDataframeBatchData,
-																												theTitle, theOutputPath, thePngFlag)
+																												theTitle, theOutputDir,
+																												theDataVersion, theTestVersion, thePngFlag)
 {
-  logDebug("createBatchEffectsOutput_BoxPlot_AllSampleRLE - theOutputPath=", theOutputPath)
-  checkDirForCreation(theOutputPath)
+  logDebug("createBatchEffectsOutput_BoxPlot_AllSampleRLE - theOutputDir", theOutputDir)
+  checkDirForCreation(theOutputDir)
   logDebug("dim(theMatrixGeneData)", dim(theMatrixGeneData))
   logDebug("length(colnames(theMatrixGeneData))", length(colnames(theMatrixGeneData)))
   logDebug("length(rownames(theMatrixGeneData))", length(rownames(theMatrixGeneData)))
   logDebug("dim(theDataframeBatchData)", dim(theDataframeBatchData))
   logDebug("length(names(theDataframeBatchData))", length(names(theDataframeBatchData)))
-  theOutputPath <- cleanFilePath(theOutputPath, "AllSample-RLE")
+  theOutputDir <- cleanFilePath(theOutputDir, "AllSample-RLE")
+  theOutputDir <- addVersionsIfNeeded(theOutputDir, theDataVersion, theTestVersion)
   for(batchTypeIndex in c(2:length(theDataframeBatchData)))
   {
     ### compile data and information for display
@@ -37,17 +47,18 @@ createBatchEffectsOutput_BoxPlot_AllSampleRLE<-function(theMatrixGeneData, theDa
     #	  labelWithBatch <- paste(labelsSorted, batchIdsSorted, sep=" / ")
     #
     # build names for output files
-    theBoxDataFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_BoxData-", batchTypeName, ".tsv", sep=""))
-    theHistogramFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Histogram-", batchTypeName, ".tsv", sep=""))
-    theAnnotationsFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Annotations-", batchTypeName, ".tsv", sep=""))
-    thePngFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-RLE", "_Diagram-", batchTypeName, ".png", sep=""))
+    theBoxDataFile <- cleanFilePath(theOutputDir, paste("BoxPlot_", "AllSample-RLE", "_BoxData-", batchTypeName, ".tsv", sep=""))
+    theHistogramFile <- cleanFilePath(theOutputDir, paste("BoxPlot_", "AllSample-RLE", "_Histogram-", batchTypeName, ".tsv", sep=""))
+    theAnnotationsFile <- cleanFilePath(theOutputDir, paste("BoxPlot_", "AllSample-RLE", "_Annotations-", batchTypeName, ".tsv", sep=""))
+    thePngFile <- cleanFilePath(theOutputDir, paste("BoxPlot_", "AllSample-RLE", "_Diagram-", batchTypeName, ".png", sep=""))
     title <- paste(theTitle, "AllSample-RLE", batchTypeName, sep=" ")
     boxplotLabels <- buildBoxplotLabels(theDataframeBatchData, batchTypeName)
     # do not pass media
     #calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels, median(theMatrixGeneData, na.rm=TRUE))
     calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels)
   }
-  TRUE
+  # let this return the output dir, used by MBatchUtils
+  theOutputDir
 }
 
 buildBoxplotLabels <- function(theDataframeBatchData, theBatchType)
@@ -62,52 +73,58 @@ buildBoxplotLabels <- function(theDataframeBatchData, theBatchType)
 }
 
 createBatchEffectsOutput_BoxPlot_AllSampleData<-function(theMatrixGeneData, theDataframeBatchData,
-																							 theTitle, theOutputPath, thePngFlag)
+																							 theTitle, theOutputDir, theDataVersion, theTestVersion, thePngFlag)
 {
-  checkDirForCreation(theOutputPath)
+  checkDirForCreation(theOutputDir)
 	logDebug("dim(theMatrixGeneData)", dim(theMatrixGeneData))
 	logDebug("length(colnames(theMatrixGeneData))", length(colnames(theMatrixGeneData)))
 	logDebug("length(rownames(theMatrixGeneData))", length(rownames(theMatrixGeneData)))
 	logDebug("dim(theDataframeBatchData)", dim(theDataframeBatchData))
 	logDebug("length(names(theDataframeBatchData))", length(names(theDataframeBatchData)))
-	theOutputPath <- cleanFilePath(theOutputPath, "AllSample-Data")
+	theOutputDir <- cleanFilePath(theOutputDir, "AllSample-Data")
+	theOutputDir <- addVersionsIfNeeded(theOutputDir, theDataVersion, theTestVersion)
 	for(batchTypeIndex in c(2:length(theDataframeBatchData)))
 	{
 	  ### compile data and information for display
 	  batchTypeName <- names(theDataframeBatchData)[batchTypeIndex]
 	  logDebug("batchTypeName = ", batchTypeName)
 	  # build names for output files
-	  theBoxDataFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_BoxData-", batchTypeName, ".tsv", sep=""))
-	  theHistogramFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Histogram-", batchTypeName, ".tsv", sep=""))
-	  theAnnotationsFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Annotations-", batchTypeName, ".tsv", sep=""))
-	  thePngFile <- cleanFilePath(theOutputPath, paste("BoxPlot_", "AllSample-Data", "_Diagram-", batchTypeName, ".png", sep=""))
+	  theBoxDataFile <- cleanFilePath(theOutputDir, paste("BoxPlot_", "AllSample-Data", "_BoxData-", batchTypeName, ".tsv", sep=""))
+	  theHistogramFile <- cleanFilePath(theOutputDir, paste("BoxPlot_", "AllSample-Data", "_Histogram-", batchTypeName, ".tsv", sep=""))
+	  theAnnotationsFile <- cleanFilePath(theOutputDir, paste("BoxPlot_", "AllSample-Data", "_Annotations-", batchTypeName, ".tsv", sep=""))
+	  thePngFile <- cleanFilePath(theOutputDir, paste("BoxPlot_", "AllSample-Data", "_Diagram-", batchTypeName, ".png", sep=""))
 	  title <- paste(theTitle, "AllSample-Data", batchTypeName, sep=" ")
 	  boxplotLabels <- buildBoxplotLabels(theDataframeBatchData, batchTypeName)
 	  #
 	  calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels)
 	}
-	TRUE
+	# let this return the output dir, used by MBatchUtils
+	theOutputDir
 }
 
 createBatchEffectsOutput_BoxPlot_Group<-function(theMatrixGeneData, theDataframeBatchData,
-																								 theTitle, theOutputPath,
+																								 theTitle, theOutputDir,
 																								 theListOfGroupBoxFunction, theListOfGroupBoxLabels,
+																								 theDataVersion, theTestVersion,
 																								 thePngFlag)
 {
 	stopifnotWithLogging("Group box list and group box labels should be the same length", length(theListOfGroupBoxFunction)==length(theListOfGroupBoxLabels))
-  checkDirForCreation(theOutputPath)
+  checkDirForCreation(theOutputDir)
 	logDebug("groupFunction")
 	logDebug("dim(theMatrixGeneData)", dim(theMatrixGeneData))
 	logDebug("length(colnames(theMatrixGeneData))", length(colnames(theMatrixGeneData)))
 	logDebug("length(rownames(theMatrixGeneData))", length(rownames(theMatrixGeneData)))
 	logDebug("dim(theDataframeBatchData)", dim(theDataframeBatchData))
 	logDebug("length(names(theDataframeBatchData))", length(names(theDataframeBatchData)))
+	vectorOfOutputDirs <- c()
 	for(index in 1:length(theListOfGroupBoxFunction))
 	{
 	  groupLabel <- theListOfGroupBoxLabels[[index]]
 	  logDebug("groupLabel = ", groupLabel)
 	  groupAndLabel <- paste("Group-", groupLabel, sep="")
-	  myOutputPath <- cleanFilePath(theOutputPath, groupAndLabel)
+	  myOutputPath <- cleanFilePath(theOutputDir, groupAndLabel)
+	  myOutputPath <- addVersionsIfNeeded(myOutputPath, theDataVersion, theTestVersion)
+	  vectorOfOutputDirs <- c(vectorOfOutputDirs, myOutputPath)
 	  for(batchTypeIndex in c(2:length(theDataframeBatchData)))
 	  {
 	    ### compile data and information for display
@@ -132,7 +149,8 @@ createBatchEffectsOutput_BoxPlot_Group<-function(theMatrixGeneData, theDataframe
 	    calcAndWriteBoxplot(newMatrix, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels)
 	  }
 	}
-	TRUE
+	# let this return vector of output dirs, used by MBatchUtils
+	vectorOfOutputDirs
 }
 
 ###########################################################################################
@@ -151,31 +169,20 @@ calcAndWriteBoxplot <- function(theData, theTitle, theBoxDataFile, thePngFile, t
   logDebug("calcAndWriteBoxplot - dim(theData)[2]=", dim(theData)[2])
   checkDirForCreation(dirname(theBoxDataFile))
   tryCatch({
+    checkIfTestError()
     logDebug("calcAndWriteBoxplot - before calcAndWriteBoxDataFile")
     calcAndWriteBoxDataFile(theData, theBoxDataFile, thePngFile, theBoxplotLabels, theTitle)
     logDebug("calcAndWriteBoxplot - after calcAndWriteBoxDataFile")
-  },error=function(myError)
-  {
-    logError("calcAndWriteBoxplot(): error in calcAndWriteBoxDataFile, ERROR= ", myError)
-    traceback()
-  })
-  tryCatch({
     logDebug("calcAndWriteBoxplot - before calcAndWriteHistogramFile")
     calcAndWriteHistogramFile(theData, theHistogramFile)
     logDebug("calcAndWriteBoxplot - after calcAndWriteHistogramFile")
-  },error=function(myError)
-  {
-    logError("calcAndWriteBoxplot(): error in calcAndWriteHistogramFile, ERROR= ", myError)
-    traceback()
-  })
-  tryCatch({
     logDebug("calcAndWriteBoxplot - before calcAndWriteAnnotationsFile")
     calcAndWriteAnnotationsFile(theData, theAnnotationsFile)
     logDebug("calcAndWriteBoxplot - after calcAndWriteAnnotationsFile")
   },error=function(myError)
   {
     logError("calcAndWriteBoxplot(): error in calcAndWriteAnnotationsFile, ERROR= ", myError)
-    traceback()
+    boxplot_openAndWriteIssuesLogFile(dirname(theBoxDataFile))
   })
 }
 
@@ -255,34 +262,43 @@ calcAndWriteHistogramFile <- function(theData, theFile)
   logDebug("calcAndWriteHistogramFile ", theFile)
   # count number of breaks
   maxBins <- 0
-  for(i in 1:ncol(theData))
+  #logDebug("calcAndWriteHistogramFile 1 ncol(theData) =", ncol(theData))
+  #logDebug("calcAndWriteHistogramFile 1 maxBins =", maxBins)
+  for(myCheckIndex in 1:ncol(theData))
   {
+    #logDebug("calcAndWriteHistogramFile 1 hist myCheckIndex =", myCheckIndex)
     # do not subtract median of entire matrix
-    # myH <- hist(theData[,i]-theMedian, plot=FALSE)
-    myH <- hist(theData[,i], plot=FALSE)
+    # myH <- hist(theData[,myCheckIndex]-theMedian, plot=FALSE)
+    myH <- hist(theData[,myCheckIndex], plot=FALSE)
     tmpBins <- length(myH$mids)
     # use gt, not lt, to get max bin size
     if (tmpBins>maxBins)
     {
       maxBins <- tmpBins
     }
+    #logDebug("calcAndWriteHistogramFile 1 tmpBins =", tmpBins)
+    #logDebug("calcAndWriteHistogramFile 1b maxBins =", maxBins)
   }
+  #logDebug("calcAndWriteHistogramFile ncol(theData)=", ncol(theData))
+  #logDebug("calcAndWriteHistogramFile maxBins=", maxBins)
   ######################################
   # theHistogramFile entry	size	x0	y0	x1	y1  ...	xN	yN
   cat("entry	size", file=theFile, sep="", append=FALSE)
-  for (i in 0:(maxBins-1))
+  for (myXYindex in 0:(maxBins-1))
   {
-    cat(paste("\tx", i, "\ty", i, sep=""), file=theFile, sep="", append=TRUE)
+    cat(paste("\tx", myXYindex, "\ty", myXYindex, sep=""), file=theFile, sep="", append=TRUE)
   }
   cat("\n", file=theFile, sep="", append=TRUE)
   # and then the values
-  for(i in 1:ncol(theData))
+  for(myHistIndex in 1:ncol(theData))
   {
+
+    #logDebug("calcAndWriteHistogramFile 2 hist myHistIndex =", myHistIndex)
     # do not subtract median of entire matrix
     #myH <- hist(theData[,i]-theMedian, plot=FALSE)
-    myH <- hist(theData[,i], plot=FALSE)
+    myH <- hist(theData[,myHistIndex], plot=FALSE)
     cat(paste(
-      colnames(theData)[i], # entry
+      colnames(theData)[myHistIndex], # entry
       length(myH$counts),      # size
       paste(myH$density, myH$mids, sep="\t", collapse="\t"),
       sep="\t"), "\n", sep="", file=theFile, append=TRUE)

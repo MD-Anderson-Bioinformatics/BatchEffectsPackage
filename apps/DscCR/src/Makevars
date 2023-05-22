@@ -1,0 +1,2 @@
+PKG_LIBS = -L/apps/x86_64/gsl-114/lib -lpthread -lgsl -lgslcblas
+PKG_CFLAGS = -I./include -I/apps/x86_64/gsl-114/include -DSSE

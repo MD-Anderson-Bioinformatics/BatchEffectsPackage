@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -45,20 +45,24 @@ if (!is.null(inputDir))
   # here, we take most defaults
   Boxplot_AllSamplesRLE_Structures(theData=myData,
                                    theTitle="Test",
-                                   theOutputPath=theOutputDir,
+                                   theOutputDir=theOutputDir,
                                    theBatchTypeAndValuePairsToRemove=NULL,
                                    theBatchTypeAndValuePairsToKeep=NULL,
+                                   theDataVersion="DATA_2022-09-09-1600",
+                                   theTestVersion="TEST_2022-10-10-1300",
                                    theMaxGeneCount=10000)
   ########################
-  correctedDataframe <- readAsGenericDataframe(cleanFilePath(cleanFilePath(theOutputDir, "AllSample-RLE"), "BoxPlot_AllSample-RLE_BoxData-TSS.tsv"))
+  allSampleDataPath <- cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "AllSample-RLE"), "DATA_2022-09-09-1600"), "TEST_2022-10-10-1300")
+  ########################
+  correctedDataframe <- readAsGenericDataframe(cleanFilePath(allSampleDataPath, "BoxPlot_AllSample-RLE_BoxData-TSS.tsv"))
   compareDataframe <- readAsGenericDataframe(theCompareFileBox)
   comparedBox <- compareTwoDataframes(correctedDataframe, compareDataframe)
   ########################
-  correctedDataframe <- readAsGenericDataframe(cleanFilePath(cleanFilePath(theOutputDir, "AllSample-RLE"), "BoxPlot_AllSample-RLE_Annotations-TSS.tsv"))
+  correctedDataframe <- readAsGenericDataframe(cleanFilePath(allSampleDataPath, "BoxPlot_AllSample-RLE_Annotations-TSS.tsv"))
   compareDataframe <- readAsGenericDataframe(theCompareFileAnn)
   comparedAnn <- compareTwoDataframes(correctedDataframe, compareDataframe)
   ########################
-  correctedDataframe <- readAsGenericDataframe(cleanFilePath(cleanFilePath(theOutputDir, "AllSample-RLE"), "BoxPlot_AllSample-RLE_Histogram-TSS.tsv"))
+  correctedDataframe <- readAsGenericDataframe(cleanFilePath(allSampleDataPath, "BoxPlot_AllSample-RLE_Histogram-TSS.tsv"))
   compareDataframe <- readAsGenericDataframe(theCompareFileHis)
   comparedHis <- compareTwoDataframes(correctedDataframe, compareDataframe)
   ########################

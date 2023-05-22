@@ -6,21 +6,21 @@
 A function to perform PCA dual batch analysis from data in files.
 }
 \usage{
-PCA_DualBatch_Structures(theData, theTitle, theOutputPath,
+PCA_DualBatch_Structures(theData, theTitle,
 theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
-theListForDoCentroidDualBatchType, theIsPcaTrendFunction=function(...) {FALSE},
+theListForDoCentroidDualBatchType,
+theOutputDir, theDataVersion, theTestVersion,
+theIsPcaTrendFunction=function(...) {FALSE},
 theDoDSCFlag=TRUE, theDoDscPermsFileFlag=FALSE, theDoSampleLocatorFlag=TRUE,
 theListOfComponentsToPlot=c(1, 2, 1, 3, 1, 4, 2, 3, 2, 4, 3, 4),
 theDSCPermutations=2000, theDSCThreads=1, theMinBatchSize=2,
-theJavaParameters="-Xms1200m", theSeed=NULL, theMaxGeneCount=20000)
+theSeed=NULL, theMaxGeneCount=20000)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{theData}{An instance of BEA_DATA \code{\link{BEA_DATA-class}}}
   \item{theTitle}{Object of class \code{"character"}
   Title to use in PNG files. }
-  \item{theOutputPath}{Object of class \code{"character"}
-  Directory in which to place output PNG files. }
   \item{theBatchTypeAndValuePairsToRemove}{Object of class \code{"list"}
   A list of vectors containing the batch type (or * for all types)
   and the value to remove.
@@ -33,6 +33,12 @@ theJavaParameters="-Xms1200m", theSeed=NULL, theMaxGeneCount=20000)
   \item{theListForDoCentroidDualBatchType}{Object of class \code{"vector"}
   A vector (list) of strings. Each pair of strings should be batch types
   and are used to generate dual-batch plots. }
+  \item{theOutputDir}{Object of class \code{"character"}
+  Directory in which to place output PNG files. }
+	\item{theDataVersion}{Object of class \code{"character"} Version of the data prefaced
+	with DATA_, such as DATA_2022-09-09-1600. Use empty string to not include. }
+	\item{theTestVersion}{Object of class \code{"character"} Version of the test prefaced
+	with TEST_, such as TEST_2022-10-10-1300. Use empty string to not include. }
   \item{theIsPcaTrendFunction}{Object of class \code{"function"}
   This function is used by the PCA Centroids algorithm to determine if
   trending lines should be added. If the function returns true, a line
@@ -70,10 +76,6 @@ theJavaParameters="-Xms1200m", theSeed=NULL, theMaxGeneCount=20000)
   Defaults to 1}
   \item{theMinBatchSize}{Object of class \code{"numeric"}
   Minimum batch to allow in PCA calculations. Defaults to 2.}
-  \item{theJavaParameters}{Object of class \code{"character"}
-  Command line arguments
-  to Java 7 for DSC calculations--for example if memory needs
-  to be more than "-Xms1200m". }
   \item{theSeed}{Object of class \code{"numeric"} If non-zero,
   a seed to use when
   calling sample to reduce genes used in PCA plots. Default 0.}
@@ -81,40 +83,3 @@ theJavaParameters="-Xms1200m", theSeed=NULL, theMaxGeneCount=20000)
   maximum number of genes allowed for PCA plots. If count is greater
   than this, sample is used to select a subset of genes. Default 20,000.}
 }
-\examples{
-#	#############################################################################
-#	mydir <- cleanFilePath(getwd(), "working", "PCA_DualBatch_Structures")
-#	dir.create(mydir, recursive=TRUE)
-#	setLogging(new("Logging", theFile=cleanFilePath(mydir, "mbatch.log")))
-#	## path for output
-#	myOutputPath <- cleanFilePath(mydir, "output")
-#	dir.create(myOutputPath, recursive=TRUE)
-#	#############################################################################
-#	## this is the title used for the images
-#	myTitle <- "Disease/Data Type/Platform/Data Level"
-#	#############################################################################
-#	# mbatchLoadFiles
-#	#############################################################################
-#	## This is the single gene data file to be read and processed
-#	myGeneDataFile <- system.file("extdata", "matrix_data.tsv", package="MBatch")
-#	## This is the single batch file to be read and processed
-#	myBatchFile <- system.file("extdata", "batches.tsv", package="MBatch")
-#	## this loads the files
-#	myData <- mbatchLoadFiles(myGeneDataFile, myBatchFile)
-#	###
-#	isTrendBatch<-function(theBatchTypeName, theListOfBatchIds)
-#	{
-#		return(is.element(theBatchTypeName, c("ShipDate")))
-#	}
-#	###
-#
-#	PCA_DualBatch_Structures(myData,
-#		myTitle, myOutputPath, list(), list(),
-#		theIsPcaTrendFunction=isTrendBatch,
-#		theListForDoCentroidDualBatchType=c("PlateId", "TSS", "BatchId", "TSS"),
-#		theDoDSCFlag=TRUE, theDoDscPermsFileFlag=TRUE, theDoSampleLocatorFlag=TRUE,
-#		theListOfComponentsToPlot=c(1, 2, 1, 3), theDSCPermutations=100,
-#		theDSCThreads=5, theMinBatchSize=0,
-#		theJavaParameters="-Xms1000m", theSeed=0, theMaxGeneCount=0)
-#
-	}

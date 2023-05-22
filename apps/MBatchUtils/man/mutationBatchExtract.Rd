@@ -5,8 +5,7 @@
 writes them into the output directory separated into disease sub-directories.
 The output can be processed by a separate call to mutationBatchAssess.}
 \usage{
-mutationBatchExtract(theMafDir, theTypeCountDir, theGDCflag,
-thePar = "-Xmx8000m")
+mutationBatchExtract(theMafDir, theTypeCountDir, theGDCflag)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -19,7 +18,6 @@ thePar = "-Xmx8000m")
   reference genome, and type of mutation. Not all categories exist within all
   data sets.}
   \item{theGDCflag}{TRUE handle as GDC data. FALSE handle as DCC data.}
-  \item{thePar}{String arguments for rJava. Default -Xmx8000m}
 }
 \value{No useful value returned.}
 \examples{

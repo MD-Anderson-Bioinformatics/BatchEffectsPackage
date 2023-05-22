@@ -1,4 +1,4 @@
-# this is the docker-compose version
+# this is the docker compose version
 version: '3.0'
 
 # file version BEA_VERSION_TIMESTAMP

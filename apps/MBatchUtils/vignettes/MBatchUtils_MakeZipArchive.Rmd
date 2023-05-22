@@ -38,13 +38,10 @@ This gives the column of the batch file that contains the sample ids.
 Comma separated list of batch types, column names from batch file, to use for doing analysis.
 
 ##mutBatchFlag	FALSE
-TRUE or FALSE flag telling whether or not do do "mutBatch" processing on a single dataset in Standardized Data format.
+TRUE or FALSE flag telling whether or not do do "mutBatch" processing on a single dataset in Standardized Data format. No longer used or read -- mutBatch processed as part of regular analysis.
 
 ##mutationsMutbatchFlag	FALSE
 TRUE or FALSE flag telling whether or not do do mutations "mutBatch" processing on multiple MAF files.
-
-##mutBatchMem	4000m
-Memory to allocate to the Java process when mutBatch processing.
 
 ##mutBatchThreads	5
 Number of threads to use for mutBatch processing.
@@ -155,7 +152,7 @@ Create a ZIP file usable with the stand-alone Batch Effects Viewer, to use dynam
 # Example Call
 
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, cache=FALSE, message=TRUE}
 {
   require(MBatch)
   require(MBatchUtils)
@@ -189,22 +186,26 @@ Create a ZIP file usable with the stand-alone Batch Effects Viewer, to use dynam
   # config
   mbatchRunFromConfig(
     theConfigFile = theDestConfigFile,
-    theDataDir = theOutputDirData,
-    theOutputDir = theOutputDirMBatch,
+    theMatrixFile = theOrigGeneFile,
+    theBatchesFile = theOrigBatchFile,
+    theZipDataDir = theOutputDirData,
+    theZipResultsDir = theOutputDirMBatch,
     theNaStrings = c("null", "NA"),
     theShaidyMapGen = jarFile,
     theNgchmWidgetJs = jsFile,
     theShaidyMapGenJava = javaExe,
     theNGCHMShaidyMem = "8G",
-    thePCAMem = "4800m",
-    theBoxplotMem = "8G",
     theRunPostFlag = TRUE
   )
-  theMbatchID <- "none"
   theResultDir <- theOutputDirMBatch
   theDataDir <- theOutputDirData
   theZipDir <- theOutputDir
-  buildSingleArchive(theMbatchID, theResultDir, theDataDir, theZipDir)
+  message("Write Single Archive")
+  message(theResultDir)
+  message(theDataDir)
+  message(theZipDir)
+  message("Call Single Archive")
+  buildSingleArchive(theResultDir, theDataDir, theZipDir)
 }
 ```
 

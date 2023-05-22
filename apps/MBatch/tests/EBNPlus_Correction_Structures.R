@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -96,17 +96,22 @@ if (!is.null(inputDir))
   # remove any duplicates (this is a requirement for EBNplus)
   theDataMatrix1 <- removeDuplicatesFromColumns(removeDuplicatesFromRows(theDataMatrix1))
   theDataMatrix2 <- removeDuplicatesFromColumns(removeDuplicatesFromRows(theDataMatrix2))
-  correctedMatrix <- EBNPlus_Correction_Structures(theDataMatrix1, theDataMatrix2, theBatchId1, theBatchId2,
+  correctedMatrix <- EBNPlus_Correction_Structures(theDataMatrix1, theDataMatrix2,
+                                                   theBatchId1, theBatchId2,
                                        theEBNP_BatchWithZero="1",
                                        theEBNP_FixDataSet=as.numeric(NA),
                                        theEBNP_CorrectForZero=TRUE,
                                        theEBNP_ParametricPriorsFlag=TRUE,
                                        theSeed=theRandomSeed,
-                                       theEBNP_PriorPlotsFile=cleanFilePath(outdir, "priorplots.PNG"))
+                                       theOutputDir=outdir,
+                                       theDataVersion="DATA_2022-09-09-1600",
+                                       theTestVersion="TEST_2022-10-10-1300",
+                                       thePriorFile="priorplots.PNG")
   outputFile <- cleanFilePath(outdir, "corrected.tsv")
   writeAsGenericMatrix(outputFile, correctedMatrix)
   compareMatrix <- as.matrix(read.delim(unz(theCompareFile, theCompareFilename), header=TRUE, sep="\t", as.is=TRUE, check.names=FALSE, stringsAsFactors=FALSE, row.names=1))
   compared <- compareTwoMatrices(correctedMatrix, compareMatrix)
+  print(outputFile)
   print(compared)
   compared
 } else {

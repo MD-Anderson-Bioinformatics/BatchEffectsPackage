@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -13,8 +13,10 @@
 ####################################################################
 
 createBatchEffectsOutput_hierclust<-function(theMatrixGeneData, theDataframeBatchData, theTitle,
-																						 theHierClustOutputDir=getwd(), theHierClustFileBase="HierarchicalClustering")
+                                             theDataVersion, theTestVersion,
+																						 theHierClustOutputDir, theHierClustFileBase)
 {
+  # theHierClustOutputDir=getwd(), theHierClustFileBase="HierarchicalClustering")
 	logDebug("hierclust_outputGraphics")
 	collateOrigValue<-Sys.getlocale("LC_COLLATE")
 	on.exit(Sys.setlocale("LC_COLLATE",collateOrigValue), add=TRUE)
@@ -23,22 +25,31 @@ createBatchEffectsOutput_hierclust<-function(theMatrixGeneData, theDataframeBatc
 	checkPackageSettings()
 	stopifnotWithLogging("The number of columns of gene data must equal the number of rows of batch data.", ncol(theMatrixGeneData)==nrow(theDataframeBatchData))
 	uDendSamples <- hierClust_calc(theMatrixGeneData)
+	uDendFeatures <- hierClust_calc(t(theMatrixGeneData))
 	hierClustOutputDir <- checkCreateDir(theHierClustOutputDir, theHierClustFileBase)
-	rdataFile <- NULL
+	hierClustOutputDir <- addVersionsIfNeeded(hierClustOutputDir, theDataVersion, theTestVersion)
+	hierClustOutputDir <- checkDirForCreation(hierClustOutputDir)
+	rdataFileSamples <- NULL
+	rdataFileFeatures <- NULL
+	newOutDir <- hierClustOutputDir
 	if (is.null(uDendSamples))
 	{
+	  logDebug("createBatchEffectsOutput_hierclust hc_openAndWriteIssuesLogFile")
 	  hc_openAndWriteIssuesLogFile(hierClustOutputDir)
 	}
 	else
 	{
-		### logDebug("RData output here, write uDend and theDataframeBatchData ", outputFile)
+		logDebug("createBatchEffectsOutput_hierclust RData output")
 		### RData output here, write uDend and theDataframeBatchData
 		### D3 Hierarchical Clustering output here
-	  rdataFile <-writeHCDataTSVs(uDendSamples, hierClustOutputDir, "HCData.tsv", "HCOrder.tsv")
-		#logDebug("createBatchEffectsOutput_hierclust: theHierClustOutputDir=",theHierClustOutputDir, "theTitle=", theTitle, "theHierClustFileBase=", theHierClustFileBase)
+	  rdataFileSamples <- writeHCDataTSVs(uDendSamples, hierClustOutputDir,
+	                                      "HCData.tsv", "HCOrder.tsv", "uDend.RData")
+	  rdataFileFeatures <-writeHCDataTSVs(uDendFeatures, hierClustOutputDir,
+	                                      "HCData_feature.tsv", "HCOrder_feature.tsv", "uDend_feature.RData")
+	  #logDebug("createBatchEffectsOutput_hierclust: theHierClustOutputDir=",theHierClustOutputDir, "theTitle=", theTitle, "theHierClustFileBase=", theHierClustFileBase)
 		hierClust_draw(uDendSamples, theDataframeBatchData, theTitle, hierClustOutputDir, theHierClustFileBase)
 	}
-	rdataFile
+  list(newOutDir, rdataFileSamples, rdataFileFeatures)
 }
 
 
@@ -94,34 +105,45 @@ hierClust_calc<-function(theMatrixGeneData)
 	else
 	{
 		subMatrix <- theMatrixGeneData[!is.na(rowSums(theMatrixGeneData)),]
-		subMatrix <- subMatrix[!is.infinite(rowSums(subMatrix)),]
-		if (nrow(subMatrix)>0)
+		rowCount <- nrow(subMatrix)
+		if ( (length(rowCount) == 1) && (!is.na(rowCount)) && (rowCount>0) )
 		{
-		  uDend <- NULL
-		  tryCatch(
-		    {
-		      logDebug("calculating HC")
-			    d<-distanceMatrix(subMatrix, metric="pearson")
-			    #logDebug("checking distance matrix results")
-			    #subMatrix <- d[!is.na(rowSums(d)),]
-			    #subMatrix <- subMatrix[!is.infinite(rowSums(subMatrix)),]
-				  uDend<-hclust(d, method="ward")
-				},
-				warning=function(e)
-				{
-				  logWarn("1 Unable to calculate hclust--too many NAs, Infinities or NaNs in data")
-				  uDend <- NULL
-				},
-				error=function(e)
-				{
-				  logWarn("2 Unable to calculate hclust--too many NAs, Infinities or NaNs in data")
-				  uDend <- NULL
-				})
-			return(uDend)
+		  subMatrix <- subMatrix[!is.infinite(rowSums(subMatrix)),]
+		  rowCount <- nrow(subMatrix)
+		  if ( (length(rowCount) == 1) && (!is.na(rowCount)) && (rowCount>0) )
+  		{
+  		  uDend <- NULL
+  		  tryCatch(
+  		    {
+  		      logDebug("calculating HC")
+  		      checkIfTestError()
+  			    d<-distanceMatrix(subMatrix, metric="pearson")
+  			    #logDebug("checking distance matrix results")
+  			    #subMatrix <- d[!is.na(rowSums(d)),]
+  			    #subMatrix <- subMatrix[!is.infinite(rowSums(subMatrix)),]
+  				  uDend<-hclust(d, method="ward.D2")
+  				},
+  				warning=function(e)
+  				{
+  				  logWarn("1 Unable to calculate hclust--too many NAs, Infinities or NaNs in data")
+  				  uDend <- NULL
+  				},
+  				error=function(e)
+  				{
+  				  logWarn("2 Unable to calculate hclust--too many NAs, Infinities or NaNs in data")
+  				  uDend <- NULL
+  				})
+  			return(uDend)
+  		}
+		  else
+		  {
+		    logWarn("3 Unable to calculate distanceMatrix--too many NAs, Infinities or NaNs in data")
+		    return(NULL)
+		  }
 		}
 		else
 		{
-			logWarn("Unable to calculate distanceMatrix--too many NAs, Infinities or NaNs in data")
+			logWarn("4 Unable to calculate distanceMatrix--too many NAs, Infinities or NaNs in data")
 			return(NULL)
 		}
 	}
@@ -311,20 +333,25 @@ makeHCFileName_PNG<-function(theDir, theDiagramOrLegend, theLegendType="")
 ####################################################################
 ####################################################################
 
-writeHCDataTSVs<-function(uDend, theHierClustOutputDir, theOutputHCDataFileName, theOutputHCOrderFileName, theUdendRData="uDend.RData")
+writeHCDataTSVs<-function(uDend, theHierClustOutputDir, theOutputHCDataFileName, theOutputHCOrderFileName,
+                          theUdendRData)
 {
   rdataFile <- cleanFilePath(theHierClustOutputDir,theUdendRData)
-	data<-cbind(uDend$merge, uDend$height, deparse.level=0)
-	colnames(data)<-c("A", "B", "Height")
-	###Write out the data as a Tab separated file to the specified location
-	write.table(data, file = cleanFilePath(theHierClustOutputDir,theOutputHCDataFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
+  logInfo("writeHCDataTSVs rdataFile=", rdataFile)
+	if (!is.null(uDend))
+	{
+	  data<-cbind(uDend$merge, uDend$height, deparse.level=0)
+	  colnames(data)<-c("A", "B", "Height")
+  	###Write out the data as a Tab separated file to the specified location
+  	write.table(data, file = cleanFilePath(theHierClustOutputDir,theOutputHCDataFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
 
-	data<-cbind(uDend$labels, uDend$order, deparse.level=0)
-	colnames(data)<-c("Id", "Order")
-	###Write out the order data as a Tab separated file to the specified location (1 more row than data file)
-	write.table(data, file = cleanFilePath(theHierClustOutputDir,theOutputHCOrderFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
-  # write udend RData file
-	save(uDend, file=rdataFile)
+  	data<-cbind(uDend$labels, uDend$order, deparse.level=0)
+  	colnames(data)<-c("Id", "Order")
+  	###Write out the order data as a Tab separated file to the specified location (1 more row than data file)
+  	write.table(data, file = cleanFilePath(theHierClustOutputDir,theOutputHCOrderFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
+    # write udend RData file
+  	save(uDend, file=rdataFile)
+	}
 	rdataFile
 }
 

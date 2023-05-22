@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -24,20 +24,20 @@ if (!is.null(getTestOutputDir()))
   ########################################################
   ########################################################
   # writes to input directory, so copy files to output
-  theOutputDirMBatch=cleanFilePath(cleanFilePath(getTestOutputDir(), "configout"), "ZIP-RESULTS")
-  theOutputDirData=cleanFilePath(cleanFilePath(getTestOutputDir(), "configout"), "ZIP-DATA")
-  originalData=cleanFilePath(theOutputDirData, "original")
-  print(theOutputDirMBatch)
-  unlink(theOutputDirMBatch, recursive=TRUE)
-  dir.create(theOutputDirMBatch, recursive=TRUE, showWarnings=FALSE)
-  print(theOutputDirData)
-  unlink(theOutputDirData, recursive=TRUE)
-  dir.create(originalData, recursive=TRUE, showWarnings=FALSE)
-  file.copy(cleanFilePath(cleanFilePath(getTestInputDir(), "config"), "MBatchConfig.tsv"), cleanFilePath(theOutputDirMBatch, "MBatchConfig.tsv"))
-  print(file.exists(cleanFilePath(theOutputDirMBatch, "MBatchConfig.tsv")))
-  file.copy(cleanFilePath(cleanFilePath(getTestInputDir(), "config"), "matrix_data.tsv"), cleanFilePath(originalData, "matrix_data.tsv"))
-  file.copy(cleanFilePath(cleanFilePath(getTestInputDir(), "config"), "batches.tsv"), cleanFilePath(originalData, "batches.tsv"))
-  configFile=cleanFilePath(theOutputDirMBatch, "MBatchConfig.tsv")
+  theOutputResults=cleanFilePath(cleanFilePath(getTestOutputDir(), "configout"), "ZIP-RESULTS")
+  theDataDir=cleanFilePath(cleanFilePath(getTestOutputDir(), "configout"), "ZIP-DATA")
+  print(theOutputResults)
+  unlink(theOutputResults, recursive=TRUE)
+  dir.create(theOutputResults, recursive=TRUE, showWarnings=FALSE)
+  print(theDataDir)
+  unlink(theDataDir, recursive=TRUE)
+  originalData <- cleanFilePath(getTestInputDir(), "config")
+  configFile <- cleanFilePath(originalData, "MBatchConfig.tsv")
+  matrixFile <- cleanFilePath(originalData, "matrix_data.tsv")
+  batchFile <- cleanFilePath(originalData, "batches.tsv")
+  message("configFile =",configFile)
+  message("matrixFile =",matrixFile)
+  message("batchFile  =",batchFile)
   ########################################################
   baseTestDir=getTestInputDir()
   jarDir=cleanFilePath(baseTestDir, "exe")
@@ -45,14 +45,21 @@ if (!is.null(getTestOutputDir()))
   jarFile=cleanFilePath(jarDir, "ShaidyMapGen.jar")
   jsFile=cleanFilePath(jarDir, "ngchmWidget-min.js")
   ########################################################
+  # DATA and TEST version are in config file
   mbatchRunFromConfig(theConfigFile=configFile,
-                      theDataDir=originalData,
-                      theOutputDir=theOutputDirMBatch,
+                      theMatrixFile=matrixFile,
+                      theBatchesFile=batchFile,
+                      theZipDataDir=theDataDir,
+                      theZipResultsDir=theOutputResults,
                       theNaStrings="NA",
                       theShaidyMapGen = jarFile,
                       theNgchmWidgetJs = jsFile,
-                      theShaidyMapGenJava = javaExe)
-  file.exists(cleanFilePath(theOutputDirMBatch, "MBATCH_SUCCESS.txt"))
+                      theShaidyMapGenJava = javaExe,
+                      theRunPostFlag=TRUE)
+  # theRunPostFlag builds DSCOverview.tsv files
+  # clear the RData files for DSC
+  clearDSCOverviewFiles(theOutputResults)
+  file.exists(cleanFilePath(theOutputResults, "MBATCH_SUCCESS.txt"))
 } else {
   message("No test data. Skip test.")
   TRUE

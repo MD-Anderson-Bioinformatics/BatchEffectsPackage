@@ -1,9 +1,22 @@
 
 	**************************************************
 	*						 *
-	*	       1.0 SERIES NEWS			 *
+	*	       2.0 SERIES NEWS			 *
 	*						 *
 	**************************************************
+
+		CHANGES IN R VERSION 2.0.0
+
+NEW FEATURES
+
+    o Removed Java dependencies
+    o Added Python dependencies
+
+		CHANGES IN R VERSION 1.8.0
+
+NEW FEATURES
+
+    o Added additional error handling to prevent errors stopping complete run
 
 		CHANGES IN R VERSION 1.7.4
 
