@@ -18,6 +18,7 @@ exportClasses(Logging)
 
 # utility functions
 export(cleanFilePath)
+export(cleanAndShortPath)
 export(compareTwoMatrices)
 export(compareTwoDataframes)
 export(mbatchLoadStructures)
@@ -46,6 +47,7 @@ export(addVersionsIfNeeded)
 export(getGlobalMBatchErrorTest)
 export(setGlobalMBatchErrorTest)
 export(checkIfTestError)
+export(writeTitleFile)
 
 # Assessments
 export(SupervisedClustering_Pairs_Structures)

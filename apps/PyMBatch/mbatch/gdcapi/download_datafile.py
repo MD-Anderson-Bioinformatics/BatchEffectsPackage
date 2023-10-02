@@ -368,6 +368,16 @@ class GdcApiDatafile(GdcApiHistoryMixin):
                         type_str = type_str[:-1]
                         if type_str in list_tumor:
                             barcode = sample.sample_barcode
+                        add_error(
+                            f"HCMI Barcode not in biospecimen files {sample.sample_barcode} with UUID {sample.sample_uuid}")
+                    elif (len(barcode_split) == 9) & ('HCM' == barcode_split[0]):
+                        # HCMI barcode - most likely to need this processing
+                        # found barcodes in GDC but not in biospecimen files
+                        # not sure why they keep adding on...
+                        type_str: str = barcode_split[4]
+                        type_str = type_str[:-1]
+                        if type_str in list_tumor:
+                            barcode = sample.sample_barcode
                         add_error(f"HCMI Barcode not in biospecimen files {sample.sample_barcode} with UUID {sample.sample_uuid}")
         assert '' != barcode, f"Tumor Barcode not found for {self.get_file_archive('/')}"
         return barcode

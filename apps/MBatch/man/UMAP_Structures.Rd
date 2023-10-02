@@ -3,10 +3,11 @@
 \title{UMAP_Structures}
 \description{Generate UMAP image and data files}
 \usage{
-UMAP_Structures(theData, theTitle, theOutputDir,
-theDataVersion, theTestVersion,
-theBatchTypeAndValuePairsToRemove = list(),
-theBatchTypeAndValuePairsToKeep = list())
+UMAP_Structures(theData, theTitle, theOutputDir, theDataVersion,
+theTestVersion, theBatchTypeAndValuePairsToRemove=list(),
+theBatchTypeAndValuePairsToKeep=list(),
+theDoDSCFlag=FALSE, theDSCPermutations=0,
+theDSCThreads=0, theDoDscPermsFileFlag=FALSE, theSeed=314)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,6 +24,20 @@ theBatchTypeAndValuePairsToKeep = list())
   \item{theBatchTypeAndValuePairsToKeep}{Object of class \code{"list"} A list of vectors
   containing the batch type (or * for all types) and a vector of the the value(s) to keep.
   list() indicates none while NULL will cause an error. }
+  \item{theDoDSCFlag}{Object of class \code{"logical"}
+  A flag indicating whether or not to
+  perform the DSC calculation for PCA-Plus plots. }
+  \item{theDSCPermutations}{Object of class \code{"numeric"}
+  The number of permutations to perform for DSC calculations.
+  Defaults to 2000}
+  \item{theDSCThreads}{Object of class \code{"numeric"}
+  The number of threads (or CPUs or cores)
+  to use to perform DSC calculations.
+  Defaults to 1}
+  \item{theDoDscPermsFileFlag}{Object of class \code{"logical"}
+  A flag indicating whether
+  or not to perform the DSC calculation for PCA-Plus plots. }
+  \item{theSeed}{Default to 314.}
 }
 \details{Generate UMAP output and data files}
 \value{Vector of strings being full paths to output files.}

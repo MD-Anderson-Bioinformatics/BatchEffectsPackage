@@ -7,17 +7,21 @@ This is for educational and research purposes only.
 Additional information on Batch Effects can be found at http://bioinformatics.mdanderson.org/main/TCGABatchEffects:Overview
 Downloads and details on Standardized Data are available at http://bioinformatics.mdanderson.org/TCGA/databrowser/
 
-Temporarily edit Dockerfile to replace BEA_VERSION_TIMESTAMP with 2023-01-25-1000
+Edit Dockerfile to replace 2023-08-14-1010 with new version
 
 This can be built with: 
-docker build -t bcb_base .
+docker build -t mdabcb/bcb_base:2023-08-14-1010 .
 
-Rename/tag for push with: 
-docker tag bcb_base mdabcb/bcb_base:2023-01-25-1000
+# CHECK IMAGE SIZE BEFORE PROCEEDING
 
 Login to docker hub with: 
 docker login
 
 Push to Docker Hub with: 
-docker push mdabcb/bcb_base:2023-01-25-1000
+docker push mdabcb/bcb_base:2023-08-14-1010
+
+Update Dockerfiles that use this version
+BatchEffectsPackage/docker-build/MBatchImage/Dockerfile
+
+
 

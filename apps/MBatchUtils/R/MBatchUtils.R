@@ -40,35 +40,46 @@ setupZipDataDir <- function(theMatrixFile, theBatchFile, theNewDir, theDataVersi
   # make directories
   currentDir <- cleanFilePath(theNewDir, "current")
   versionsDir <- cleanFilePath(theNewDir, "versions")
-  dir.create(currentDir, recursive=TRUE, showWarnings=FALSE)
-  dir.create(versionsDir, recursive=TRUE, showWarnings=FALSE)
+  message("dir.create ",currentDir)
+  dir.create(currentDir, recursive=TRUE)
+  message("dir.create ",versionsDir)
+  dir.create(versionsDir, recursive=TRUE)
   originalDir <- cleanFilePath(currentDir, "original")
   pipelineDir <- cleanFilePath(currentDir, "pipeline")
+  message("unlink ",originalDir)
   unlink(originalDir, recursive=TRUE)
+  message("unlink ",pipelineDir)
   unlink(pipelineDir, recursive=TRUE)
-  dir.create(originalDir, recursive=TRUE, showWarnings=FALSE)
-  dir.create(pipelineDir, recursive=TRUE, showWarnings=FALSE)
+  message("dir.create ",originalDir)
+  dir.create(originalDir, recursive=TRUE)
+  message("dir.create ",pipelineDir)
+  dir.create(pipelineDir, recursive=TRUE)
   dataVersDir <- addVersionsIfNeeded(versionsDir, theDataVersion, NULL)
-  dir.create(dataVersDir, recursive=TRUE, showWarnings=FALSE)
+  message("dir.create ",dataVersDir)
+  dir.create(dataVersDir, recursive=TRUE)
   # copy files
   currentMatrixFile <- file.path(originalDir, "matrix.tsv")
+  message("file.copy ",theMatrixFile, " to ", currentMatrixFile)
   file.copy(theMatrixFile, currentMatrixFile)
   currentBatchesFile <- ""
   if (!is.null(theBatchFile))
   {
     currentBatchesFile <- file.path(originalDir, "batches.tsv")
+    message("file.copy ",theBatchFile, " to ", currentBatchesFile)
     file.copy(theBatchFile, currentBatchesFile)
   }
   currentMatrixFile2 <- ""
   if (!is.null(theMatrixFile2))
   {
     currentMatrixFile2 <- file.path(originalDir, "matrix2.tsv")
+    message("file.copy ",theMatrixFile2, " to ", currentMatrixFile2)
     file.copy(theMatrixFile2, currentMatrixFile2)
   }
   currentBatchesFile2 <- ""
   if (!is.null(theBatchFile2))
   {
     currentBatchesFile2 <- file.path(originalDir, "batches2.tsv")
+    message("file.copy ",theBatchFile2, " to ", currentBatchesFile2)
     file.copy(theBatchFile2, currentBatchesFile2)
   }
   # pipeline versions
@@ -76,6 +87,8 @@ setupZipDataDir <- function(theMatrixFile, theBatchFile, theNewDir, theDataVersi
   pipelineBatchesFile <- file.path(pipelineDir, "batches.tsv")
   pipelineMatrixFile2 <- file.path(pipelineDir, "matrix2.tsv")
   pipelineBatchesFile2 <- file.path(pipelineDir, "batches2.tsv")
+  message("pipeline versions pipelineMatrixFile=", pipelineMatrixFile)
+  message("pipeline versions pipelineBatchesFile=", pipelineBatchesFile)
   c(currentMatrixFile, currentBatchesFile,
     pipelineMatrixFile, pipelineBatchesFile,
     currentMatrixFile2, currentBatchesFile2,
@@ -102,7 +115,8 @@ setupZipDataDir <- function(theMatrixFile, theBatchFile, theNewDir, theDataVersi
 # 					static	(static analysis results – png files)
 # 					dynamic	(dynamic analysis results – tsv files for JavaScript/D3)
 
-setupZipResultsDir <- function(theConfigDir, theNewDir, theDataVersion, theTestVersion)
+setupZipResultsDir <- function(theConfigDir, theNewDir, theDataVersion, theTestVersion,
+                               theBatchType, theCorrectionType, theCorrectionReason)
 {
   # make directories
   infoDir <- cleanFilePath(theNewDir, "info")
@@ -119,12 +133,14 @@ setupZipResultsDir <- function(theConfigDir, theNewDir, theDataVersion, theTestV
   file.copy(file.path(theConfigDir, "version_stamp.txt"), file.path(infoTestVerDir, "version_stamp.txt"))
   file.copy(file.path(theConfigDir, "source_id.txt"), file.path(infoTestVerDir, "source_id.txt"))
   file.copy(file.path(theConfigDir, "original_data.json"), file.path(infoTestVerDir, "original_data.json"))
-
   # optional directory path for corrections
   correctionDir <- cleanFilePath(theNewDir, "correction")
   correctionDir <- addVersionsIfNeeded(correctionDir, NULL, theTestVersion)
-  c(infoTestVerDir, correctionDir,
-    analysisDir, versionedConfigFile)
+  # then add combined correction and batch type to correction directory path
+  correctionDir <- cleanFilePath(correctionDir, paste(theCorrectionType, "-",
+                                                      cleanAndShortPath(theBatchType), "-",
+                                                      theCorrectionReason, sep="", collapse=""))
+  c(infoTestVerDir, correctionDir, analysisDir, versionedConfigFile, file.path(infoTestVerDir, "title.txt"))
 }
 
 ####################################################################
@@ -157,7 +173,7 @@ getTestInputDir <- function()
   baseDir <- Sys.getenv("MBATCHUTILS_TEST_INPUT")
   if(!file.exists(baseDir))
   {
-    baseDir <- "/BatchEffectsPackage_data/testing_static/MBatchUtils"
+    baseDir <- "/BEA/BatchEffectsPackage_data/testing_static/MBatchUtils"
   }
   baseDir
 }
@@ -167,7 +183,7 @@ getTestInputDirForMBatch <- function()
   value <- Sys.getenv("MBATCH_TEST_INPUT")
   if (!isTRUE(file.exists(value)))
   {
-    value <- "/BatchEffectsPackage_data/testing_static/MATRIX_DATA"
+    value <- "/BEA/BatchEffectsPackage_data/testing_static/MATRIX_DATA"
   }
   value
 }
@@ -177,7 +193,7 @@ getTestOutputDir <- function()
   baseDir <- Sys.getenv("MBATCHUTILS_TEST_OUTPUT")
   if(!file.exists(baseDir))
   {
-    baseDir <- "/BatchEffectsPackage_data/testing_dynamic/MBatchUtils"
+    baseDir <- "/BEA/BatchEffectsPackage_data/testing_dynamic/MBatchUtils"
   }
   baseDir
 }

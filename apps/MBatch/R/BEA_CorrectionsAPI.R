@@ -47,7 +47,7 @@ EB_internal<-function(theBeaData,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- cleanFilePath(myPath, "corrected_matrix.tsv")
+    correctFile <- cleanFilePath(myPath, "adjusted_matrix.tsv")
     writeDataToFile(results, correctFile)
     results <- correctFile
   }
@@ -127,7 +127,7 @@ MP_Internal<- function(theBeaData,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- cleanFilePath(myPath, "corrected_matrix.tsv")
+    correctFile <- cleanFilePath(myPath, "adjusted_matrix.tsv")
     writeDataToFile(results, correctFile)
     results <- correctFile
   }
@@ -187,7 +187,7 @@ AN_Internal<- function(theBeaData,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- cleanFilePath(myPath, "corrected_matrix.tsv")
+    correctFile <- cleanFilePath(myPath, "adjusted_matrix.tsv")
     writeDataToFile(results, correctFile)
     results <- correctFile
   }

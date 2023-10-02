@@ -5,6 +5,12 @@
 	*						 *
 	**************************************************
 
+		CHANGES IN R VERSION 2.0.2
+
+NEW FEATURES
+
+    o copy mutations.tsv for pipeline usage
+
 		CHANGES IN R VERSION 2.0.0
 
 NEW FEATURES

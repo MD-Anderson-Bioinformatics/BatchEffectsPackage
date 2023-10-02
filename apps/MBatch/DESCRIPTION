@@ -1,13 +1,13 @@
 Package: MBatch
 Title: MD Anderson Batch Assessment Tools (MBatch) Package
-Version: 2.0.0
-Date: 2023-03-03
+Version: 2.0.3
+Date: 2023-09-12
 Author: Rehan Akbani <rakbani@mdanderson.org>,
 				Tod Casasent <tdcasasent@mdanderson.org>,
 				Bradley Broom <bbroom@mdanderson.org>,
 				John Weinstein <jweinstein@mdanderson.org>
 Maintainer: Rehan Akbani <rakbani@mdanderson.org>
-Depends: R (>= 4.1)
+Depends: R (>= 4.0)
 Imports: Cairo, ClassDiscovery, squash, methods, parallel, stats, uwot, vizier, reticulate
 Suggests: batchcorr,
     knitr,

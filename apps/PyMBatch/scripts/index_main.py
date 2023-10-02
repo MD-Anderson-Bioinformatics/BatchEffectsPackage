@@ -23,11 +23,12 @@ import os
 from mbatch.test.test_index import create_index_archive
 from mbatch.test.common import delete_directory_contents
 
-result_dir: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/index/ZIP-RESULTS"
-data_dir: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/index/ZIP-DATA"
-zip_dir: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/index/"
+result_dir: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/index/ZIP-RESULTS"
+info_dir: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/index/RESULTS/info"
+data_dir: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/index/ZIP-DATA"
+zip_dir: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/index/"
 
 if __name__ == '__main__':
     delete_directory_contents(zip_dir)
     os.makedirs(zip_dir, exist_ok=True)
-    create_index_archive(result_dir, data_dir, zip_dir)
+    create_index_archive(result_dir, data_dir, zip_dir, info_dir, None, None)

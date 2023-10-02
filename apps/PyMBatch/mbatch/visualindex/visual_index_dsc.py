@@ -123,11 +123,20 @@ class VisualIndexElementDsc:
     # pylint: enable=too-many-arguments,too-many-locals
 
     def get_key(self: 'VisualIndexElementDsc') -> str:
+        """
+        create a key based on all members
+        :return: key formed from member variables
+        """
         return f"{self.m_source}--{self.m_program}--{self.m_project}--{self.m_category}--{self.m_platform}--{self.m_data}--{self.m_details}--{self.m_data_version}--{self.m_test_version}--{self.m_analysis_path}--{self.job_type}"
 
     # pylint: disable=too-many-statements
     # noinspection DuplicatedCode
     def write_element(self: 'VisualIndexElementDsc', the_out: io.TextIOWrapper) -> None:
+        """
+        write self element to given stream
+        :param the_out: output stream for element
+        :return: nothing
+        """
         the_out.write(self.m_path_results)
         the_out.write("\t")
         the_out.write(self.m_path_data)
@@ -202,11 +211,20 @@ class VisualIndexDsc:
     m_base_dir: str
 
     def __init__(self: 'VisualIndexDsc', the_filename: str, the_base_dir: str) -> None:
+        """
+        initialize base values
+        :param the_filename: filename for this element
+        :param the_base_dir: base directory for paths/etc
+        """
         self.m_filename = the_filename
         self.m_ele_dict = {}
         self.m_base_dir = the_base_dir
 
     def populate_index(self: 'VisualIndexDsc') -> None:
+        """
+        build index from this node of the data
+        :return: nothing
+        """
         print(f"VisualIndexDsc::populate_index m_filename={self.m_filename}", flush=True)
         if os.path.exists(self.m_filename):
             print("VisualIndexDsc::populate_index populate index from file", flush=True)
@@ -239,6 +257,10 @@ class VisualIndexDsc:
             print("VisualIndexDsc::populate_index use empty index, since file does not exist", flush=True)
 
     def write_index_file(self: 'VisualIndexDsc') -> None:
+        """
+        write index file from this element
+        :return: nothing
+        """
         out_file: io.TextIOWrapper
         write_list: List[VisualIndexElementDsc] = list(self.m_ele_dict.values())
         write_list.sort(key=lambda my_element: my_element.m_path_data, reverse=False)
@@ -258,6 +280,38 @@ class VisualIndexDsc:
                   the_dsc_1_2: str, the_dsc_1_2_pvalue: str, the_dsc_1_3: str, the_dsc_1_3_pvalue: str,
                   the_dsc_1_4: str, the_dsc_1_4_pvalue: str, the_dsc_2_3: str, the_dsc_2_3_pvalue: str,
                   the_dsc_2_4: str, the_dsc_2_4_pvalue: str, the_dsc_3_4: str, the_dsc_3_4_pvalue: str, the_job_type: str) -> None:
+        """
+        Add a node to the index/data list
+        :param the_path_results:
+        :param the_path_data:
+        :param the_id:
+        :param the_source:
+        :param the_program:
+        :param the_project:
+        :param the_category:
+        :param the_platform:
+        :param the_data:
+        :param the_details:
+        :param the_data_version:
+        :param the_test_version:
+        :param the_analysis_path:
+        :param the_overall_dsc:
+        :param the_overall_dsc_pvalue:
+        :param the_dsc_1_2:
+        :param the_dsc_1_2_pvalue:
+        :param the_dsc_1_3:
+        :param the_dsc_1_3_pvalue:
+        :param the_dsc_1_4:
+        :param the_dsc_1_4_pvalue:
+        :param the_dsc_2_3:
+        :param the_dsc_2_3_pvalue:
+        :param the_dsc_2_4:
+        :param the_dsc_2_4_pvalue:
+        :param the_dsc_3_4:
+        :param the_dsc_3_4_pvalue:
+        :param the_job_type:
+        :return:
+        """
         newval: VisualIndexElementDsc = VisualIndexElementDsc(the_path_results, the_path_data, the_id,
                                                               the_source, the_program, the_project, the_category,
                                                               the_platform, the_data, the_details, the_data_version,
@@ -278,6 +332,16 @@ class VisualIndexDsc:
     # pylint: disable=too-many-locals
     # noinspection DuplicatedCode
     def find_and_add_entries(self: 'VisualIndexDsc', the_output_dir: str, the_results_zip: str, the_data_zip: str, the_result_dir: str) -> None:
+        """
+        find completed data analysis and add it to the entries
+        :param the_output_dir:
+        :param the_results_zip:
+        :param the_data_zip:
+        :param the_result_dir:
+        :param the_test_version:
+        :param the_data_path:
+        :return:
+        """
         data_file: str = get_newest_file(os.path.join(the_result_dir, "analysis"), "DSCOverview.tsv")
         if data_file is not None:
             print(f"VisualIndexDsc::find_and_add_entries populate from file {data_file}", flush=True)

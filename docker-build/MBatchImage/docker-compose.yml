@@ -1,7 +1,7 @@
 # this is the docker compose version
 version: '3.0'
 
-# file version BEA_VERSION_TIMESTAMP
+# file version 2023-09-22-1600
 
 
 services:
@@ -16,11 +16,11 @@ services:
             dockerfile: Dockerfile
         container_name: mbatchsa_cont_extr
         # update :latest to desired version
-        image: mdabcb/mbatchsa_image:BEA_VERSION_TIMESTAMP
+        image: mdabcb/mbatchsa_image:2023-09-22-1600
         volumes:
             # outside access for data files outside:inside
-            - /MBatchSA/mbatch:/MBATCH
-            - /MBatchSA/website:/WEBSITE
+            - /MBatchSA/mbatch:/BEA/MBATCH
+            - /MBatchSA/website:/BEA/WEBSITE
             # read-only file to set time to same in image as on server
             - /etc/localtime:/etc/localtime:ro
 #       ports:

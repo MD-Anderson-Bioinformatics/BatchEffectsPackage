@@ -73,8 +73,9 @@ if (!is.null(inputDir))
   }
   CDP_Plot(theOutputDir, "DATA_2022-09-09-1600", "TEST_2022-10-10-1300", "CDP_Plot.png",
            theData1, theData2, pairedSamples, pairedSamples, unpairedSamples1, unpairedSamples2,
-           theSubTitle="no replicates", theMethod="pearson", theUse="pairwise.complete.obs", theSeed=theRandomSeed,
-           theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL)
+           theMethod="pearson", theUse="pairwise.complete.obs", theSeed=theRandomSeed,
+           theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL,
+           theTitle="THIS / IS / A TITLE / TO TEST / THAT SHOULD / BE / REASONABLY / LONG AND VARIED / FOR A TEST / no replicates")
   message("No error means test was OK.")
   TRUE
 } else {

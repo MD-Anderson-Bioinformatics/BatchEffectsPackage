@@ -285,7 +285,7 @@ def add_batch_cgci_xlsx(the_archive_file: str, the_internal_file: str, the_batch
     with zipfile.ZipFile(the_archive_file, 'r') as zip_file:
         with zip_file.open(the_internal_file, mode="r") as in_file:
             # add ,0 to read_excel to resolve PyLint mapping issue
-            my_df: pandas.DataFrame = pandas.read_excel(in_file, 0)
+            my_df: pandas.DataFrame = pandas.read_excel(in_file, 0, dtype='str')
             # convert missing values to empty string
             my_df = my_df.mask(my_df.isna(), '')
             # iterate rows of dataframe

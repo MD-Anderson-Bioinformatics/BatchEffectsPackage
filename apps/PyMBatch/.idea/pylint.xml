@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="PylintConfigService">
-    <option name="customPylintPath" value="$USER_HOME$/anaconda/envs/gendev/bin/pylint" />
+    <option name="customPylintPath" value="$PROJECT_DIR$/../../../../apps/miniconda3/envs/gendev/bin/pylint" />
     <option name="pylintArguments" value="--enable=no-member,attribute-defined-outside-init,assigning-non-slot --disable=line-too-long,duplicate-code" />
   </component>
 </project>

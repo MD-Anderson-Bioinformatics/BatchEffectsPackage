@@ -67,7 +67,7 @@ setGlobalMBatchVersionData <- function(theValue)
 #### variable to hold Python environment name
 ####
 
-assign('MBATCH_PYTHON_ENV', "gendev", GLOBAL_MBATCH_ENV)
+assign('MBATCH_PYTHON_ENV', "/BEA/gendev", GLOBAL_MBATCH_ENV)
 
 getGlobalMBatchEnv <- function()
 {

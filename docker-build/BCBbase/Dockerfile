@@ -1,23 +1,18 @@
-FROM almalinux:8
+FROM fedora:38
 
-# cd /code/BatchEffects_clean/BatchEffectsPackage/docker-build/BCBbase/
-# docker build -t mdabcb/bcb_base:2023-03-09-1313 .
+# docker build -t mdabcb/bcb_base:2023-08-14-1010 .
 # Login to docker hub with: docker login
 # repo may need be created on Docker Hub before pushing (depends on versions of stuff)
-# Push to Docker Hub with: docker push mdabcb/bcb_base:2023-03-09-1313
-
-# save
-# docker save -o ~/bcb_base_22023-03-09-1313.tar mdabcb/bcb_base:2023-03-09-1313
+# Push to Docker Hub with: docker push mdabcb/bcb_base:2023-08-14-1010
 
 # reminder, use {} around environmental variables, otherwise docker uses it as a literal
 
 LABEL edu.mda.bcb.name="BCBBase" \
       edu.mda.bcb.sub="coj" \
-      edu.mda.bcb.coj.version="2023-03-09-1313" \
+      edu.mda.bcb.coj.version="2023-08-14-1010" \
       edu.mda.bcb.coj.Rversion="4.x" \
       edu.mda.bcb.coj.Javaversion="17" \
-      edu.mda.bcb.coj.AlmaLinuxversion="8"
-
+      edu.mda.bcb.coj.Linuxversion="Fedora 38"
 
 ####
 #### generic setup for OS
@@ -28,16 +23,24 @@ RUN ln -snf /usr/share/zoneinfo/US/Central /etc/localtime && echo "US/Central" >
 ENV TZ=US/Central
 
 ####
+#### Make group to allow later users to access files,
+#### without duplicating files/dirs in layer with chmod/chown
+####
+
+RUN groupadd -g 131313 bcb_base_group
+
+####
 #### Install/Setup Java 17 with variables
 ####
 
-RUN dnf -y install java-17-openjdk java-17-openjdk-devel java-17-openjdk-headless && \
+RUN dnf upgrade -y && \
+    dnf -y install java-17-openjdk java-17-openjdk-devel java-17-openjdk-headless && \
     update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-17-openjdk/bin/java 1 && \
     update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-17-openjdk/bin/javac 1 && \
     update-alternatives --set java /usr/lib/jvm/java-17-openjdk/bin/java && \
     update-alternatives --set javac /usr/lib/jvm/java-17-openjdk/bin/javac && \
-    yum update -y && \
-    yum clean all
+    dnf upgrade -y && \
+    dnf clean all
 
 # adding these variables fixes issue where registering Java with R (keeps getting "lost")
 ENV JAR=/usr/lib/jvm/java-17-openjdk/bin/jar 
@@ -51,7 +54,7 @@ ENV JAVA=/usr/lib/jvm/java-17-openjdk/bin/java
 ENV JAVAC=/usr/lib/jvm/java-17-openjdk/bin/javac
 ENV JAVAH=/usr/lib/jvm/java-17-openjdk/bin/javac
 ENV JAR=/usr/lib/jvm/java-17-openjdk/bin/jar
-ENV LD_LIBRARY_PATH=/usr/lib/jvm/java-17-openjdk/lib/server
+ENV LD_LIBRARY_PATH=/usr/lib64/:/usr/lib/jvm/java-17-openjdk/lib/server
 
 ####
 #### Install/Setup R 4.x+ plus OS packages for MBatch
@@ -60,95 +63,50 @@ ENV LD_LIBRARY_PATH=/usr/lib/jvm/java-17-openjdk/lib/server
 # installs for R-related elements (like cairo)
 # and build elements like Git and Maven
 # set enables repo names need to be all lowercase, despite some online docs indicating otherwise
-RUN dnf -y install dnf-plugins-core && \
-    dnf config-manager --set-enabled powertools && \
-    dnf config-manager --set-enabled appstream && \
-    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
-    yum install -y https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm && \
-    yum install -y http://rpmfind.net/linux/centos/8-stream/PowerTools/x86_64/os/Packages/SDL2-2.0.10-2.el8.x86_64.rpm && \
-    yum install -y ffmpeg ffmpeg-devel && \
-    yum install -y unzip diffutils openssl-devel libxml2-devel cairo-devel libXt-devel && \
-    yum install -y udunits2-devel proj-devel geos-devel gdal-devel sqlite sqlite-devel && \
-    yum install -y perl-Tk git git-gui ant maven nodejs file wget && \
-    yum install -y harfbuzz fribidi harfbuzz-devel fribidi-devel ffmpeg-devel && \
-    yum install -y freetype-devel libpng-devel libtiff-devel && \
-    yum install -y libcurl-devel libjpeg-turbo-devel && \
-    yum install -y tesseract tesseract-devel leptonica-devel cargo && \
-    yum install -y poppler-cpp-devel ImageMagick-c++-devel && \
-    yum install -y libwebp-devel librsvg2-devel libgit2-devel && \
-    yum install -y gsl gsl-devel && \
-    yum update -y && \
-    yum clean all && \
+RUN dnf upgrade -y && \
+    dnf -y install dnf-plugins-core && \
+    dnf -y install libstdc++ ffmpeg-free ffmpeg-free-devel unzip diffutils openssl-devel libxml2-devel cairo-devel libXt-devel udunits2-devel proj-devel geos-devel gdal-devel sqlite sqlite-devel perl-Tk git git-gui ant maven nodejs file wget harfbuzz fribidi harfbuzz-devel fribidi-devel libcurl-devel freetype-devel libpng-devel libtiff-devel libjpeg-turbo-devel tesseract tesseract-devel leptonica-devel cargo poppler-cpp-devel ImageMagick-c++-devel libwebp-devel librsvg2-devel libgit2-devel gsl gsl-devel && \
+    dnf upgrade -y && \
+    dnf clean all && \
     npm install -g express-generator
 
 # Install all TexLive
-RUN dnf install -y texliv*
+RUN dnf upgrade -y && \
+    dnf install -y texlive-2022 texlive-framed && \
+    dnf upgrade -y && \
+    dnf clean all
 
 # install pandoc after texlive, since it depends on texlive
-RUN yum install -y pandoc && \
-    yum update -y && \
-    yum clean all
+RUN dnf upgrade -y && \
+    dnf -y install pandoc && \
+    dnf upgrade -y && \
+    dnf clean all
 
 # install R 4.x+
-RUN dnf install -y R-java-devel
+RUN dnf upgrade -y && \
+    dnf install -y R-java-devel && \
+    dnf upgrade -y && \
+    dnf clean all
 
-RUN echo 'LC_CTYPE="C"' >> /usr/lib64/R/.Renviron && \
-    echo 'LC_TIME="C"' >> /usr/lib64/R/.Renviron && \
-    echo 'LC_MESSAGES="C"' >> /usr/lib64/R/.Renviron && \
-    echo 'LC_MONETARY="C"' >> /usr/lib64/R/.Renviron && \
-    echo 'LC_PAPER="C"' >> /usr/lib64/R/.Renviron && \
-    echo 'LC_MEASUREMENT="C"' >> /usr/lib64/R/.Renviron
+RUN echo 'LC_CTYPE="C"' >> /usr/lib64/R/etc/Renviron && \
+    echo 'LC_TIME="C"' >> /usr/lib64/R/etc/Renviron && \
+    echo 'LC_MESSAGES="C"' >> /usr/lib64/R/etc/Renviron && \
+    echo 'LC_MONETARY="C"' >> /usr/lib64/R/etc/Renviron && \
+    echo 'LC_PAPER="C"' >> /usr/lib64/R/etc/Renviron && \
+    echo 'LC_MEASUREMENT="C"' >> /usr/lib64/R/etc/Renviron
 
 # register Java with R
 RUN R CMD javareconf
 
 ####
-#### Requirements for MBatch Python install/setup
-####
-
-RUN mkdir -p /home/bcbuser && \
-    cd /home/bcbuser && \
-    wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh && \
-    mkdir -p /home/bcbuser/conda && \
-    bash /home/bcbuser/Anaconda3-2022.10-Linux-x86_64.sh -b -p /home/bcbuser/conda -f && \
-    source /home/bcbuser/conda/bin/activate && \
-    conda init && \
-    conda update -y conda
-
-# LD_LIBRARY_PATH needed for Python to find libraries due to conda env issues
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/bcbuser/conda/envs/gendev/lib
-
-RUN source /home/bcbuser/conda/bin/activate && \
-    conda init && \
-    conda create -y -p /home/bcbuser/conda/envs/gendev && \
-    conda activate /home/bcbuser/conda/envs/gendev && \
-    conda install -y -c conda-forge python==3.9 && \
-    conda install -y -c conda-forge tensorflow && \
-    conda install -y -c conda-forge pandas && \
-    conda install -y -c conda-forge numpy && \
-    conda install -y -c conda-forge scipy && \
-    conda install -y -c conda-forge pyinstaller && \
-    conda install -y -c conda-forge mypy && \
-    conda install -y -c conda-forge pylint && \
-    conda install -y -c conda-forge flask && \
-    conda install -y -c conda-forge waitress && \
-    conda install -y -c conda-forge setuptools && \
-    conda install -y -c conda-forge tox && \
-    conda install -y -c conda-forge pipreqs && \
-    conda install -y -c conda-forge matplotlib && \
-    conda install -y -c conda-forge nptyping && \
-    conda install -y -c conda-forge pillow && \
-    conda install -y -c conda-forge jsonpickle && \
-    conda install -y -c conda-forge xmltodict && \
-    pip install pex
-
-####
-#### Requirements for MBatch R install/setup
+#### Install/Setup MBatch (root)
 ####
 
 # copy installs
 # COPY is always done as root!!!!
 COPY installations /bcbsetup/.
+# required for NGCHM-R install (throws bad flag problem but works)
+RUN ln -s /usr/bin/hostid /bin/hostname
 # perform R installs for packages
 # Separately, so if GitHub use runs out, restart has existing layers
 RUN Rscript /bcbsetup/installNGCHM.R
@@ -161,9 +119,69 @@ RUN Rscript /bcbsetup/postInstall.R
 RUN cp /bcbsetup/custom.js /usr/lib64/R/library/NGCHM/extdata/custom.js && \
     chmod 755 /usr/lib64/R/library/NGCHM/extdata/custom.js
 
+####
+#### Base mapping dir, owned by special group
+####
+
+# add base /BEA dir and set ownership
+RUN mkdir /BEA && \
+    chown -R :bcb_base_group /BEA && \
+    chmod -R 775 /BEA
+
+####
+#### Python installs
+####
+
+# bcbuser is not created yet, so make dir, and chown/cmod
+
+RUN mkdir /home/bcbuser && \
+    cd /home/bcbuser && \
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    mkdir /home/bcbuser/conda && \
+    bash /home/bcbuser/Miniconda3-latest-Linux-x86_64.sh -b -p /home/bcbuser/conda -f && \
+    . /home/bcbuser/conda/bin/activate && \
+    conda init && \
+    conda update -y conda && \
+    conda init bash && \
+    chown -R :bcb_base_group /home/bcbuser && \
+    chmod -R 775 /home/bcbuser
+
+# link to gendev environment
+RUN . /home/bcbuser/conda/bin/activate && \
+    conda init && \
+    conda create -y -p /home/bcbuser/conda/envs/gendev && \
+    conda activate /home/bcbuser/conda/envs/gendev && \
+    ln -s /home/bcbuser/conda/envs/gendev /BEA/gendev
+
+# LD_LIBRARY_PATH needed for Python to find libraries due to conda env issues
+ENV LD_LIBRARY_PATH=/usr/lib64/:/home/bcbuser/conda/envs/gendev/lib:/usr/lib/jvm/java-17-openjdk/lib/server
+
+# need chmod at end to support other users
+RUN . /home/bcbuser/conda/bin/activate && \
+    conda init && \
+    conda activate /home/bcbuser/conda/envs/gendev && \
+    conda install -y -c conda-forge python==3.11 && \
+    conda install -y -c conda-forge pyinstaller && \
+    conda install -y -c conda-forge flask && \
+    conda install -y -c conda-forge waitress && \
+    conda install -y -c conda-forge pylint && \
+    conda install -y -c conda-forge pandas && \
+    conda install -y -c conda-forge numpy && \
+    conda install -y -c conda-forge matplotlib && \
+    conda install -y -c conda-forge xmltodict && \
+    conda install -y -c conda-forge setuptools && \
+    conda install -y -c conda-forge pillow && \
+    conda install -y -c conda-forge jsonpickle && \
+    conda install -y -c conda-forge requests && \
+    pip install pex && \
+    conda clean --all --yes && \
+    chmod -R 777 /home/bcbuser/conda/envs/gendev
+
 # add universal access to conda
 RUN cat /etc/bashrc /bcbsetup/conda.txt >> /bcbsetup/bashrc && \
     cp /bcbsetup/bashrc /etc/bashrc
+
+RUN echo 'RETICULATE_PYTHON="/home/bcbuser/conda/envs/gendev/bin/python3"' >> /usr/lib64/R/etc/Renviron
 
 ####
 #### End of build steps

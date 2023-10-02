@@ -138,7 +138,7 @@ callMBatch_SupervisedClustering_Structures <- function(theOutputDir, theDataVers
     # do not use feature map, since supervised clustering is sample ids in both directions
     buildBatchHeatMapFromHC_Structures(theMatrixData=myMatrix,
                                        theBatchData=theDataObject@mBatches,
-                                       theTitle=paste(theTitle, myBatchType, sep=" "),
+                                       theTitle=paste(theTitle, "/", myBatchType, "Supervised Clustering", sep=" "),
                                        theOutputDir=cleanFilePath(outdir, myBatchType),
                                        theDataVersion=theDataVersion,
                                        theTestVersion=theTestVersion,

@@ -19,34 +19,34 @@ MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/rese
 @author: Tod Casasent
 """
 
-from mbatch.pipeline.pipeline import execute_pipeline, update_pipeline_data_index, update_pipeline_rebuild_results_archives
+import io
+from mbatch.pipeline.pipeline import check_pipeline
 from mbatch.test.common import print_errors, print_warnings
 
-dir_datafiles: str = '/your/data/path/Pipeline-GDC/converted/data'
+dir_datafiles: str = '/BEA/DVLP/Pipeline-MWB/converted'
 
-dir_pipeline_index: str = '/your/data/path/Pipeline-MQA/index/pipline_index.tsv'
-dir_pipeline_results: str = '/your/data/path/Pipeline-MQA/results'
-dir_pipeline_util: str = '/your/data/path/Pipeline-MQA/util'
+dir_pipeline_index: str = '/BEA/DVLP/Pipeline-MOB/index/pipline_index.tsv'
+dir_pipeline_results: str = '/BEA/DVLP/Pipeline-MOB/results'
+dir_pipeline_util: str = '/BEA/DVLP/Pipeline-MOB/util'
 
-bei_url: str = "http://your.server.com/BEI/BEI/"
-bei_dir: str = "/your/data/path/BEI/OUTPUT"
-index_base_dir: str = "/DAPI_MQA/DATA"
+server_file: str = '/BEA/DVLP/Pipeline-MOB/pipeline_server.txt'
+bei_url: str = ''
+bei_dir: str = "/BEA/DVLP/MBA/OUTPUT"
+index_base_dir: str = "/DAPI_MOB/DATA"
 
-run_version: str = "2022_12_28_1300"
-run_source: str = "GDC"
+run_version: str = "2023_07_01_1200"
+run_source: str = "MWB"
 
 if __name__ == '__main__':
+    # read URL file
+    my_file: io.BufferedReader
+    with open(server_file, 'r', encoding='utf-8') as my_file:
+        bei_url = str(my_file.read().rstrip())
     # ########################################################
-    # pipeline
+    # check new data status
     # ########################################################
-    execute_pipeline(dir_datafiles, dir_pipeline_results, dir_pipeline_index, dir_pipeline_util,
-                     bei_url, bei_dir, run_version, run_source, index_base_dir, "aliquot_barcode")
-    # below is used to update pipeline data index after problems.
-    # update_pipeline_data_index(dir_datafiles, dir_pipeline_results, dir_pipeline_index, dir_pipeline_util,
-    #                            bei_url, bei_dir, run_version, run_source, index_base_dir, "aliquot_barcode")
-    # below is used to rebuild the results ZIP files to fix the internal files
-    # update_pipeline_rebuild_results_archives(dir_datafiles, dir_pipeline_results, dir_pipeline_index, dir_pipeline_util,
-    #                                         bei_url, bei_dir, run_version, run_source, index_base_dir, "aliquot_barcode")
+    check_pipeline(dir_datafiles, dir_pipeline_results, dir_pipeline_index, dir_pipeline_util,
+                     bei_url, bei_dir, run_version, run_source, index_base_dir, "Sample")
     # ########################################################
     # print important warnings and errors
     # ########################################################

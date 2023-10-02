@@ -28,10 +28,10 @@ from mbatch.index.index_original_data import read_json_original_data
 
 
 # files for testing building json and ZIP from configout output
-static_test_job_dir: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/job"
+static_test_job_dir: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/job"
 
 # files for testing building json and ZIP from error output
-dynamic_test_job_dir: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/job"
+dynamic_test_job_dir: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/job"
 
 
 def copy_original_data_wrapper(the_dynamic_test_job_dir: str, the_static_test_job_dir: str) -> 'None':

@@ -364,14 +364,14 @@ compressIntoFilename<-function(theString)
 }
 
 ###breakIntoTitle<-function(theString, theOldChar="\\", theNewChar=" ", theWidth=40)
-breakIntoTitle<-function(theString, theOldChar=.Platform$file.sep, theNewChar=" ", theWidth=40)
+breakIntoTitle<-function(theString, theWidth=40) #, theOldChar=.Platform$file.sep, theNewChar=" ", theWidth=40)
 {
   if (nchar(theString)>theWidth)
   {
-    theString <- gsub(theOldChar, theNewChar, theString, fixed=TRUE)
+    # theString <- gsub(theOldChar, theNewChar, theString, fixed=TRUE)
   	theString <- strwrap(theString, width=theWidth)
   	theString <- paste(theString, collapse="\n")
-  	theString <- gsub(theNewChar, theOldChar, theString, fixed=TRUE)
+  	# theString <- gsub(theNewChar, theOldChar, theString, fixed=TRUE)
   }
 	return(theString)
 }
@@ -609,7 +609,7 @@ getListOfBatchNamesWithCounts<-function(theListOfAllBatchIds, theUniqueBatchIdNa
 	### if this changes the order of the list, the legends produced by PCA will be incorrect
 	batchIdentifiersWithCount <- sapply(theUniqueBatchIdNames, function (batchId)
 			{
-				return(breakIntoTitle(paste(batchId," (",sum(as.vector(theListOfAllBatchIds)==batchId), ")", sep=""), theOldChar=" ", theNewChar=" ", theWidth=30))
+				return(breakIntoTitle(paste(batchId," (",sum(as.vector(theListOfAllBatchIds)==batchId), ")", sep=""), theWidth=30))
 			}, USE.NAMES=FALSE)
 	return(batchIdentifiersWithCount)
 }
@@ -1026,16 +1026,19 @@ mbatchStandardLegend <- function(theTitle, theVersion, theLegendNames, theLegend
 	logDebug("mbatchStandardLegend - getGlobalMBatchEnv() = ", getGlobalMBatchEnv())
 	logDebug("mbatchStandardLegend - import(mbatch.legend.legend)")
 	legend <- import("mbatch.legend.legend")
+	logDebug("mbatchStandardLegend - after import")
 	colorList <- as.list(as.vector(as.character(myColors)))
 	if (length(myColors)<1)
 	{
 	  colorList <- list()
 	}
+	logDebug("mbatchStandardLegend - after color list")
 	symbolList <- as.list(as.vector(as.character(theLegendSymbols)))
 	if (length(theLegendSymbols)<1)
 	{
 	  symbolList <- list()
 	}
+	logDebug("mbatchStandardLegend - after symbol list")
 	legendNameList <- as.list(as.vector(as.character(theLegendNames)))
 	myTitle <- paste(theTitle, theVersion, sep=" ")
 	logDebug("mbatchStandardLegend - colorList = ", colorList)
@@ -1079,7 +1082,7 @@ getTestInputDir <- function()
   value <- Sys.getenv("MBATCH_TEST_INPUT")
   if (!isTRUE(file.exists(value)))
   {
-    value <- "/BatchEffectsPackage_data/testing_static/MATRIX_DATA"
+    value <- "/BEA/BatchEffectsPackage_data/testing_static/MATRIX_DATA"
   }
   value
 }
@@ -1089,7 +1092,7 @@ getTestOutputDir <- function()
   value <- Sys.getenv("MBATCH_TEST_OUTPUT")
   if (!isTRUE(file.exists(value)))
   {
-    value <- "/BatchEffectsPackage_data/testing_dynamic/MBatch"
+    value <- "/BEA/BatchEffectsPackage_data/testing_dynamic/MBatch"
   }
   value
 }
@@ -1099,7 +1102,7 @@ getTestCompareDir <- function()
   value <- Sys.getenv("MBATCH_TEST_COMPARE")
   if (!isTRUE(file.exists(value)))
   {
-    value <- "/BatchEffectsPackage_data/testing_static/COMPARE"
+    value <- "/BEA/BatchEffectsPackage_data/testing_static/COMPARE"
   }
   value
 }
@@ -1218,6 +1221,25 @@ compareTwoDataframes <- function(theCorrected, theCompare)
     }
   }
   return(TRUE)
+}
+
+writeTitleFile <- function(theTitle, theDiagramPngFile)
+{
+  logDebug("writeTitleFile - pre title ", theTitle)
+  theTitle <- gsub("\n", "", theTitle, fixed=TRUE)
+  theTitle <- gsub("\r", "", theTitle, fixed=TRUE)
+  theTitle <- gsub(" /", "/", theTitle, fixed=TRUE)
+  theTitle <- gsub("/ ", "/", theTitle, fixed=TRUE)
+  theTitle <- gsub("  ", " ", theTitle, fixed=TRUE)
+  theTitle <- gsub("/", " / ", theTitle, fixed=TRUE)
+  logDebug("writeTitleFile - theTitle ", theTitle)
+  if (!is.null(theDiagramPngFile))
+  {
+    titleFile <- gsub(".png", ".txt", theDiagramPngFile, ignore.case=TRUE)
+    titleFile <- gsub("_Diagram", "_Title", titleFile, fixed=TRUE)
+    logDebug("writeTitleFile - titleFile ", titleFile)
+    writeLines(theTitle, titleFile)
+  }
 }
 
 ####################################################################

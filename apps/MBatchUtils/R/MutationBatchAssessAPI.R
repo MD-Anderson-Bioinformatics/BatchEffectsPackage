@@ -121,8 +121,9 @@ mutationBatchAssess <- function(theTypeCountDir, theOutputDir, theJavaArgs=c("-X
 					# if Dunn's test returned batch names, put them into parens to put in diagram otherwise, put an empty string
 					batchAddOns <- getBatchAddOn(collectBatches)
 					# write the PNG for Kruskal's output
-					makeKruskalPng(outfile, loggedPvalues, collectBatches, paste(myBatchType, "for", myCountType, sep=" "), batchAddOns, thePvalueCutoff)
-					makeKruskalTsv(outfileTSV, loggedPvalues, collectBatches, paste(myBatchType, "for", myCountType, sep=" "), batchAddOns, thePvalueCutoff)
+					mytitle <- makeKruskalPng(outfile, loggedPvalues, collectBatches, paste(myBatchType, "for", myCountType, sep=" "), batchAddOns, thePvalueCutoff)
+					makeKruskalTsv(outfileTSV, loggedPvalues, collectBatches, paste(myBatchType, "for", myCountType, sep=" "),
+					               batchAddOns, thePvalueCutoff, mytitle, outfile)
 					# if any batches were called by Dunn't test, get the names, and write strip charts and MBatch for their batch types
 					if (sum(!(batchAddOns==""))>0)
 					{
@@ -1006,10 +1007,16 @@ makeKruskalPng <- function(theFile, theValues, theBatches, theMain, batchAddOn, 
   text(0, y=bb, labels=batchAddOn, pos=4, adj=0, cex=0.8)
   # add a red line at the cutoff value
   abline(v=-log10(thePvalueCutoff),  col="red")
+  # return the formal title
+  title <- paste(theMain, "/", "Kruskal-Wallis-Dunns-Test", batchAddOn, sep=" ")
+  title
 }
 
-makeKruskalTsv <- function(theFile, theValues, theBatches, theMain, batchAddOn, thePvalueCutoff)
+makeKruskalTsv <- function(theFile, theValues, theBatches, theMain, batchAddOn, thePvalueCutoff, theTitle, thePngFile)
 {
+  message("makeKruskalTsv theTitle=", theTitle)
+  message("makeKruskalTsv thePngFile=", thePngFile)
+  writeTitleFile(theTitle, thePngFile)
   outDF <- data.frame(dataset=names(theValues),
                       negLog10PValue=as.vector(unlist(theValues)),
                       batchesCalled=batchAddOn,

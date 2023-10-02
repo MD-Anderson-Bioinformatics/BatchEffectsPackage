@@ -63,8 +63,9 @@ def copy_json_original_files(the_zip_file: str, the_source: str, the_version: st
                 # json.dump(json.dumps(my_obj), out_file)
 
 
+# pylint: disable=too-many-arguments
 def write_zip_files(the_std_data: StandardizedData, the_job_zip_dir: str, the_run_version: str,
-                    the_input_dir: str, the_source: str) -> None:
+                    the_input_dir: str, the_source: str, the_job_type: str) -> None:
     """
     Create normal files for data and job information in job directories to be ZIPped
     :param the_std_data: object representing a standardized data set
@@ -72,6 +73,7 @@ def write_zip_files(the_std_data: StandardizedData, the_job_zip_dir: str, the_ru
     :param the_run_version: timestamp string for MBatch run version
     :param the_input_dir: full directory path containing standardized data ZIP files (uses Standardized Data std_archive path)
     :param the_source: string giving source (GDC or MWB)
+    :param the_job_type: string, Original or Adjusted-EB_withPara
     :return: Nothing
     """
     print(f'write_zip_files the_job_zip_dir={the_job_zip_dir}', flush=True)
@@ -84,10 +86,11 @@ def write_zip_files(the_std_data: StandardizedData, the_job_zip_dir: str, the_ru
         out_file.write(f"{the_std_data.calc_md5()}\n")
     with open(os.path.join(the_job_zip_dir, "version_stamp.txt"), 'w', encoding='utf-8') as out_file:
         out_file.write(f"{the_run_version}\n")
-    # TODO: update to handle Original and Corrected*
+    # update to handle Original and Adjusted
     with open(os.path.join(the_job_zip_dir, "version_type.txt"), 'w', encoding='utf-8') as out_file:
-        out_file.write("Original\n")
+        out_file.write(f"{the_job_type}\n")
     copy_json_original_files(zip_arch, the_source, the_std_data.version, the_job_zip_dir)
+# pylint: enable=too-many-arguments
 
 
 def check_batch_type(the_batch_info: pandas.DataFrame, the_sample_count: int, the_greater_than: float, the_less_than: float) -> List[str]:
@@ -147,7 +150,6 @@ def easier_check_batch_type(the_batch_info: pandas.DataFrame, the_min_count: int
     :param the_max_count: maximum number of batches to accept
     :return: list of sample column (aliquot_barcode) and interesting batch types
     """
-    # TODO: test this with metabolomics data
     valid_columns: List[str] = []
     batch_type: str
     ignore_columns: List[str] = ['aliquot_uuid', 'patient_barcode', 'patient_uuid']
@@ -189,7 +191,7 @@ def filter_usable_batch_types(the_batch_info: pandas.DataFrame, the_tcga_flag: b
     """
     if the_tcga_flag:
         valid_columns: List[str] = ['aliquot_barcode', 'Sample', 'ship_date', 'tissue_source_site', 'batch_id', 'source_center', 'sample_type_name']
-        the_batch_info = the_batch_info[valid_columns]
+        the_batch_info = the_batch_info.drop(the_batch_info.columns.difference(valid_columns), axis=1)
     else:
         # keep aliquot_barcode
         greater_than: float = 0.9
@@ -209,7 +211,8 @@ def filter_usable_batch_types(the_batch_info: pandas.DataFrame, the_tcga_flag: b
 # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
 def create_job(the_std_data: StandardizedData, the_bei_url: str, the_bei_dir: str, the_input_dir: str,
                the_run_version: str, the_has_batch_info_flag: bool, the_tcga_flag: bool,
-               the_util_dir: str, the_run_source: str, the_sample_column_name: str) -> None:
+               the_util_dir: str, the_run_source: str, the_sample_column_name: str,
+               the_correct_batch_type: str, the_correction_algorithm: str, the_correction_reason: str) -> None:
     """
     Create the job and populate its job directories.
     :param the_std_data: object representing a standardized data set
@@ -222,6 +225,9 @@ def create_job(the_std_data: StandardizedData, the_bei_url: str, the_bei_dir: st
     :param the_util_dir: full directory path to util dir
     :param the_run_source: string source, GDC or MWB
     :param the_sample_column_name: column string for samples in batch (different for GDC vs MWB)
+    :param the_correct_batch_type: string, batch type to correct
+    :param the_correction_algorithm: string, correction algorithm to use
+    :param the_correction_reason: string, correction reason to use (DSC or KWD)
     :return: Nothing
     """
     print(f'create_job start {the_std_data.version} {the_std_data.std_archive}', flush=True)
@@ -236,14 +242,19 @@ def create_job(the_std_data: StandardizedData, the_bei_url: str, the_bei_dir: st
     data_dir: str = os.path.join(job_dir, "ZIP-DATA")
     os.makedirs(data_dir, exist_ok=True)
     ########################################################
+    # job type
+    job_type: str = "Original"
+    if "null" != the_correction_algorithm:
+        job_type = f"Adjusted-EB_withPara-{the_correction_reason}"
+    ########################################################
     # Populate Results directory
-    write_zip_files(the_std_data, result_dir, the_run_version, the_input_dir, the_run_source)
+    write_zip_files(the_std_data, result_dir, the_run_version, the_input_dir, the_run_source, job_type)
     ########################################################
     # create and populate Data/original directory
     original_dir: str = os.path.join(data_dir, "original")
     os.makedirs(original_dir, exist_ok=True)
     # Populate Data directory
-    write_zip_files(the_std_data, data_dir, the_run_version, the_input_dir, the_run_source)
+    write_zip_files(the_std_data, data_dir, the_run_version, the_input_dir, the_run_source, job_type)
     # copy changeable files to Data/original directory
     # only copies if they exist
     sample_id_batch_type: str = the_sample_column_name
@@ -288,7 +299,6 @@ def create_job(the_std_data: StandardizedData, the_bei_url: str, the_bei_dir: st
     # default template lives in BatchEffects_clean/BatchEffectsPackage/data/testing_static/PyMBatch/mbatch
     # but is in util directory during pipeline run
     # batch_id,plate_id,sample_type_name,sex,ship_date,source_center,tissue_source_site,sample_type_name
-    # TODO: copy/update MBatchConfig file
     config_template: str = os.path.join(the_util_dir, "MBatchConfig_template.tsv")
     config_file: io.TextIOWrapper
     file_data: str
@@ -303,6 +313,9 @@ def create_job(the_std_data: StandardizedData, the_bei_url: str, the_bei_dir: st
     file_data = file_data.replace('<DataVersion>', f"DATA_{the_std_data.version}")
     file_data = file_data.replace('<TestVersion>', f"TEST_{the_run_version}")
     file_data = file_data.replace('<replaceNAs>', f"{the_std_data.needs_replace_na(the_run_source)}".upper())
+    file_data = file_data.replace('<selectedBatchToCorrect>', the_correct_batch_type)
+    file_data = file_data.replace('<selectedCorrection>', the_correction_algorithm)
+    file_data = file_data.replace('<selectedCorrectionReason>', the_correction_reason)
     config_file_path: str = os.path.join(result_dir, "MBatchConfig.tsv")
     with open(config_file_path, 'w', encoding='utf-8') as config_file:
         config_file.write(file_data)

@@ -268,7 +268,11 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
   # directory to be created and populated with original and pipeline data files
   zipDataVersionDir <- convertNulls(zipDataFiles[11])
   ########################
-  zipResultsFiles <- setupZipResultsDir(dirname(theConfigFile), theZipResultsDir, myDataVersion, myTestVersion)
+  # TODO: add correction and batch type to setupZipResultsDir call
+  zipResultsFiles <- setupZipResultsDir(dirname(theConfigFile), theZipResultsDir, myDataVersion,
+                                        myTestVersion, myConfig["selectedBatchToCorrect",],
+                                        myConfig["selectedCorrection",],
+                                        myConfig["selectedCorrectionReason",])
   # directory for logging and other run specific files
   loggingDir <- zipResultsFiles[1]
   # directory for correction files (path includes versions) not created yet
@@ -277,6 +281,14 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
   analysisOutputDir <- zipResultsFiles[3]
   # config file
   versionedConfigFile <- zipResultsFiles[4]
+  # info/<version>/title.txt (to be written)
+  versionedTitleFile <- zipResultsFiles[5]
+  # reasons dataframe
+  reasonsDF <- data.frame (
+    key = c("BatchType", "Correction", "Reason"),
+    value = c(myConfig["selectedBatchToCorrect",],
+              myConfig["selectedCorrection",],
+              myConfig["selectedCorrectionReason",]))
   ########################
   # setup results directories
   myJobId <- convertNulls(myConfig["jobId",])
@@ -335,7 +347,35 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
     #
     # General MBatch Run
     #
-    title <- myConfig["title",]
+    title <- myConfig["Title",]
+    if ("" == title)
+    {
+      message("Title entry empty - check for original.json file")
+      jsonFile <- file.path(dirname(theConfigFile), "original_data.json")
+      if (file.exists(jsonFile))
+      {
+        message("found json file ", jsonFile)
+        json <- read_json(jsonFile)
+        dataVersion <- myConfig["DataVersion",]
+        testVersion <- myConfig["TestVersion",]
+        title <- paste(json$source, " / ",
+                       json$program, " / ",
+                       json$project, " / ",
+                       json$category, " / ",
+                       json$platform, " / ",
+                       json$data,
+                       if (""!=json$details) {paste(" / ", json$details, sep="")} else {""},
+                       " / ", dataVersion,
+                       " / ", testVersion, sep="")
+      }
+      else
+      {
+        message("no json ", jsonFile)
+      }
+    }
+    titleFile <- file.path(dirname(theConfigFile), "title.txt")
+    message("write versionedTitleFile ", versionedTitleFile)
+    writeLines(title, versionedTitleFile)
     sampleidBatchType <- myConfig["sampleidBatchType",]
     ngchmRowType <- myConfig["ngchmRowType",]
     ngchmColumnType <- myConfig["ngchmColumnType",]
@@ -617,7 +657,8 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
                                               theEBNPlus_Seed=EBNPlus_Seed,
                                               theEBNPlus_MinSamples=EBNPlus_MinSamples,
                                               theDataVersion=myDataVersion,
-                                              theTestVersion=myTestVersion)
+                                              theTestVersion=myTestVersion,
+                                              theReasons=reasonsDF)
     }
     if ((!is.null(selectedCorrection))&&(is.null(myMBatchData)))
     {
@@ -715,7 +756,7 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
         ngchmData <- mbatchTrimData(myMBatchData@mData, theMaxSize = (selectedBoxplotMaxGeneCount * ncol(myMBatchData@mData)))
         buildBatchHeatMapFromHC_Structures(theMatrixData=ngchmData,
                                      theBatchData=myMBatchData@mBatches,
-                                     theTitle=paste(title, myBatchType, sep=" "),
+                                     theTitle=paste(title, "/", myBatchType, "NGCHM", sep=" "),
                                      theOutputDir=cleanFilePath(analysisOutputDir, "NGCHM"),
                                      theDataVersion=myDataVersion,
                                      theTestVersion=myTestVersion,
@@ -742,10 +783,14 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
         {
           dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
         }
-        CDP_Structures(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion, myTestVersion, "CDP_Plot_Data1_Diagram.PNG", myOriginalData@mData, myMBatchData@mData, "CDP Output 1")
+        CDP_Structures(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion,
+                       myTestVersion, "CDP_Plot_Data1_Diagram.PNG", myOriginalData@mData,
+                       myMBatchData@mData, "Primary-Dataset", theTitle=title)
         if (!is.null(myOriginalData2))
         {
-          CDP_Structures(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion, myTestVersion, "CDP_Plot_Data2_Diagram.PNG", myOriginalData2@mData, myMBatchData@mData, "CDP Output 2")
+          CDP_Structures(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion,
+                         myTestVersion, "CDP_Plot_Data2_Diagram.PNG", myOriginalData2@mData,
+                         myMBatchData@mData, "Secondary-Dataset", theTitle=title)
         }
       }
     }
@@ -767,6 +812,14 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
   file.copy(zipDataCurrentOrigDir, zipDataVersionDir, recursive=TRUE)
   message("Copy from ", zipDataCurrentPipeDir, " to ", zipDataVersionDir)
   file.copy(zipDataCurrentPipeDir, zipDataVersionDir, recursive=TRUE)
+  # copy theZipDataDir/original/mutations.tsv (if it exists) to zipDataVersionDir/original/mutations.tsv
+  sorcMutations <- cleanFilePath(cleanFilePath(theZipDataDir, "original"), "mutations.tsv")
+  if (file.exists(sorcMutations))
+  {
+    destMutations <- cleanFilePath(cleanFilePath(zipDataVersionDir, "original"), "mutations.tsv")
+    message("Copy mutations.tsv from ", sorcMutations, " to ", destMutations)
+    file.copy(sorcMutations, destMutations)
+  }
 }
 
 
@@ -858,7 +911,7 @@ doCorrectionsFromConfig <- function(theOutputDir, theDataObject, theDataObject2,
                                     theRBN_InvariantReps, theRBN_VariantReps,
                                     theEBNPlus_GroupId1, theEBNPlus_GroupId2,
                                     theEBNPlus_Seed, theEBNPlus_MinSamples,
-                                    theDataVersion, theTestVersion)
+                                    theDataVersion, theTestVersion, theReasons)
 {
   processed <- FALSE
   myCorrectedFile <- NULL
@@ -1001,7 +1054,7 @@ doCorrectionsFromConfig <- function(theOutputDir, theDataObject, theDataObject2,
   {
     #theDataObject, theDataObject2, theEBNPlus_Batch1, theEBNPlus_Batch2, theEBNPlus_GroupId1, theEBNPlus_GroupId2, theEBNPlus_Seed,
     processed <- TRUE
-    correctedFile <- cleanFilePath(theOutputDir, "corrected_matrix.tsv")
+    correctedFile <- cleanFilePath(theOutputDir, "adjusted_matrix.tsv")
     print(dim(theDataObject@mData))
     print(dim(theDataObject2@mData))
     dataMatrix <- EBNPlus_Correction_Structures(theDataMatrix1=theDataObject@mData,
@@ -1048,6 +1101,10 @@ doCorrectionsFromConfig <- function(theOutputDir, theDataObject, theDataObject2,
   {
     # if have data info and processing was done, return new data object
     theDataObject <- mbatchLoadStructures(dataMatrix, dataBatches)
+  }
+  if (TRUE==processed)
+  {
+    writeAsGenericDataframe(theFile=cleanFilePath(theOutputDir, "adjusted_reasons.txt"), theDataframe=theReasons)
   }
   dataMatrix <- NULL
   dataBatches <- NULL

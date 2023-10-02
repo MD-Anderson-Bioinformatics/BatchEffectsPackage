@@ -65,7 +65,7 @@ doEBNPlus_internal <- function(theBeaData1Matrix,
   if (!is.null(corrections))
   {
     checkDirForCreation(thePath)
-    correctFile <- cleanFilePath(thePath, "corrected_matrix.tsv")
+    correctFile <- cleanFilePath(thePath, "adjusted_matrix.tsv")
     writeDataToFile(corrections, correctFile)
   }
   else

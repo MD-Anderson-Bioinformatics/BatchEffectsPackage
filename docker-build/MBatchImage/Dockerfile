@@ -1,45 +1,42 @@
-FROM mdabcb/bcb_base:2023-03-09-1313
+FROM mdabcb/bcb_base:2023-08-14-1010
 
 # NOTE: above version should match build from Dockerfile for BCBBase, which is manually done.
 #       manual build of BCBBase is because of the extended build time to generate the image.
 #       it is generally rebuilt very seldomly.
 
-## This can be built with: docker build -t mdabcb/mbatchsa_image:BEA_VERSION_TIMESTAMP .
+## This can be built with: docker build -t mdabcb/mbatchsa_image:HUB_2023-09-22-1600 .
 ## Login to docker hub with: docker login
 ## repo may need be created on Docker Hub before pushing (depends on versions of stuff)
-## Push to Docker Hub with: docker push mdabcb/mbatchsa_image:BEA_VERSION_TIMESTAMP
+## Push to Docker Hub with: docker push mdabcb/mbatchsa_image:HUB_2023-09-22-1600
 
 # reminder, use {} around environmental variables, otherwise docker uses it as a literal
 
 LABEL edu.mda.bcb.name="MBatch" \
       edu.mda.bcb.sub="mba" \
-      edu.mda.bcb.mba.version="BEA_VERSION_TIMESTAMP"
+      edu.mda.bcb.mba.version="2023-09-22-1600"
 
 # make bcbuser
-RUN useradd -l -s /bin/bash -d /home/bcbuser -u 2002 bcbuser && \
-    echo "bcbuser:bcbuser" | chpasswd && \
+RUN groupadd -g 2003 bcbgroup && \
+    useradd -l -s /bin/bash -d /home/bcbuser -u 2002 -g bcb_base_group bcbuser && \
+    usermod -a -G bcbgroup bcbuser && \
+    chown bcbuser:bcbgroup /home/bcbuser && \
     mkdir /home/bcbuser/mbatch && \
-    chown -R bcbuser:bcbuser /home/bcbuser && \
-    mkdir /BatchEffectsPackage_data && \
-    mkdir /BatchEffectsPackage_data/testing_static && \
-    chown -R bcbuser:bcbuser /BatchEffectsPackage_data && \
-    chmod -R u+rwx /BatchEffectsPackage_data
-    
+    chown -R :bcb_base_group /home/bcbuser/mbatch && \
+    mkdir /BEA/BatchEffectsPackage_data && \
+    mkdir /BEA/BatchEffectsPackage_data/testing_static && \
+    chown -R :bcb_base_group /BEA/BatchEffectsPackage_data && \
+    chmod -R 775 /BEA/BatchEffectsPackage_data
+
 # COPY is always done as root!!!!
 # quote: When using COPY with more than one source file, the destination must be a directory and end with a / :unquote
-COPY installations/*.tar.gz /home/bcbuser/mbatch/
-COPY installations/testing_static /BatchEffectsPackage_data/testing_static
-COPY installations/PyMBatch /home/bcbuser/PyMBatch/
-RUN ls -lh /BatchEffectsPackage_data && \
-    chown -R bcbuser:bcbuser /BatchEffectsPackage_data && \
-    chmod -R u+rwx /BatchEffectsPackage_data && \
-    mkdir /bea_testing && \
-    ln -s /BatchEffectsPackage_data/testing_static/MATRIX_DATA /bea_testing/MATRIX_DATA && \
-    chown -R bcbuser:bcbuser /bea_testing && \
-    chmod -R u+rwx /bea_testing
-
+COPY --chown=bcbuser:bcbgroup --chmod=775 installations/*.tar.gz /home/bcbuser/mbatch/
+#################################################
+# this COPY block adds 2.8GB of layer data
+#################################################
+COPY --chown=bcbuser:bcbgroup --chmod=775 installations/testing_static /BEA/BatchEffectsPackage_data/testing_static
+COPY --chown=bcbuser:bcbgroup --chmod=775 installations/PyMBatch /home/bcbuser/PyMBatch/
 # perform Python packge install
-RUN source /home/bcbuser/conda/bin/activate && \
+RUN . /home/bcbuser/conda/bin/activate && \
     conda activate /home/bcbuser/conda/envs/gendev && \
     cd /home/bcbuser/PyMBatch && \
     pip install .

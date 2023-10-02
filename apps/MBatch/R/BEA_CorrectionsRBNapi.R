@@ -39,7 +39,7 @@ RBN_internal <- function(theInvariantMatrix, theVariantMatrix,
   correctFile <- NULL
   if ((!is.null(results))&&(TRUE==theWriteToFile))
   {
-    correctFile <- cleanFilePath(myPath, "corrected_matrix.tsv")
+    correctFile <- cleanFilePath(myPath, "adjusted_matrix.tsv")
     writeDataToFile(results, correctFile)
     results <- correctFile
   }

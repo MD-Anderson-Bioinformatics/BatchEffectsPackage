@@ -339,7 +339,7 @@ writeBatchCoreFile<-function(theFile, theBatchType, theTitle, theData, theColors
 	CairoPNG(filename=theFile, pointsize=24, width = 1000, height = 1000)
 	on.exit(dev.off())
 	imageFromMatrix(data=theData, col=theColors, breaks=theBreaks,
-			main=list(breakIntoTitle(theTitle, theOldChar = " ", theNewChar = " ", theWidth = 50)))
+			main=list(breakIntoTitle(theTitle, theWidth = 50)))
 	mtext(paste("MBatch", packageDescription("MBatch")["Version"], "batchcorr", packageDescription("batchcorr")["Version"], sep=" "), side=1, adj=1, outer=FALSE, line=4, cex=0.50, bg="white")
 }
 
@@ -357,12 +357,12 @@ imageFromMatrix<-function(data, col=beaRainbow(12), breaks=NULL, main=NULL)
 	###logDebug("imagewithkey 2")
 	splitColNames <- sapply(colnames(data), function (mylabel)
 			{
-				return(breakIntoTitle(mylabel, theOldChar=" ", theNewChar=" ", theWidth=18))
+				return(breakIntoTitle(mylabel, theWidth=18))
 			}, USE.NAMES=FALSE)
 	###logDebug("imagewithkey 3")
 	splitRowNames <- sapply(rownames(data), function (mylabel)
 			{
-				return(breakIntoTitle(mylabel, theOldChar=" ", theNewChar=" ", theWidth=18))
+				return(breakIntoTitle(mylabel, theWidth=18))
 			}, USE.NAMES=FALSE)
 	###logDebug("imagewithkey 4")
 	if ((length(splitColNames)>=15)||(length(splitRowNames)>=15))
@@ -621,8 +621,8 @@ batchcorrForBatchType_writeImage<-function(theResultsBatchList, theTitle, theOut
 			outputDir <- checkCreateDir(checkCreateDir(checkCreateDir(theOutputDir, theBatchCorrBase), batchTypeName), "OneToMany")
 			metricFile <- createDirPlusFilename(outputDir, theBatchCorrBase, "_Metric_Diagram.png")
 			pvalueFile <- createDirPlusFilename(outputDir, theBatchCorrBase, "_Pvalue_Diagram.png")
-			writeStringToImage(metricFile, breakIntoTitle(paste(theTitle, batchTypeName, resultsBatchArrayList, sep=" "), theOldChar=" ", theNewChar=" " ))
-			writeStringToImage(pvalueFile, breakIntoTitle(paste(theTitle, batchTypeName, resultsBatchArrayList, sep=" "), theOldChar=" ", theNewChar=" " ))
+			writeStringToImage(metricFile, breakIntoTitle(paste(theTitle, batchTypeName, resultsBatchArrayList, sep=" ")))
+			writeStringToImage(pvalueFile, breakIntoTitle(paste(theTitle, batchTypeName, resultsBatchArrayList, sep=" ")))
 		}
 		else
 		{

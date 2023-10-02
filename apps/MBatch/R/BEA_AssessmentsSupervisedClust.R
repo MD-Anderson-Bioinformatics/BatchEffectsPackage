@@ -46,14 +46,6 @@ createBatchEffectsOutput_SupervisedClustering_batches<-function(theMatrixGeneDat
   		supervisedClustLegend(color, batchIdsForSamples, sort(unique(batchIdsForSamples)), batchTypeName, legendFilename)
 	  }
 	},
-	warning=function(e)
-	{
-	  logWarn("1 Unable to generate SupervisedClustering_batches")
-	  logDebug(lastPath)
-	  unlink(lastPath, recursive = TRUE, force = TRUE)
-	  dir.create(lastPath, showWarnings=FALSE, recursive=TRUE)
-	  openAndWriteIssuesLogFileSuperClust(lastPath)
-	},
 	error=function(e)
 	{
 	  logWarn("2 Unable to generate SupervisedClustering_batches")
@@ -91,17 +83,14 @@ createBatchEffectsOutput_SupervisedClustering_pairs<-function(theMatrixGeneData,
   		diagramFilename = createDirPlusFilename(myOutputPath, "SupervisedClust_Diagram.png")
   		legendFilenameA = createDirPlusFilename(myOutputPath, "SupervisedClust_Legend", "-", batchTypeNameA,".png")
   		legendFilenameB = createDirPlusFilename(myOutputPath, "SupervisedClust_Legend", "-", batchTypeNameB,".png")
+  		logInfo("createBatchEffectsOutput_SupervisedClustering_pairs - pre bias clust")
   		success <- makeBiasClust(theMatrixGeneData, theDataframeBatchData, batchTypeNameA, color, title,
   									diagramFilename, theMore=batchTypeNameB)
+  		logInfo("createBatchEffectsOutput_SupervisedClustering_pairs - post bias clust")
   		supervisedClustLegend(color, batchIdsForSamplesA, sort(unique(batchIdsForSamplesA)), batchTypeNameA, legendFilenameA)
+  		logInfo("createBatchEffectsOutput_SupervisedClustering_pairs - after first legend")
   		supervisedClustLegend(color, batchIdsForSamplesB, sort(unique(batchIdsForSamplesB)), batchTypeNameB, legendFilenameB)
-		},
-		warning=function(e)
-		{
-		  logWarn("1 Unable to generate SupervisedClustering_pairs")
-		  unlink(lastPath, recursive = TRUE, force = TRUE)
-		  dir.create(lastPath, showWarnings=FALSE, recursive=TRUE)
-		  openAndWriteIssuesLogFileSuperClust(lastPath)
+  		logInfo("createBatchEffectsOutput_SupervisedClustering_pairs - after second legend")
 		},
 		error=function(e)
 		{
@@ -222,11 +211,6 @@ makeBiasClust<-function(theMatrix, theBatches, theBatchType, theColors, theTitle
 	  tryCatch(
 	    {
 	      biasedDend <- biasedClusterFunction(interestingData, factor(selectedBatches[,theBatchType]))
-	    },
-	    warning=function(e)
-	    {
-	      logWarn("1 Unable to calculate biasedClusterFunction--too many NAs, Infinities or NaNs in data")
-	      biasedDend <- NULL
 	    },
 	    error=function(e)
 	    {

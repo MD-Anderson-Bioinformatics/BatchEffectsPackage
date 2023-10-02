@@ -34,26 +34,34 @@ from mbatch.gdcapi.convert_clinical import convert_clinical_batches
 from mbatch.test.common import add_error
 
 
-def update_clinical_index(the_clinical_index: str) -> None:
+def update_clinical_index(the_clinical_index: str, the_save_flag: bool) -> List[GdcApiClinical]:
     """
     Update list of known clinical files, and their history (release) status.
     :param the_clinical_index: full path to clinical index file, with file name.
-    :return: None
+    :param the_save_flag: if True, save index
+    :return: List[GdcApiClinical] - list of new entries
     """
     print("*************START:update_clinical_index*************", flush=True)
     # read existing index files (if any)
     my_entries: Dict[str, GdcApiClinical] = {}
     if os.path.exists(the_clinical_index):
         my_entries = read_clinical_index(the_clinical_index)
-    # update list of files, adding any new ones (new ones will not have history data)
+    # update list of files, adding any new ones (new ones history data will be empty string)
     fresh_entries: List[GdcApiClinical] = get_clinical_list_from_gdc(my_entries)
-    # save the current index files (if needed for restart)
-    write_clinical_index(the_clinical_index, fresh_entries)
-    # update history
-    if update_history_from_gdc(fresh_entries, 5):
-        # save index files if anything changed
+    if the_save_flag:
+        # save the current index files (if needed for restart)
         write_clinical_index(the_clinical_index, fresh_entries)
+        # update history
+        if update_history_from_gdc(fresh_entries, 5):
+            # save index files if anything changed
+            write_clinical_index(the_clinical_index, fresh_entries)
+    new_entries: List[GdcApiClinical] = []
+    tmp_entry: GdcApiClinical
+    for tmp_entry in fresh_entries:
+        if "" == tmp_entry.history_status:
+            new_entries.append(tmp_entry)
     print("*************DONE:update_clinical_index*************", flush=True)
+    return new_entries
 
 
 def download_clinical_index(the_clinical_index: str, the_base_dir: str) -> None:
@@ -73,26 +81,34 @@ def download_clinical_index(the_clinical_index: str, the_base_dir: str) -> None:
     print("*************DONE:download_clinical_index*************", flush=True)
 
 
-def update_biospecimen_index(the_biospecimen_index: str) -> None:
+def update_biospecimen_index(the_biospecimen_index: str, the_save_flag: bool) -> List[GdcApiBiospecimen]:
     """
     Update list of known biospecimen files, and their history (release) status.
     :param the_biospecimen_index: full path to biospecimen index file, with file name.
-    :return: None
+    :param the_save_flag: if True, save index
+    :return: List[GdcApiBiospecimen] - list of new entries
     """
     print("*************START:update_biospecimen_index*************", flush=True)
     # read existing index files (if any)
     my_entries: Dict[str, GdcApiBiospecimen] = {}
     if os.path.exists(the_biospecimen_index):
         my_entries = read_biospecimen_index(the_biospecimen_index)
-    # update list of files, adding any new ones (new ones will not have history data)
+    # update list of files, adding any new ones (new ones will have history data equal to empty string)
     fresh_entries: List[GdcApiBiospecimen] = get_biospecimen_list_from_gdc(my_entries)
-    # save the current index files (if needed for restart)
-    write_biospecimen_index(the_biospecimen_index, fresh_entries)
-    # update history
-    if update_history_from_gdc(fresh_entries, 5):
-        # save index files if anything changed
+    if the_save_flag:
+        # save the current index files (if needed for restart)
         write_biospecimen_index(the_biospecimen_index, fresh_entries)
+        # update history
+        if update_history_from_gdc(fresh_entries, 5):
+            # save index files if anything changed
+            write_biospecimen_index(the_biospecimen_index, fresh_entries)
+    new_entries: List[GdcApiBiospecimen] = []
+    tmp_entry: GdcApiBiospecimen
+    for tmp_entry in fresh_entries:
+        if "" == tmp_entry.history_status:
+            new_entries.append(tmp_entry)
     print("*************DONE:update_biospecimen_index*************", flush=True)
+    return new_entries
 
 
 def download_biospecimen_index(the_biospecimen_index: str, the_base_dir: str) -> None:
@@ -112,12 +128,13 @@ def download_biospecimen_index(the_biospecimen_index: str, the_base_dir: str) ->
     print("*************DONE:download_biospecimen_index*************", flush=True)
 
 
-def update_datafile_index(the_file_datafiles: str, the_sample_dir: str) -> None:
+def update_datafile_index(the_file_datafiles: str, the_sample_dir: str, the_save_flag: bool) -> List[GdcApiDatafile]:
     """
     Update list of known datafile files, and their history (release) status.
     :param the_file_datafiles: full path to datafile index file, with file name.
     :param the_sample_dir: full path to directory for index files
-    :return: None
+    :param the_save_flag: if True, save index
+    :return: List[GdcApiDatafile] - list of new entries
     """
     print("*************START:update_datafile_index*************", flush=True)
     # read existing index files (if any)
@@ -126,13 +143,20 @@ def update_datafile_index(the_file_datafiles: str, the_sample_dir: str) -> None:
         my_entries = read_datafile_index(the_file_datafiles)
     # update list of files, adding any new one (new ones will not have history data)
     all_entries: List[GdcApiDatafile] = get_datafile_list_from_gdc(my_entries)
-    # save the current index files (if needed for restart)
-    write_datafile_index(the_file_datafiles, the_sample_dir, all_entries)
-    # update history
-    if update_history_from_gdc(all_entries, 5):
-        # save index files if anything changed
+    if the_save_flag:
+        # save the current index files (if needed for restart)
         write_datafile_index(the_file_datafiles, the_sample_dir, all_entries)
+        # update history
+        if update_history_from_gdc(all_entries, 5):
+            # save index files if anything changed
+            write_datafile_index(the_file_datafiles, the_sample_dir, all_entries)
+    new_entries: List[GdcApiDatafile] = []
+    tmp_entry: GdcApiDatafile
+    for tmp_entry in all_entries:
+        if "" == tmp_entry.history_status:
+            new_entries.append(tmp_entry)
     print("*************DONE:update_datafile_index*************", flush=True)
+    return new_entries
 
 
 def download_datafile_index(the_datafile_index: str, the_download_dir: str, the_sample_dir: str) -> None:

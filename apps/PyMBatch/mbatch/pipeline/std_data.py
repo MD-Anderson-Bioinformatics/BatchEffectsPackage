@@ -25,7 +25,7 @@ import csv
 import zipfile
 import hashlib
 import json
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List
 import pandas
 import requests
 from mbatch.test.common import write_tsv_list, read_headers
@@ -415,7 +415,7 @@ def write_std_pipeline_index(the_index_file: str, the_entries: List[Standardized
     :return: Nothing
     """
     print(f"write_std_pipeline_index the_index_file={the_index_file}", flush=True)
-    the_entries.sort(key=lambda my_std_data: (my_std_data.std_archive, my_std_data.version), reverse=False)
+    the_entries.sort(key=lambda my_std_data: (my_std_data.std_archive, my_std_data.version, my_std_data.job_id), reverse=False)
     out_file: io.TextIOWrapper
     with open(the_index_file, 'w', encoding='utf-8') as out_file:
         write_tsv_list(out_file, STD_HEADERS, True, False)
@@ -428,7 +428,7 @@ def write_std_pipeline_index(the_index_file: str, the_entries: List[Standardized
 # reading files
 # ########################################################
 
-def read_std_pipeline_index(the_index_file: str) -> Dict[Tuple[str, str], StandardizedData]:
+def read_std_pipeline_index(the_index_file: str) -> List[StandardizedData]:
     """
     Read index file and return Dictionary of StandardizedData objects
     :param the_index_file: Full path including filename to pipeline index file.
@@ -436,7 +436,8 @@ def read_std_pipeline_index(the_index_file: str) -> Dict[Tuple[str, str], Standa
     """
     print(f"read_std_pipeline_index the_index_file={the_index_file}", flush=True)
     index_file: io.TextIOWrapper
-    my_entries: Dict[Tuple[str, str], StandardizedData] = {}
+    # std_list use entry.std_archive, entry.version, entry.job_id
+    my_entries: List[StandardizedData] = []
     with open(the_index_file, 'r', encoding='utf-8') as index_file:
         keys: List[str] = read_headers(index_file)
         line: str = index_file.readline().rstrip('\n')
@@ -448,7 +449,7 @@ def read_std_pipeline_index(the_index_file: str) -> Dict[Tuple[str, str], Standa
             values: List[str] = line.split("\t")
             tsv_dict: Dict[str, str] = dict(zip(keys, values))
             entry: StandardizedData = StandardizedData.from_dict(tsv_dict)
-            my_entries[(entry.std_archive, entry.version)] = entry
+            my_entries.append(entry)
             line = index_file.readline().rstrip('\n')
     return my_entries
 
@@ -481,18 +482,57 @@ def get_archive_versions(the_archive_path: str) -> List[str]:
 # ########################################################
 
 
-def build_std_pipeline_index(the_input_dir: str, the_index_file: str) -> Dict[Tuple[str, str], StandardizedData]:
+def find_historical_standardized_data(the_std_list: List[StandardizedData], the_version: str,
+                                      the_data_archive: str, the_result_archive: str) -> Optional[StandardizedData]:
+    """
+    Find the historical StandardizedData object that has the version, data, and result paths.
+    That way we can get the std_archive
+    :param the_std_list: list of StandardizedData objects
+    :param the_version: version string
+    :param the_data_archive: data archive zip path
+    :param the_result_archive: result archive zip path
+    :return: StandardizedData object matching version, and data/result archive zip paths
+    """
+    old_std: Optional[StandardizedData] = None
+    my_std: StandardizedData
+    for my_std in the_std_list:
+        if the_version == my_std.version:
+            if the_data_archive == my_std.data_archive:
+                if the_result_archive == my_std.result_archive:
+                    old_std = my_std
+    return old_std
+
+
+def std_list_contains(the_std_list: List[StandardizedData], the_std_archive: str, the_my_version: str) -> bool:
+    """
+    Check if archive and version are already in list.
+    :param the_std_list: List of StanardizedData (pipline.tsv entries) to search
+    :param the_std_archive: archive path to check for
+    :param the_my_version: data version to check for
+    :return: bool, return True if archive and version are in list
+    """
+    found: bool = False
+    my_std: StandardizedData
+    for my_std in the_std_list:
+        if my_std.std_archive == the_std_archive:
+            if my_std.version == the_my_version:
+                found = True
+    return found
+
+
+def build_std_pipeline_index(the_input_dir: str, the_index_file: str, the_write_flag: bool) -> List[StandardizedData]:
     """
     Build and save pipeline index file from current file and available datasets.
     :param the_input_dir: full directory path containing standardized data ZIP files (uses Standardized Data std_archive path)
     :param the_index_file: full path including file name to index file for MBatch index file
+    :param the_write_flag: if True, skip writing index. Used for checking new status of pipeline
     :return: Dictionary with keys being tuples of std_archive and version, and values being StandardizedData
     """
-    std_dict: Dict[Tuple[str, str], StandardizedData] = {}
+    std_list: List[StandardizedData] = []
     # read index file if it exists
     if os.path.exists(the_index_file):
         print(f"read index {the_index_file}", flush=True)
-        std_dict = read_std_pipeline_index(the_index_file)
+        std_list = read_std_pipeline_index(the_index_file)
     # check for unprocessed standardized data archives, add to std_list, write to pipeline index
     found: bool = False
     dir_path: str
@@ -512,13 +552,14 @@ def build_std_pipeline_index(the_input_dir: str, the_index_file: str) -> Dict[Tu
                     my_version: str
                     for my_version in version_list:
                         print(f"Check version {my_version} and path {dir_path}", flush=True)
-                        if not (std_archive, my_version) in std_dict:
+                        if not std_list_contains(std_list, std_archive, my_version):
                             found = True
                             # the_std_archive, the_version, the_data_archive, the_result_archive
                             print(f"New archive {my_version} and path {dir_path}", flush=True)
-                            std_dict[(std_archive, my_version)] = StandardizedData(std_archive, my_version, '', '', '', '')
+                            std_list.append(StandardizedData(std_archive, my_version, '', '', '', ''))
     # pylint: enable=too-many-nested-blocks
-    if found:
-        print(f"write index {the_index_file}", flush=True)
-        write_std_pipeline_index(the_index_file, list(std_dict.values()))
-    return std_dict
+    if the_write_flag:
+        if found:
+            print(f"write index {the_index_file}", flush=True)
+            write_std_pipeline_index(the_index_file, std_list)
+    return std_list

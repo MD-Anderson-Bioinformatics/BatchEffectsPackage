@@ -22,8 +22,8 @@ writeBatchDataTsvForBoxplot <- function(theOutputDir, theBatches)
 {
   message("writeBatchDataTsvForBoxplot")
   batchDataFile <- cleanFilePath(theOutputDir, "BatchData.tsv")
-  message("writeAsGenericDataframe writeBatchDataTsvForBoxplot")
   message(batchDataFile)
+  message("writeAsGenericDataframe writeBatchDataTsvForBoxplot")
   if (!file.exists(batchDataFile))
   {
     message("Writing BatchData.tsv now")
@@ -62,7 +62,7 @@ HierarchicalClustering_Structures <- function(theData, theTitle, theOutputDir, t
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
                               theBatchTypeAndValuePairsToKeep=theBatchTypeAndValuePairsToKeep)
-  theTitle <- breakIntoTitle(theTitle)
+  theTitle <- paste(breakIntoTitle(theTitle), "/", "Hierarchical Clustering", sep=" ")
   dirVector <- createBatchEffectsOutput_hierclust(theData@mData, theData@mBatches, theTitle, theDataVersion, theTestVersion, "", theHierClustOutputDir=theOutputDir)
   logInfo("HierarchicalClustering_Structures dirVector=", dirVector)
   newOutDir <- dirVector[1]
@@ -71,6 +71,7 @@ HierarchicalClustering_Structures <- function(theData, theTitle, theOutputDir, t
   logInfo("HierarchicalClustering_Structures rdataFileSamples=", rdataFileSamples)
   logInfo("HierarchicalClustering_Structures rdataFileFeatures=", rdataFileFeatures)
   writeBatchDataTsvForBoxplot(newOutDir, theData@mBatches)
+  logInfo("HierarchicalClustering_Structures done")
   c(rdataFileSamples, rdataFileFeatures)
 }
 
@@ -84,7 +85,7 @@ SupervisedClustering_Batches_Structures <- function(theData, theTitle, theOutput
 	theData <- as.numericWithIssues(theData)
 	theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
 	                            theBatchTypeAndValuePairsToKeep=theBatchTypeAndValuePairsToKeep)
-	theTitle <- breakIntoTitle(theTitle)
+	theTitle <- paste(breakIntoTitle(theTitle), "/", "Hierarchical Clustering", sep=" ")
 	createBatchEffectsOutput_SupervisedClustering_batches(theData@mData, theData@mBatches, theDataVersion, theTestVersion,
 	                                                      theTitle, theOutputDir)
 }
@@ -95,7 +96,7 @@ SupervisedClustering_Pairs_Structures <- function(theData, theTitle, theOutputDi
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
                               theBatchTypeAndValuePairsToKeep=theBatchTypeAndValuePairsToKeep)
-  theTitle <- breakIntoTitle(theTitle)
+  theTitle <- paste(breakIntoTitle(theTitle), "/", "Hierarchical Clustering", sep=" ")
   createBatchEffectsOutput_SupervisedClustering_pairs(theData@mData, theData@mBatches,
                                                       thePairList=theListOfBatchPairs, theDataVersion, theTestVersion,
                                                       theTitle, theOutputDir)}
@@ -115,7 +116,6 @@ PCA_Regular_Structures <- function(theData, theTitle, theOutputDir, theBatchType
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
                               theBatchTypeAndValuePairsToKeep=theBatchTypeAndValuePairsToKeep)
-  theTitle <- breakIntoTitle(theTitle)
   newOutDirVector <- createBatchEffectsOutput_pca(theData@mData, theData@mBatches, theTitle,
                                theDoPlainMtoMFlag,
                                theDoCentroidsMtoMFlag,

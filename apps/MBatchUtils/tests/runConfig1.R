@@ -11,6 +11,10 @@
 
 require(MBatchUtils)
 
+#
+# Is also a test for having Title populated in the MBatchConfig.tsv file
+#
+
 if (!is.null(getTestOutputDir()))
 {
   # set the paths

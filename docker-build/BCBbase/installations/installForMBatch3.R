@@ -21,12 +21,21 @@ install.packages("jsonlite", dependencies=TRUE, repos = "http://cran.r-project.o
 message("#*#* dunn.test")
 install.packages("dunn.test", dependencies=TRUE, repos = "http://cran.r-project.org")
 
+# need timeout for larger packages
+options(timeout=9999999)
+
 # used for UMAP
 message("#*#* uwot")
 install.packages("uwot", dependencies=TRUE, repos = "http://cran.r-project.org")
+
+# required for devtools (UMAP install and elsewhere)
+message("#*#* stringi")
+install.packages("stringi", dependencies=TRUE, repos = "http://cran.r-project.org")
 message("#*#* devtools")
 install.packages("devtools", dependencies=TRUE, repos = "http://cran.r-project.org")
 library(devtools)
+
+# required for UMAP embeds
 message("#*#* jlmelville/vizier")
 devtools::install_github("jlmelville/vizier")
 

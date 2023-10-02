@@ -47,6 +47,26 @@ echo "build DscCR"
 R CMD build DscCR
 echo "check DscCR"
 R CMD check DscCR*.tar.gz
+
+echo "copy DscCR times"
+SRC_FILE=/builds/BatchEffects_clean/BatchEffectsPackage/data/testing_dynamic/DSCCR/times.tsv
+DST_DIR=/dsc_results
+TIMESTAMP=$(date +"%Y_%m_%d_%H%M%S")
+if [ -d "$DST_DIR" ];
+then
+    echo "$DST_DIR directory exists, copy output."
+    if [ -f "$SRC_FILE" ];
+    then
+        echo "$SRC_FILE file exists, copy output."
+        cp ${SRC_FILE} ${DST_DIR}/${TIMESTAMP}_times.tsv
+    else
+        echo "$SRC_FILE file does not exist, do not copy output."
+        touch ${DST_DIR}/${TIMESTAMP}_times_NODATA.tsv
+    fi
+else
+    echo "$DST_DIR directory does not exist."
+fi
+
 rm DscCR*.tar.gz
 
 echo "FINISHED 06_checkMBatchUtils"

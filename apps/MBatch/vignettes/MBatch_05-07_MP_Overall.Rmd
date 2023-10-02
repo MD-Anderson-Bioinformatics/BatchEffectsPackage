@@ -85,5 +85,5 @@ The following code is adapted from the tests/MP_Overall.R file. Data used is fro
 # Example File Output
 
 The above code creates the following output file. File is named using the following naming convention:
-corrected_matrix.tsv
+adjusted_matrix.tsv
 The TSV file with the corrected dataset is written by the MBatch package. The end of the output shows a snippet from the corrected matrix.

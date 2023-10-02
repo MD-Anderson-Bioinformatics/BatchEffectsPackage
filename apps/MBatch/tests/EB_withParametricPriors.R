@@ -51,7 +51,7 @@ if (!is.null(inputDir))
                           theDataVersion="DATA_2022-09-09-1600",
                           theTestVersion="TEST_2022-10-10-1300",
                           theWriteToFile=TRUE)
-  correctedMatrix <- readAsGenericMatrix(cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "DATA_2022-09-09-1600"), "TEST_2022-10-10-1300"), "corrected_matrix.tsv"))
+  correctedMatrix <- readAsGenericMatrix(cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "DATA_2022-09-09-1600"), "TEST_2022-10-10-1300"), "adjusted_matrix.tsv"))
   compareMatrix <- readAsGenericMatrix(theCompareFile)
   message("correctedMatrix")
   print(dim(correctedMatrix))

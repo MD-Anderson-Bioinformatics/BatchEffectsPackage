@@ -106,7 +106,8 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 				###logDebug("after openAndWriteDscAllFile")
 			}
 			logDebug("Write PCA Files 1 ", batchTypeOutputDir)
-			writePcaDataFilesForDataset(batchTypeOutputDir, theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot)
+			mytitle <- paste(theTitle, "/", "PCA+", batchTypeName, sep=" ")
+			writePcaDataFilesForDataset(batchTypeOutputDir, theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot, mytitle)
 			####
 			logDebug("write writeSharedFveWeightScoresFiles")
 			writeSharedFveWeightScoresFiles(theDoSampleLocatorFlag, batchTypeOutputDir, pca, theSampleIds=rownames(theMatrixGeneData), theGeneIds=colnames(theMatrixGeneData))
@@ -234,7 +235,8 @@ createBatchEffectsOutput_pca_dualBatch<-function(theMatrixGeneData, theDataframe
 				}
 			}
 			logDebug("Write PCA Files 2 ", datafilesOutputDir)
-			writePcaDataFilesForDataset(datafilesOutputDir, theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot)
+			mytitle <- paste(theTitle, "/", "PCA+", batchTypeA, "vs", batchTypeB, sep=" ")
+			writePcaDataFilesForDataset(datafilesOutputDir, theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot, mytitle)
 			####
 			writeSharedFveWeightScoresFiles(theDoSampleLocatorFlag, datafilesOutputDir, pca, theSampleIds=rownames(theMatrixGeneData), theGeneIds=colnames(theMatrixGeneData))
 			for(i in seq(from=1, to=(length(theListOfComponentsToPlot)-1), by=2 ))
@@ -371,6 +373,7 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 				}
 				### RData output here for one2many, write pca (scores has Principle Component and Sample ids), dscAllResults and batchTypeName and batchIdsForSamples
 				logDebug("Write PCA Files 3 ", batchTypeOutputDir)
+				mytitle <- paste(theTitle, "/", "PCA+", batchTypeName, sep=" ")
 				writePcaDataFilesForDataset(batchTypeOutputDir, theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot)
 				####
 				writeSharedFveWeightScoresFiles(theDoSampleLocatorFlag, batchTypeOutputDir, pca, theSampleIds=rownames(theMatrixGeneData), theGeneIds=colnames(theMatrixGeneData))
@@ -552,6 +555,7 @@ doSamplePcaCall<-function(theMatrixGeneData, theMinBatchSize, theBatchIds, theCo
 
 pcaErrorNormal <- function(theOutputFile, theDscResultsDir)
 {
+  logDebug("pcaErrorNormal - theOutputFile=", theOutputFile)
   myFile <- file(theOutputFile, "w+")
   on.exit(close(myFile))
   cat("Unable to Generate PCA Results\n", file=myFile, append=TRUE)
@@ -559,6 +563,8 @@ pcaErrorNormal <- function(theOutputFile, theDscResultsDir)
 
 pcaErrorDSC <- function(theOutputFile, theDscResultsDir)
 {
+  logDebug("pcaErrorDSC - theOutputFile=", theOutputFile)
+  logDebug("pcaErrorDSC - myFile=", file.path(theDscResultsDir, "error.log"))
   unlink(file.path(theDscResultsDir, "DSCOverview.tsv"))
   myFile <- file(file.path(theDscResultsDir, "error.log"), "w+")
   on.exit(close(myFile))
@@ -594,14 +600,6 @@ doInternalPca<-function(thePca, theDscAllResults, theComponentA, theComponentB, 
                            batchIdsForSamplesA, batchIdsForSamplesB, sortedListOfBatchIdsA, sortedListOfBatchIdsB, batchTypeNameA, batchTypeNameB,
                            theIsPcaTrendFunction, theDSCPermutations, theDSCThreads, theMinBatchSize, theSampleIds,
                            theSeed)
-  },
-  warning=function(e)
-  {
-    logWarn("1 Unable to generate PCA")
-    logDebug("1 write error to ", theErrorFile)
-    # unlink(dirname(theErrorFile), recursive = TRUE, force = TRUE)
-    # dir.create(dirname(theErrorFile), showWarnings=FALSE, recursive=TRUE)
-    openAndWriteIssuesLogFilePCA(theErrorFile, theDscResultsDir)
   },
   error=function(e)
   {
@@ -1332,11 +1330,11 @@ makePcaFileName_TXT<-function(theDir, theAllOrBatch, theComponentA, theComponent
 ###
 ####################################################################
 
-writePcaDataFilesForDataset<-function(theOutputDir, theDSCPermutations, thePca, theDscAllResults, theCompPairList)
+writePcaDataFilesForDataset<-function(theOutputDir, theDSCPermutations, thePca, theDscAllResults, theCompPairList, theTitle)
 {
 	logDebug("write writePcaDataFilesForDataset")
   checkDirForCreation(theOutputDir)
-	writePCAValuesTSV(theOutputDir, thePca, theCompPairList)
+	writePCAValuesTSV(theOutputDir, thePca, theCompPairList, theTitle)
 	writePCAAnnotations(theOutputDir, theDSCPermutations, thePca, theDscAllResults, NULL, NULL, NULL )
 }
 
@@ -1363,16 +1361,19 @@ convertDataframeToMatrixAddingNonHeaderRow<-function(theDataFrame, theHeader, th
 	return(foo)
 }
 
-writePCAValuesTSV <- function(theOutputDir, thePca, theCompPairList)
+writePCAValuesTSV <- function(theOutputDir, thePca, theCompPairList, theTitle)
 {
 	logDebug("writePCAValuesTSV")
 	### File for PCA Fractional Variances for components in PCA plot.
 	### PCAFractionalVariances.tsv is a tab-delimited file containing two rows.
 	### The top row is PC1	PC2	PC3 PC$ and so on. The second row is the fractional variance value.
 	### PC1	PC2	PC3	PC4
-	logDebug("writePCAValuesTSV outputFile")
-	outputFile <- cleanFilePath(theOutputDir, "PCAValues.tsv")
-	logDebug("writePCAValuesTSV components")
+  logDebug("writePCAValuesTSV title file")
+  titleFile <- cleanFilePath(theOutputDir, "PCA_Title.txt")
+  writeTitleFile(theTitle, titleFile)
+  logDebug("writePCAValuesTSV outputFile")
+  outputFile <- cleanFilePath(theOutputDir, "PCAValues.tsv")
+  logDebug("writePCAValuesTSV components")
 	components <- order(unique(theCompPairList))
 	logDebug("writePCAValuesTSV myDataFrame")
 	myDataFrame <- thePca@scores[,components]

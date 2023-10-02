@@ -55,9 +55,10 @@ CDP_Plot <- function(thePath, theDataVersion, theTestVersion, theFileName,
                      theData1, theData2,
                      theData1PairedReplicates, theData2PairedReplicates,
                      theData1UnmatchedReplicates, theData2UnmatchedReplicates,
-                     theSubTitle,
+                     theSubTitle = "",
                      theMethod="pearson", theUse="pairwise.complete.obs", theSeed=NULL,
-                     theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL)
+                     theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL,
+                     theTitle=theTitle)
 {
   newOutputDir <- addVersionsIfNeeded(thePath, theDataVersion, theTestVersion)
   myFilePath <- file.path(newOutputDir, theFileName)
@@ -72,7 +73,7 @@ CDP_Plot <- function(thePath, theDataVersion, theTestVersion, theFileName,
   logInfo("CDP_Plot theData2UnmatchedReplicates=", length(theData2UnmatchedReplicates))
   tryCatch({
     checkIfTestError()
-    theSubTitle <- breakIntoTitle(theSubTitle)
+    mytitle <- paste(theTitle, "/", "Correlation Density Plot", theSubTitle)
     # make rows the same
     theData1 <- theData1[rownames(theData1)[rownames(theData1) %in% rownames(theData2)],]
     theData2 <- theData2[rownames(theData1)[rownames(theData1) %in% rownames(theData2)],]
@@ -119,6 +120,8 @@ CDP_Plot <- function(thePath, theDataVersion, theTestVersion, theFileName,
     logInfo("CDP_Plot xRange=", xRange)
     #xRange <- c(-1, 1)
     # plot!
+    dir.create(dirname(myFilePath), showWarnings=FALSE, recursive=TRUE)
+    writeTitleFile(mytitle, myFilePath)
     pdf(NULL)
     CairoPNG(filename=myFilePath, width = 480, height = 480 )
     on.exit(dev.off())
@@ -126,10 +129,11 @@ CDP_Plot <- function(thePath, theDataVersion, theTestVersion, theFileName,
     par(oma=c(3,0,0,0))
     myAnn <- TRUE
     myAxes <- TRUE
+    pngTitle <- breakIntoTitle(mytitle)
     if ((TRUE==theHistPlot)&&(!is.null(pairedHist)))
     {
       plot(pairedHist, ann=myAnn, col=rgb(0,0,1,1/4), border=rgb(0,0,1,1/4),  axes=myAxes, xlim=xRange,
-           main=paste("Correlation Density Plots\n",theSubTitle),
+           main=pngTitle,
            xlab=convertCDPsubtitle(theMethod), ylab="Density")
       par(new=TRUE)
       myAnn <- FALSE
@@ -138,7 +142,7 @@ CDP_Plot <- function(thePath, theDataVersion, theTestVersion, theFileName,
     if ((TRUE==theHistPlot)&&(!is.null(unmatchedHist)))
     {
       plot(unmatchedHist, ann=myAnn, col=rgb(1,0,0,1/4), border=rgb(1,0,0,1/4), axes=myAxes, xlim=xRange,
-           main=paste("Correlation Density Plots\n",theSubTitle),
+           main=pngTitle,
            xlab=convertCDPsubtitle(theMethod), ylab="Density")
       par(new=TRUE)
       myAnn <- FALSE
@@ -147,7 +151,7 @@ CDP_Plot <- function(thePath, theDataVersion, theTestVersion, theFileName,
     if ((TRUE==theLinePlot)&&(!is.null(pairedDensity)))
     {
       plot(pairedDensity, type='l', ann=myAnn, col=rgb(0,0,1), axes=myAxes, xlim=xRange,
-           main=paste("Correlation Density Plots\n",theSubTitle),
+           main=pngTitle,
            xlab=convertCDPsubtitle(theMethod), ylab="Density")
       par(new=TRUE)
       myAnn <- FALSE
@@ -196,12 +200,6 @@ CDP_Plot <- function(thePath, theDataVersion, theTestVersion, theFileName,
            lty=1, col=c(rgb(0,0,1),rgb(1,0,0)), bty='n',
            xpd = TRUE)
   },
-  warning=function(e)
-  {
-    logWarn("1 Unable to calculate CDP--too many NAs, Infinities or NaNs in data")
-    unlink(myFilePath)
-    openAndWriteIssuesLogFileCDP(dirname(myFilePath))
-  },
   error=function(e)
   {
     logWarn("2 Unable to calculate CDP--too many NAs, Infinities or NaNs in data")
@@ -220,7 +218,8 @@ openAndWriteIssuesLogFileCDP<-function(theOutputDir)
 CDP_Structures <- function(thePath, theDataVersion, theTestVersion, theFileName,
                            theData1, theData2, theSubTitle, theUnmatchedCount=1000,
                            theMethod="pearson", theUse="pairwise.complete.obs", theSeed=NULL, theUseReplicatesUnpaired=FALSE,
-                           theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL)
+                           theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL,
+                           theTitle="")
 {
   # get list of natural replicates
   pairedSamples <- colnames(theData1)[colnames(theData1) %in% colnames(theData2)]
@@ -254,13 +253,15 @@ CDP_Structures <- function(thePath, theDataVersion, theTestVersion, theFileName,
   }
   CDP_Plot(thePath, theDataVersion, theTestVersion, theFileName,
            theData1, theData2, pairedSamples, pairedSamples, unpairedSamples1, unpairedSamples2,
-           theSubTitle, theMethod, theUse, theSeed, theLinePlot=theLinePlot, theHistPlot=theHistPlot, theBinWidth=theBinWidth)
+           theSubTitle, theMethod, theUse, theSeed, theLinePlot=theLinePlot,
+           theHistPlot=theHistPlot, theBinWidth=theBinWidth, theTitle=theTitle)
 }
 
 CDP_Files <- function(thePath, theDataVersion, theTestVersion, theFileName,
                       theDataFile1, theDataFile2, theSubTitle, theUnmatchedCount=1000,
                       theMethod="pearson", theUse="pairwise.complete.obs", theSeed=NULL, theUseReplicatesUnpaired=FALSE,
-                      theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL)
+                      theLinePlot=TRUE, theHistPlot=TRUE, theBinWidth=NULL,
+                      theTitle="")
 {
   logInfo(paste("CDP_Files -- theDataFile1=", theDataFile1))
   myData1 <- readAsGenericMatrix(theDataFile1)
@@ -269,5 +270,6 @@ CDP_Files <- function(thePath, theDataVersion, theTestVersion, theFileName,
   CDP_Structures(thePath, theDataVersion, theTestVersion, theFileName,
                  myData1, myData2, theSubTitle=theSubTitle, theUnmatchedCount=theUnmatchedCount,
                  theMethod=theMethod, theUse=theUse, theSeed=theSeed, theUseReplicatesUnpaired=theUseReplicatesUnpaired,
-                 theLinePlot=theLinePlot, theHistPlot=theHistPlot, theBinWidth=theBinWidth)
+                 theLinePlot=theLinePlot, theHistPlot=theHistPlot, theBinWidth=theBinWidth,
+                 theTitle=theTitle)
 }

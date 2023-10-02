@@ -88,13 +88,11 @@ buildBatchHeatMap_Structures_internal <- function(theMatrixData, theBatchData, t
                                          theShaidyMapGenArgs="-Xmx16G",
                                          theEncoding="en_US.UTF-8")
 {
+  mytitle <- paste(theTitle, "/", "NGCHM", sep=" ")
   # need to do this, since NGCHM uses title as filename, so slashed become directories.
   theTitle <- compressIntoFilename(theTitle)
   message("buildBatchHeatMap_Structures")
-  print(theTitle)
-  print(theOutputFile)
   dir.create(dirname(theOutputFile), showWarnings=FALSE, recursive=TRUE)
-  print(theSortByType)
   message("theMatrixData size ", dim(theMatrixData)[1], " ", dim(theMatrixData)[2])
   message("theBatchData size ", dim(theBatchData)[1], " ", dim(theBatchData)[2])
   message("sort batches")
@@ -154,7 +152,9 @@ buildBatchHeatMap_Structures_internal <- function(theMatrixData, theBatchData, t
   Sys.setenv(LC_CTYPE=theEncoding)
   message("chmExportToHTML 1")
   htmlNgchm <- paste(theOutputFile, ".html", sep="")
-  message(htmlNgchm)
+  titleNgchm <- paste(gsub(".nghcm", "", theOutputFile, ignore.case=TRUE, fixed=TRUE), "_Title.txt", sep="")
+  writeTitleFile(mytitle, titleNgchm)
+  message("chmExportToHTML 2")
   chmExportToHTML(chm, htmlNgchm, overwrite=TRUE, shaidyMapGen=theShaidyMapGen, shaidyMapGenJava=theShaidyMapGenJava,
                   shaidyMapGenArgs=theShaidyMapGenArgs, ngchmWidgetPath=theNgchmWidgetJs)
   message("chmExportToFile")
@@ -394,6 +394,7 @@ buildBatchHeatMapFromHC_Structures_internal <- function(theMatrixData, theBatchD
                                                  theEncoding="en_US.UTF-8")
 {
   message(mbatchUtilVersion())
+  mytitle <- theTitle
   # need to do this, since NGCHM uses title as filename, so slashes become directories.
   theTitle <- compressIntoFilename(theTitle)
   message("buildBatchHeatMapFromHC_Structures")
@@ -555,9 +556,11 @@ buildBatchHeatMapFromHC_Structures_internal <- function(theMatrixData, theBatchD
     }
     message("Set Environment LC_CTYPE=", theEncoding)
     Sys.setenv(LC_CTYPE=theEncoding)
-    message("chmExportToHTML 2")
+    message("chmExportToHTML 3")
     htmlNgchm <- paste(theOutputFile, ".html", sep="")
     message(htmlNgchm)
+    titleNgchm <- paste(gsub(".nghcm", "", theOutputFile, ignore.case=TRUE, fixed=TRUE), "_Title.txt", sep="")
+    writeTitleFile(mytitle, titleNgchm)
     chmExportToHTML(chm, htmlNgchm, overwrite=TRUE, shaidyMapGen=theShaidyMapGen, shaidyMapGenJava=theShaidyMapGenJava,
                     shaidyMapGenArgs=theShaidyMapGenArgs, ngchmWidgetPath=theNgchmWidgetJs)
     message("chmExportToFile")

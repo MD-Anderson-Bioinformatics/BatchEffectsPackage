@@ -34,6 +34,17 @@ import zipfile
 import pandas
 
 
+def timestamp_file_if_exists(the_file_path: str, the_timestamp: str) -> None:
+    """
+    if file exists, rename with the given timestamp
+    :param the_file_path: Check if this file exists
+    :param the_timestamp: if it exists, rename with _<the_timestamp> on the end
+    :return: nothing
+    """
+    if os.path.exists(the_file_path):
+        os.rename(the_file_path, f"{the_file_path}_{the_timestamp}")
+
+
 def generate_file_md5(the_file_path: str, the_block_size=2**20) -> str:
     """
     based on https://stackoverflow.com/questions/1131220/get-md5-hash-of-big-files-in-python
@@ -562,6 +573,13 @@ def convert_str_to_float(the_str: str) -> float:
 
 
 def index_string_to_dict_str_str(the_str: str) -> dict[str, str]:
+    """
+    split index string key value list into dictionary.
+    May have double-quotes around values.
+    Values are strings.
+    :param the_str: comma delimited key:value list
+    :return: dictionary of key/values
+    """
     my_dict: dict[str, str] = {}
     if '' != the_str:
         key_val_list: List[str] = the_str.strip().split(',')
@@ -576,6 +594,13 @@ def index_string_to_dict_str_str(the_str: str) -> dict[str, str]:
 
 
 def index_string_to_dict_str_int(the_str: str) -> dict[str, int]:
+    """
+    split index string key value list into dictionary.
+    May have double-quotes around values.
+    Values are integers.
+    :param the_str: comma delimited key:value list
+    :return: dictionary of key/values
+    """
     my_dict: dict[str, int] = {}
     if '' != the_str:
         key_val_list: List[str] = the_str.strip().split(',')
@@ -590,6 +615,13 @@ def index_string_to_dict_str_int(the_str: str) -> dict[str, int]:
 
 
 def index_string_to_dict_str_float(the_str: str) -> dict[str, float]:
+    """
+    split index string key value list into dictionary.
+    May have double-quotes around values.
+    Values are Strings.
+    :param the_str: comma delimited key:value list
+    :return: dictionary of key/values
+    """
     my_dict: dict[str, float] = {}
     if '' != the_str:
         key_val_list: List[str] = the_str.strip().split(',')
@@ -604,6 +636,14 @@ def index_string_to_dict_str_float(the_str: str) -> dict[str, float]:
 
 
 def remove_unsafe_characters(the_str: str) -> str:
+    """
+    Make sure string is actually a string - Excel code started returning non-strings.
+    Remove tabs, newlines, and line feeds from string.
+    :param the_str: string to clean (might not even be a string)
+    :return: cleaned string
+    """
+    # Excel processing sometimes
+    the_str = str(the_str)
     # remove tab, line feeds and returns and double quotes
     the_str = re.sub("[\t\n\r\"]", "", the_str)
     return the_str

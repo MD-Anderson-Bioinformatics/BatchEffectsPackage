@@ -113,9 +113,13 @@ After the output is an explanation of files and directories created.
   theGeneFile=cleanFilePath(inputDir, "AN002418_matrix_data.tsv")
   theBatchFile=cleanFilePath(inputDir, "AN002418_batches.tsv")
   theOutputDir=cleanFilePath(outputDir, "MWB_HierarchicalClustering_Structures")
+  print(theGeneFile)
+  print(theBatchFile)
+  print(theOutputDir)
   theRandomSeed=314
   
   # make sure the output dir exists and is empty
+  print(theOutputDir)
   unlink(theOutputDir, recursive=TRUE)
   dir.create(theOutputDir, showWarnings=FALSE, recursive=TRUE)
 

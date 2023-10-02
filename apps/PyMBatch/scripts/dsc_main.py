@@ -24,27 +24,27 @@ from mbatch.test.test_dsc import test_dsc_once_toy, test_dsc_once_file
 from mbatch.test.test_dsc import test_perm_only_file, test_perm_only_toy
 
 # data files and seed
-sta_matrix: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/StdData/TCGA/matrix_data.tsv"
-sta_batches: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/StdData/TCGA/batches.tsv"
+sta_matrix: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/StdData/TCGA/matrix_data.tsv"
+sta_batches: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/StdData/TCGA/batches.tsv"
 seed: int = 314
 # test_dsc_calc_toy
-sta_toy: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/dsc_toy.txt"
-dyn_toy: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/dsc_toy.txt"
+sta_toy: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/dsc_toy.txt"
+dyn_toy: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/dsc_toy.txt"
 # test_dsc_calc_file
-sta_file: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/dsc_file.txt"
-dyn_file: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/dsc_file.txt"
+sta_file: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/dsc_file.txt"
+dyn_file: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/dsc_file.txt"
 # test_dsc_perm_toy
-sta_perm_toy: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/perm_toy.txt"
-dyn_perm_toy: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/perm_toy.txt"
+sta_perm_toy: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/perm_toy.txt"
+dyn_perm_toy: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/perm_toy.txt"
 # test_dsc_perm_file
-sta_perm_file: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/perm_file.txt"
-dyn_perm_file: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/perm_file.txt"
+sta_perm_file: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/perm_file.txt"
+dyn_perm_file: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/perm_file.txt"
 # test_dsc_count_toy
-sta_count_toy: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/count_toy.txt"
-dyn_count_toy: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/count_toy.txt"
+sta_count_toy: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/count_toy.txt"
+dyn_count_toy: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/count_toy.txt"
 # test_dsc_count_file
-sta_count_file: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/count_file.txt"
-dyn_count_file: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/count_file.txt"
+sta_count_file: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/count_file.txt"
+dyn_count_file: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/count_file.txt"
 
 
 if __name__ == '__main__':

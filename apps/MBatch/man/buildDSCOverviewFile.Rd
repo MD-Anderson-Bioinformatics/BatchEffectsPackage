@@ -21,16 +21,14 @@ So, for the GBM output listed above, you end up with these values in the output,
 After running mbatchAssess, there are *DSC.RData files created -- these can either be use to create a DSC Overview file with buildDSCOverviewFile, or they can be deleted using clearDSCOverviewFiles. This is handled outside of these functions, so all data sets can be processed by multiple calls to mbatchAssess in a parallel or distributed environment, and then the DSC Overview created from these files at the end of the processing.
 }
 \usage{
-buildDSCOverviewFile(theStartDir, theAllOutDir, theBaseDir, theOutputFile, theBaseOutFlag)
+buildDSCOverviewFile(theSearchDir, theOutputDir, theBaseDir, theOutputFile)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{theStartDir}{String indicating top of directory structure to search for *DSC.RData objects.}
-  \item{theAllOutDir}{String indicating existing directoryto which to write overall overview file.}
+  \item{theSearchDir}{String indicating top of directory structure to search for *DSC.RData objects.}
+  \item{theOutputDir}{String indicating existing directory to which to write overall overview file.}
   \item{theBaseDir}{String indicating top of directory data structure.}
   \item{theOutputFile}{String containing only the filename of output text file.}
-  \item{theBaseOutFlag}{Boolean. If TRUE, use theAllOutDir for theOutPutFile, otherwise
-  place in DSC subdirectory where ALL__CompListDSC.RData was found.}
 }
 \author{
 Tod Casasent \email{tdcasasent@mdanderson.org}

@@ -22,7 +22,7 @@ MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/rese
 
 from typing import List
 import os
-from mbatch.test.common import get_sorted_dirs, next_sub_dir_starts_with, get_sorted_files
+from mbatch.test.common import get_sorted_dirs, next_sub_dir_starts_with, get_sorted_files, read_file_to_string
 
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
@@ -31,6 +31,13 @@ class MBatchEntry:
     Store information on directory entries - used for making menu entries
     """
     # do not set method variables, as they should be initialized in the init function
+    # #####
+    # job values
+    job_id: str
+    job_type: str
+    notice: str
+    # #####
+    # hierarchy level values
     # error log location (empty string if no error)
     error: str
     # Label and dropdown entries for menus
@@ -69,11 +76,16 @@ class MBatchEntry:
     dropdown_entries: List['MBatchEntry']
 
     def __init__(self: 'MBatchEntry', the_entry_label: str,
-                 the_dropdown_label: str, the_diagram_type: str) -> None:
+                 the_dropdown_label: str, the_diagram_type: str, the_info_dir: str) -> None:
         """
         init and empty/nan values.
         Members described at class level
         """
+        # job values
+        self.job_id: str = ""
+        self.job_type: str = ""
+        self.notice: str = ""
+        # hierarchy level values
         self.error = ""
         self.diagram_image = ""  # failover or static image
         self.legend_image = ""  # failover or static image
@@ -95,11 +107,57 @@ class MBatchEntry:
         self.dropdown_label = the_dropdown_label
         self.diagram_type = the_diagram_type
         self.dropdown_entries = []
+        # for the title
+        self.title = ""
+        # call update if needed
+        if self.entry_label.startswith("TEST_"):
+            self.update_index_from_info(the_info_dir)
+
+    def update_index_from_info(self: 'MBatchEntry', the_info_dir: str) -> None:
+        """
+        load and set values from the_info_dir/self.entry_label directory
+        :param the_info_dir: full path to directory containing TEST_<version> labels
+        :return: nothing
+        """
+        # get job id from job_id.txt
+        # job id from BEI or other processing step
+        # empty string if file string empty or file does not exist
+        job_id_file: str = os.path.join(the_info_dir, self.entry_label, "job_id.txt")
+        print(f"update_index_from_info job_id_file={job_id_file}", flush=True)
+        job_id: str = read_file_to_string(job_id_file)
+        # get version type (such as Original-Analyzed) from version_type.txt
+        # type of run being done, may also be BEI-RUN from a BEI run
+        # empty string if file string empty or file does not exist
+        version_type_file: str = os.path.join(the_info_dir, self.entry_label, "version_type.txt")
+        print(f"update_index_from_info version_type_file={version_type_file}", flush=True)
+        job_type: str = read_file_to_string(version_type_file)
+        # correction notice
+        notice: str = ""
+        if job_type.startswith("Adjusted") | self.entry_label.endswith("adjusted") :
+            notice = "This dataset has been corrected using an automated system without human input. The correction does not imply the presence or absence of batch effects in the original data. The user is solely responsible for assessing batch effects (e.g. by using our assessment tools) and deciding whether or not to use the corrected data, which may or may not have mitigated some useful biological information along with any technical artifacts."
+        #
+        self.job_id = job_id
+        self.job_type = job_type
+        self.notice = notice
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
+# ##################################################################
+# ##################################################################
 
-# ##################################################################
-# ##################################################################
+
+def convert_to_title_file(the_png_filename: str) -> str:
+    """
+    convert from diagram png file to title txt file.
+    Replace _Diagram with _Title
+    Replace .PNG (case-insensitive) with .txt by trimming end of string.
+    :param the_png_filename: Filname of format xxxxxx_Diagramxxxxx.PNG
+    :return: title filename
+    """
+    the_png_filename = the_png_filename.replace("_Diagram", "_Title")
+    # remove last three characters
+    the_png_filename = the_png_filename[:-3]
+    the_png_filename = the_png_filename + ".txt"
+    return the_png_filename
 
 
 def get_dir_path_from(the_dir: str, the_from: str) -> str:
@@ -120,17 +178,18 @@ def get_dir_path_from(the_dir: str, the_from: str) -> str:
 # ##################################################################
 
 
-def make_entry_boxplot_diagram(the_dir: str, the_parent: MBatchEntry) -> None:
+def make_entry_boxplot_diagram(the_dir: str, the_parent: MBatchEntry, the_info_dir: dir) -> None:
     """
     Make the diagram entry.
     :param the_dir: current directory to be investigated
     :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: None - populate the_parent and new objects (if any)
     """
     # build Batch Type diagram menu entries
     if os.path.exists(os.path.join(the_dir, "error.log")):
         # error generated
-        next_entry: MBatchEntry = MBatchEntry("Diagram", "", "boxplot")
+        next_entry: MBatchEntry = MBatchEntry("Diagram", "", "boxplot", the_info_dir)
         dir_path: str = get_dir_path_from(the_dir, "analysis")
         next_entry.error = dir_path + "error.log"
         the_parent.dropdown_entries.append(next_entry)
@@ -163,21 +222,24 @@ def make_entry_boxplot_diagram(the_dir: str, the_parent: MBatchEntry) -> None:
         dir_path: str = get_dir_path_from(the_dir, "analysis")
         batch_id: str
         for batch_id in batch_ids:
-            next_entry: MBatchEntry = MBatchEntry(batch_id, "", "boxplot")
+            next_entry: MBatchEntry = MBatchEntry(batch_id, "", "boxplot", the_info_dir)
             next_entry.batch_data = dir_path + "BatchData.tsv"
             next_entry.box_annotations = dir_path + "BoxPlot_" + diagram_type + "_Annotations-" + batch_id + ".tsv"
             next_entry.box_data = dir_path + "BoxPlot_" + diagram_type + "_BoxData-" + batch_id + ".tsv"
             next_entry.box_histogram = dir_path + "BoxPlot_" + diagram_type + "_Histogram-" + batch_id + ".tsv"
             next_entry.diagram_image = dir_path + "BoxPlot_" + diagram_type + "_Diagram-" + batch_id + ".png"
+            # read title file for boxplot and set title
+            next_entry.title = read_file_to_string(os.path.join(the_dir, "BoxPlot_" + diagram_type + "_Title-" + batch_id + ".txt"))
             the_parent.dropdown_entries.append(next_entry)
 
 
-def make_entry_boxplot_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
+def make_entry_boxplot_subdirs(the_dir: str, the_parent: MBatchEntry, the_info_dir: str) -> None:
     """
     Recursive function that drills through directory structure.
     Handles optional DATA and TEST version directories.
     :param the_dir: current directory to be investigated
     :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: None - populate the_parent and new objects
     """
     # handles data and test versions, and then the results
@@ -187,15 +249,15 @@ def make_entry_boxplot_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
     # determine labels for next level of directory/menu
     if next_sub_dir_starts_with(the_dir, "DATA"):
         # add optional data version
-        next_entry = MBatchEntry(dir_name, "Data Version", "")
+        next_entry = MBatchEntry(dir_name, "Data Version", "", the_info_dir)
         do_dirs = True
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         # add optional test version
-        next_entry = MBatchEntry(dir_name, "Test Version", "")
+        next_entry = MBatchEntry(dir_name, "Test Version", "", the_info_dir)
         do_dirs = True
     else:
         # add diagram entry
-        next_entry = MBatchEntry(dir_name, "Batch Type", "")
+        next_entry = MBatchEntry(dir_name, "Batch Type", "", the_info_dir)
         do_dirs = False
     # add other subdirectories or diagram info
     if do_dirs:
@@ -203,39 +265,41 @@ def make_entry_boxplot_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
         subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
         dir_entry: os.DirEntry
         for dir_entry in subdir_list:
-            make_entry_boxplot_subdirs(dir_entry.path, next_entry)
+            make_entry_boxplot_subdirs(dir_entry.path, next_entry, the_info_dir)
     else:
         # add diagram data
-        make_entry_boxplot_diagram(the_dir, next_entry)
+        make_entry_boxplot_diagram(the_dir, next_entry, the_info_dir)
     the_parent.dropdown_entries.append(next_entry)
 
 
-def make_entry_boxplot(the_dir: str) -> MBatchEntry:
+def make_entry_boxplot(the_dir: str, the_info_dir: str) -> MBatchEntry:
     """
     Builds MBatchEntry for algorithm directory structure.
     Must match MBatch output.
     :param the_dir: Algorithm directory to be populated
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: populated MBatchEntry object
     """
-    my_obj: MBatchEntry = MBatchEntry("Boxplot", "Diagram Type", "")
+    my_obj: MBatchEntry = MBatchEntry("Boxplot", "Diagram Type", "", the_info_dir)
     # add Diagram Type entries
     subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
     dir_entry: os.DirEntry
     for dir_entry in subdir_list:
         # second argument, dropdown label, will be Batch Type or Data/Test Version
-        make_entry_boxplot_subdirs(dir_entry.path, my_obj)
+        make_entry_boxplot_subdirs(dir_entry.path, my_obj, the_info_dir)
     return my_obj
 
 # ##################################################################
 # ##################################################################
 
 
-def make_entry_cdp_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
+def make_entry_cdp_subdirs(the_dir: str, the_parent: MBatchEntry, the_info_dir: str) -> None:
     """
     Recursive function that drills through directory structure.
     Handles optional DATA and TEST version directories.
     :param the_dir: current directory to be investigated
     :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: None - populate the_parent and new objects
     """
     # handles data and test versions, and then the results
@@ -245,15 +309,15 @@ def make_entry_cdp_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
     # determine labels for next level of directory/menu
     if next_sub_dir_starts_with(the_dir, "DATA"):
         # add optional data version
-        next_entry = MBatchEntry(dir_name, "Data Version", "")
+        next_entry = MBatchEntry(dir_name, "Data Version", "", the_info_dir)
         do_dirs = True
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         # add optional test version
-        next_entry = MBatchEntry(dir_name, "Test Version", "")
+        next_entry = MBatchEntry(dir_name, "Test Version", "", the_info_dir)
         do_dirs = True
     else:
         # add diagram entry
-        next_entry = MBatchEntry(dir_name, "", "cdp")
+        next_entry = MBatchEntry(dir_name, "", "cdp", the_info_dir)
         do_dirs = False
     # add other subdirectories or diagram info
     if do_dirs:
@@ -261,7 +325,7 @@ def make_entry_cdp_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
         subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
         dir_entry: os.DirEntry
         for dir_entry in subdir_list:
-            make_entry_cdp_subdirs(dir_entry.path, next_entry)
+            make_entry_cdp_subdirs(dir_entry.path, next_entry, the_info_dir)
     elif os.path.exists(os.path.join(the_dir, "error.log")):
         dir_path: str = get_dir_path_from(the_dir, "analysis")
         next_entry.error = dir_path + "error.log"
@@ -270,15 +334,17 @@ def make_entry_cdp_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
         # analysis is the top level directory (within ZIP-RESULTS)
         # that is added to the archive zip
         dir_path: str = get_dir_path_from(the_dir, "analysis")
+        next_entry.title = read_file_to_string(os.path.join(the_dir, "CDP_Plot_Data1_Title.txt"))
         next_entry.diagram_image = dir_path + "CDP_Plot_Data1_Diagram.PNG"
     the_parent.dropdown_entries.append(next_entry)
 
 
-def make_entry_cdp(the_dir: str) -> MBatchEntry:
+def make_entry_cdp(the_dir: str, the_info_dir: str) -> MBatchEntry:
     """
     Builds MBatchEntry for algorithm directory structure.
     Must match MBatch output.
     :param the_dir: Algorithm directory to be populated
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: populated MBatchEntry object
     """
     # this level the_entry_label is "Correlation Density Plot"
@@ -293,25 +359,26 @@ def make_entry_cdp(the_dir: str) -> MBatchEntry:
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         dropdown_label = "Test Version"
         diagram_type = ""
-    my_obj: MBatchEntry = MBatchEntry("Correlation Density Plot", dropdown_label, diagram_type)
+    my_obj: MBatchEntry = MBatchEntry("Correlation Density Plot", dropdown_label, diagram_type, the_info_dir)
     # add Diagram Type entries
     subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
     dir_entry: os.DirEntry
     for dir_entry in subdir_list:
         # second argument, dropdown label, will be Batch Type or Data/Test Version
-        make_entry_cdp_subdirs(dir_entry.path, my_obj)
+        make_entry_cdp_subdirs(dir_entry.path, my_obj, the_info_dir)
     return my_obj
 
 # ##################################################################
 # ##################################################################
 
 
-def make_entry_discrete_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
+def make_entry_discrete_subdirs(the_dir: str, the_parent: MBatchEntry, the_info_dir: str) -> None:
     """
     Recursive function that drills through directory structure.
     Handles optional DATA and TEST version directories.
     :param the_dir: current directory to be investigated
     :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: None - populate the_parent and new objects
     """
     # handles data and test versions, and then the results
@@ -321,15 +388,15 @@ def make_entry_discrete_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
     # determine labels for next level of directory/menu
     if next_sub_dir_starts_with(the_dir, "DATA"):
         # add optional data version
-        next_entry = MBatchEntry(dir_name, "Data Version", "")
+        next_entry = MBatchEntry(dir_name, "Data Version", "", the_info_dir)
         do_dirs = True
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         # add optional test version
-        next_entry = MBatchEntry(dir_name, "Test Version", "")
+        next_entry = MBatchEntry(dir_name, "Test Version", "", the_info_dir)
         do_dirs = True
     else:
         # add diagram entry
-        next_entry = MBatchEntry(dir_name, "", "discrete")
+        next_entry = MBatchEntry(dir_name, "", "discrete", the_info_dir)
         do_dirs = False
     # add other subdirectories or diagram info
     if do_dirs:
@@ -337,44 +404,47 @@ def make_entry_discrete_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
         subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
         dir_entry: os.DirEntry
         for dir_entry in subdir_list:
-            make_entry_discrete_subdirs(dir_entry.path, next_entry)
+            make_entry_discrete_subdirs(dir_entry.path, next_entry, the_info_dir)
     elif os.path.exists(os.path.join(the_dir, "error.log")):
         dir_path: str = get_dir_path_from(the_dir, "analysis")
         next_entry.error = dir_path + "error.log"
     else:
         # add diagram data
         dir_path: str = get_dir_path_from(the_dir, "analysis")
+        next_entry.title = read_file_to_string(os.path.join(the_dir, "KW_Dunns_Title.txt"))
         next_entry.diagram_image = dir_path + "KW_Dunns_Diagram.PNG"
         next_entry.kwd_kwddata = dir_path + "KW_Dunns_Diagram.tsv"
     the_parent.dropdown_entries.append(next_entry)
 
 
-def make_entry_discrete(the_dir: str) -> MBatchEntry:
+def make_entry_discrete(the_dir: str, the_info_dir: str) -> MBatchEntry:
     """
     Builds MBatchEntry for algorithm directory structure.
     Must match MBatch output.
     :param the_dir: Algorithm directory to be populated
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: populated MBatchEntry object
     """
-    my_obj: MBatchEntry = MBatchEntry("Kruskal-Wallis/Dunn's Test", "Batch Type", "")
+    my_obj: MBatchEntry = MBatchEntry("Kruskal-Wallis/Dunn's Test", "Batch Type", "", the_info_dir)
     # add Diagram Type entries
     subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
     dir_entry: os.DirEntry
     for dir_entry in subdir_list:
         # second argument, dropdown label, will be Batch Type or Data/Test Version
-        make_entry_discrete_subdirs(dir_entry.path, my_obj)
+        make_entry_discrete_subdirs(dir_entry.path, my_obj, the_info_dir)
     return my_obj
 
 # ##################################################################
 # ##################################################################
 
 
-def make_entry_hc_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
+def make_entry_hc_subdirs(the_dir: str, the_parent: MBatchEntry, the_info_dir: str) -> None:
     """
     Recursive function that drills through directory structure.
     Handles optional DATA and TEST version directories.
     :param the_dir: current directory to be investigated
     :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: None - populate the_parent and new objects
     """
     # handles data and test versions, and then the results
@@ -384,15 +454,15 @@ def make_entry_hc_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
     # determine labels for next level of directory/menu
     if next_sub_dir_starts_with(the_dir, "DATA"):
         # add optional data version
-        next_entry = MBatchEntry(dir_name, "Data Version", "")
+        next_entry = MBatchEntry(dir_name, "Data Version", "", the_info_dir)
         do_dirs = True
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         # add optional test version
-        next_entry = MBatchEntry(dir_name, "Test Version", "")
+        next_entry = MBatchEntry(dir_name, "Test Version", "", the_info_dir)
         do_dirs = True
     else:
         # add diagram entry
-        next_entry = MBatchEntry(dir_name, "", "hc")
+        next_entry = MBatchEntry(dir_name, "", "hc", the_info_dir)
         do_dirs = False
     # add other subdirectories or diagram info
     if do_dirs:
@@ -400,7 +470,7 @@ def make_entry_hc_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
         subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
         dir_entry: os.DirEntry
         for dir_entry in subdir_list:
-            make_entry_hc_subdirs(dir_entry.path, next_entry)
+            make_entry_hc_subdirs(dir_entry.path, next_entry, the_info_dir)
     elif os.path.exists(os.path.join(the_dir, "error.log")):
         dir_path: str = get_dir_path_from(the_dir, "analysis")
         next_entry.error = dir_path + "error.log"
@@ -412,16 +482,18 @@ def make_entry_hc_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
         next_entry.batch_data = dir_path + "BatchData.tsv"
         next_entry.legend_image = dir_path + "HierarchicalClustering_Diagram.png"
         next_entry.diagram_image = dir_path + "HierarchicalClustering_Legend-ALL.png"
+        next_entry.title = read_file_to_string(os.path.join(the_dir, "HierarchicalClustering_Title.txt"))
         next_entry.hc_data = dir_path + "HCData.tsv"
         next_entry.hc_order = dir_path + "HCOrder.tsv"
     the_parent.dropdown_entries.append(next_entry)
 
 
-def make_entry_hc(the_dir: str) -> MBatchEntry:
+def make_entry_hc(the_dir: str, the_info_dir: str) -> MBatchEntry:
     """
     Builds MBatchEntry for algorithm directory structure.
     Must match MBatch output.
     :param the_dir: Algorithm directory to be populated
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: populated MBatchEntry object
     """
     # this level the_dropdown_label depends
@@ -435,25 +507,26 @@ def make_entry_hc(the_dir: str) -> MBatchEntry:
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         dropdown_label = "Test Version"
         diagram_type = ""
-    my_obj: MBatchEntry = MBatchEntry("Hierarchical Clustering", dropdown_label, diagram_type)
+    my_obj: MBatchEntry = MBatchEntry("Hierarchical Clustering", dropdown_label, diagram_type, the_info_dir)
     # add Diagram Type entries
     subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
     dir_entry: os.DirEntry
     for dir_entry in subdir_list:
         # second argument
-        make_entry_hc_subdirs(dir_entry.path, my_obj)
+        make_entry_hc_subdirs(dir_entry.path, my_obj, the_info_dir)
     return my_obj
 
 # ##################################################################
 # ##################################################################
 
 
-def make_entry_ngchm_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
+def make_entry_ngchm_subdirs(the_dir: str, the_parent: MBatchEntry, the_info_dir: str) -> None:
     """
     Recursive function that drills through directory structure.
     Handles optional DATA and TEST version directories.
     :param the_dir: current directory to be investigated
     :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: None - populate the_parent and new objects
     """
     # handles data and test versions, and then the results
@@ -463,15 +536,15 @@ def make_entry_ngchm_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
     # determine labels for next level of directory/menu
     if next_sub_dir_starts_with(the_dir, "DATA"):
         # add optional data version
-        next_entry = MBatchEntry(dir_name, "Data Version", "")
+        next_entry = MBatchEntry(dir_name, "Data Version", "", the_info_dir)
         do_dirs = True
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         # add optional test version
-        next_entry = MBatchEntry(dir_name, "Test Version", "")
+        next_entry = MBatchEntry(dir_name, "Test Version", "", the_info_dir)
         do_dirs = True
     else:
         # add diagram entry
-        next_entry = MBatchEntry(dir_name, "", "ngchm")
+        next_entry = MBatchEntry(dir_name, "", "ngchm", the_info_dir)
         do_dirs = False
     # add other subdirectories or diagram info
     if do_dirs:
@@ -479,8 +552,8 @@ def make_entry_ngchm_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
         subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
         dir_entry: os.DirEntry
         for dir_entry in subdir_list:
-            make_entry_ngchm_subdirs(dir_entry.path, next_entry)
-    elif os.path.exists(os.path.join(the_dir, "error.log")):
+            make_entry_ngchm_subdirs(dir_entry.path, next_entry, the_info_dir)
+    elif os.path.exists(os.path.join(the_dir, "error.log")) and not os.path.exists(os.path.join(the_dir, "All_ngchm.ngchm.html")):
         dir_path: str = get_dir_path_from(the_dir, "analysis")
         next_entry.error = dir_path + "error.log"
     else:
@@ -488,16 +561,18 @@ def make_entry_ngchm_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
         # analysis is the top level directory (within ZIP-RESULTS)
         # that is added to the archive zip
         dir_path: str = get_dir_path_from(the_dir, "analysis")
+        next_entry.title = read_file_to_string(os.path.join(the_dir, "All_ngchm.ngchm_Title.txt"))
         # use .html file -- visualizer looks for .ngchm first
         next_entry.ngchm = dir_path + "All_ngchm.ngchm.html"
     the_parent.dropdown_entries.append(next_entry)
 
 
-def make_entry_ngchm(the_dir: str) -> MBatchEntry:
+def make_entry_ngchm(the_dir: str, the_info_dir: str) -> MBatchEntry:
     """
     Builds MBatchEntry for algorithm directory structure.
     Must match MBatch output.
     :param the_dir: Algorithm directory to be populated
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: populated MBatchEntry object
     """
     # eventual the_diagram_type is ngchm
@@ -510,12 +585,12 @@ def make_entry_ngchm(the_dir: str) -> MBatchEntry:
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         dropdown_label = "Test Version"
         diagram_type = ""
-    my_obj: MBatchEntry = MBatchEntry("NGCHM", dropdown_label, diagram_type)
+    my_obj: MBatchEntry = MBatchEntry("NGCHM", dropdown_label, diagram_type, the_info_dir)
     # add Diagram Type entries
     subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
     dir_entry: os.DirEntry
     for dir_entry in subdir_list:
-        make_entry_ngchm_subdirs(dir_entry.path, my_obj)
+        make_entry_ngchm_subdirs(dir_entry.path, my_obj, the_info_dir)
     return my_obj
 
 # ##################################################################
@@ -538,18 +613,20 @@ def make_entry_pca_diagram(the_dir: str, the_parent: MBatchEntry) -> None:
         # build results based on available files
         dir_path: str = get_dir_path_from(the_dir, "analysis")
         the_parent.batch_data = dir_path + "BatchData.tsv"
+        the_parent.title = read_file_to_string(os.path.join(the_dir, "PCA_Title.txt"))
         the_parent.diagram_image = dir_path + "PCA-Plus/ALL_Comp1_Comp2_Diagram.png"
         the_parent.legend_image = dir_path + "PCA-Plus/ALL_Comp1_Comp2_Legend-ALL.png"
         the_parent.pca_annotations = dir_path + "PCAAnnotations.tsv"
         the_parent.pca_values = dir_path + "PCAValues.tsv"
 
 
-def make_entry_pca_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
+def make_entry_pca_subdirs(the_dir: str, the_parent: MBatchEntry, the_info_dir: str) -> None:
     """
     Recursive function that drills through directory structure.
     Handles optional DATA and TEST version directories.
     :param the_dir: current directory to be investigated
     :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: None - populate the_parent and new objects
     """
     # handles data and test versions, and then the results
@@ -559,20 +636,20 @@ def make_entry_pca_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
     # determine labels for next level of directory/menu
     if (next_sub_dir_starts_with(the_dir, "ManyToMany")) | (next_sub_dir_starts_with(the_dir, "OneToMany")):
         # add optional data version
-        next_entry = MBatchEntry(dir_name, "Diagram Type", "")
+        next_entry = MBatchEntry(dir_name, "Diagram Type", "", the_info_dir)
         do_dirs = True
     elif next_sub_dir_starts_with(the_dir, "DATA"):
         # add optional data version
-        next_entry = MBatchEntry(dir_name, "Data Version", "")
+        next_entry = MBatchEntry(dir_name, "Data Version", "", the_info_dir)
         do_dirs = True
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         # add optional test version
-        next_entry = MBatchEntry(dir_name, "Test Version", "")
+        next_entry = MBatchEntry(dir_name, "Test Version", "", the_info_dir)
         do_dirs = True
     else:
         # next_sub_dir_starts_with(the_dir, "PCA-Plus"):
         # add diagram entry
-        next_entry = MBatchEntry(dir_name, "", "pca")
+        next_entry = MBatchEntry(dir_name, "", "pca", the_info_dir)
         do_dirs = False
     # add other subdirectories or diagram info
     if do_dirs:
@@ -580,28 +657,29 @@ def make_entry_pca_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
         subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
         dir_entry: os.DirEntry
         for dir_entry in subdir_list:
-            make_entry_pca_subdirs(dir_entry.path, next_entry)
+            make_entry_pca_subdirs(dir_entry.path, next_entry, the_info_dir)
     else:
         # add diagram data
         make_entry_pca_diagram(the_dir, next_entry)
     the_parent.dropdown_entries.append(next_entry)
 
 
-def make_entry_pca(the_dir: str) -> MBatchEntry:
+def make_entry_pca(the_dir: str, the_info_dir: str) -> MBatchEntry:
     """
     Builds MBatchEntry for algorithm directory structure.
     Must match MBatch output.
     :param the_dir: Algorithm directory to be populated
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: populated MBatchEntry object
     """
-    my_obj: MBatchEntry = MBatchEntry("PCA+", "Batch Type", "")
+    my_obj: MBatchEntry = MBatchEntry("PCA+", "Batch Type", "", the_info_dir)
     # add Diagram Type entries
     subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
     dir_entry: os.DirEntry
     for dir_entry in subdir_list:
         # second argument, dropdown label, will be Diagram Type
         # will either have diagram or Data/Test Version
-        make_entry_pca_subdirs(dir_entry.path, my_obj)
+        make_entry_pca_subdirs(dir_entry.path, my_obj, the_info_dir)
     return my_obj
 
 # ##################################################################
@@ -611,12 +689,13 @@ def make_entry_pca(the_dir: str) -> MBatchEntry:
 # ##################################################################
 
 
-def make_entry_dsc_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
+def make_entry_dsc_subdirs(the_dir: str, the_parent: MBatchEntry, the_info_dir: str) -> None:
     """
     Recursive function that drills through directory structure.
     Handles optional DATA and TEST version directories.
     :param the_dir: current directory to be investigated
     :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: None - populate the_parent and new objects
     """
     # handles data and test versions, and then the results
@@ -626,15 +705,15 @@ def make_entry_dsc_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
     # determine labels for next level of directory/menu
     if next_sub_dir_starts_with(the_dir, "DATA"):
         # add optional data version
-        next_entry = MBatchEntry(dir_name, "Data Version", "")
+        next_entry = MBatchEntry(dir_name, "Data Version", "", the_info_dir)
         do_dirs = True
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         # add optional test version
-        next_entry = MBatchEntry(dir_name, "Test Version", "")
+        next_entry = MBatchEntry(dir_name, "Test Version", "", the_info_dir)
         do_dirs = True
     else:
         # add diagram entry
-        next_entry = MBatchEntry(dir_name, "", "dsc")
+        next_entry = MBatchEntry(dir_name, "", "dsc", the_info_dir)
         do_dirs = False
     # add other subdirectories or diagram info
     if do_dirs:
@@ -642,7 +721,7 @@ def make_entry_dsc_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
         subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
         dir_entry: os.DirEntry
         for dir_entry in subdir_list:
-            make_entry_dsc_subdirs(dir_entry.path, next_entry)
+            make_entry_dsc_subdirs(dir_entry.path, next_entry, the_info_dir)
     elif os.path.exists(os.path.join(the_dir, "error.log")):
         dir_path: str = get_dir_path_from(the_dir, "analysis")
         next_entry.error = dir_path + "error.log"
@@ -655,11 +734,12 @@ def make_entry_dsc_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
     the_parent.dropdown_entries.append(next_entry)
 
 
-def make_entry_dsc(the_dir: str) -> MBatchEntry:
+def make_entry_dsc(the_dir: str, the_info_dir: str) -> MBatchEntry:
     """
     Builds MBatchEntry for algorithm directory structure.
     Must match MBatch output.
     :param the_dir: Algorithm directory to be populated
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: populated MBatchEntry object
     """
     # this level the_entry_label is "Dispersion Seperability Criteria"
@@ -674,26 +754,27 @@ def make_entry_dsc(the_dir: str) -> MBatchEntry:
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         dropdown_label = "Test Version"
         diagram_type = ""
-    my_obj: MBatchEntry = MBatchEntry("Dispersion Separability Criteria", dropdown_label, diagram_type)
+    my_obj: MBatchEntry = MBatchEntry("Dispersion Separability Criteria", dropdown_label, diagram_type, the_info_dir)
     # add Diagram Type entries
     subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
     dir_entry: os.DirEntry
     for dir_entry in subdir_list:
         # second argument, dropdown label, will be Batch Type or Data/Test Version
-        make_entry_dsc_subdirs(dir_entry.path, my_obj)
+        make_entry_dsc_subdirs(dir_entry.path, my_obj, the_info_dir)
     return my_obj
 
 # ##################################################################
 # ##################################################################
 
 
-def make_entry_sc_subdirs(the_batch_type: str, the_dir: str, the_parent: MBatchEntry) -> None:
+def make_entry_sc_subdirs(the_batch_type: str, the_dir: str, the_parent: MBatchEntry, the_info_dir: str) -> None:
     """
     Recursive function that drills through directory structure.
     Handles optional DATA and TEST version directories.
     :param the_batch_type: Batch Type Name for NGCHM file name
     :param the_dir: current directory to be investigated
     :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: None - populate the_parent and new objects
     """
     # handles data and test versions, and then the results
@@ -704,15 +785,15 @@ def make_entry_sc_subdirs(the_batch_type: str, the_dir: str, the_parent: MBatchE
     # determine labels for next level of directory/menu
     if next_sub_dir_starts_with(the_dir, "DATA"):
         # add optional data version
-        next_entry = MBatchEntry(dir_name, "Data Version", "")
+        next_entry = MBatchEntry(dir_name, "Data Version", "", the_info_dir)
         do_dirs = True
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         # add optional test version
-        next_entry = MBatchEntry(dir_name, "Test Version", "")
+        next_entry = MBatchEntry(dir_name, "Test Version", "", the_info_dir)
         do_dirs = True
     else:
         # add diagram entry
-        next_entry = MBatchEntry(dir_name, "", "ngchm")
+        next_entry = MBatchEntry(dir_name, "", "ngchm", the_info_dir)
         do_dirs = False
     # add other subdirectories or diagram info
     if do_dirs:
@@ -721,8 +802,8 @@ def make_entry_sc_subdirs(the_batch_type: str, the_dir: str, the_parent: MBatchE
         dir_entry: os.DirEntry
         for dir_entry in subdir_list:
             print(f"make_entry_sc_subdirs dir_entry.path={dir_entry.path}", flush=True)
-            make_entry_sc_subdirs(the_batch_type, dir_entry.path, next_entry)
-    elif os.path.exists(os.path.join(the_dir, "error.log")):
+            make_entry_sc_subdirs(the_batch_type, dir_entry.path, next_entry, the_info_dir)
+    elif os.path.exists(os.path.join(the_dir, "error.log")) and not os.path.exists(os.path.join(the_dir, f"{the_batch_type}_ngchm.ngchm.html")):
         dir_path: str = get_dir_path_from(the_dir, "analysis")
         next_entry.error = dir_path + "error.log"
     else:
@@ -731,40 +812,43 @@ def make_entry_sc_subdirs(the_batch_type: str, the_dir: str, the_parent: MBatchE
         # that is added to the archive zip
         dir_path: str = get_dir_path_from(the_dir, "analysis")
         # use .html file -- visualizer looks for .ngchm first
+        next_entry.title = read_file_to_string(os.path.join(the_dir, f"{the_batch_type}_ngchm.ngchm_Title.txt"))
         next_entry.ngchm = dir_path + f"{the_batch_type}_ngchm.ngchm.html"
     the_parent.dropdown_entries.append(next_entry)
 
 
-def make_entry_sc(the_dir: str) -> MBatchEntry:
+def make_entry_sc(the_dir: str, the_info_dir: str) -> MBatchEntry:
     """
     Builds MBatchEntry for algorithm directory structure.
     Must match MBatch output.
     :param the_dir: Algorithm directory to be populated
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: populated MBatchEntry object
     """
     # eventual the_diagram_type is ngchm
     ####
     print(f"make_entry_sc the_dir={the_dir}", flush=True)
-    my_obj: MBatchEntry = MBatchEntry("Supervised Clustering", "Batch Type", "")
+    my_obj: MBatchEntry = MBatchEntry("Supervised Clustering", "Batch Type", "", the_info_dir)
     # add Diagram Type entries
     subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
     dir_entry: os.DirEntry
     for dir_entry in subdir_list:
         print(f"make_entry_sc dir_entry.path={dir_entry.path}", flush=True)
         batch_type: str = os.path.basename(dir_entry.path)
-        make_entry_sc_subdirs(batch_type, dir_entry.path, my_obj)
+        make_entry_sc_subdirs(batch_type, dir_entry.path, my_obj, the_info_dir)
     return my_obj
 
 # ##################################################################
 # ##################################################################
 
 
-def make_entry_umap_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
+def make_entry_umap_subdirs(the_dir: str, the_parent: MBatchEntry, the_info_dir: str) -> None:
     """
     Recursive function that drills through directory structure.
     Handles optional DATA and TEST version directories.
     :param the_dir: current directory to be investigated
     :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: None - populate the_parent and new objects
     """
     # handles data and test versions, and then the results
@@ -774,15 +858,15 @@ def make_entry_umap_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
     # determine labels for next level of directory/menu
     if next_sub_dir_starts_with(the_dir, "DATA"):
         # add optional data version
-        next_entry = MBatchEntry(dir_name, "Data Version", "")
+        next_entry = MBatchEntry(dir_name, "Data Version", "", the_info_dir)
         do_dirs = True
     elif next_sub_dir_starts_with(the_dir, "TEST"):
         # add optional test version
-        next_entry = MBatchEntry(dir_name, "Test Version", "")
+        next_entry = MBatchEntry(dir_name, "Test Version", "", the_info_dir)
         do_dirs = True
     else:
         # add diagram entry
-        next_entry = MBatchEntry(dir_name, "", "umap")
+        next_entry = MBatchEntry(dir_name, "", "umap", the_info_dir)
         do_dirs = False
     # add other subdirectories or diagram info
     if do_dirs:
@@ -790,7 +874,7 @@ def make_entry_umap_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
         subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
         dir_entry: os.DirEntry
         for dir_entry in subdir_list:
-            make_entry_umap_subdirs(dir_entry.path, next_entry)
+            make_entry_umap_subdirs(dir_entry.path, next_entry, the_info_dir)
     else:
         if os.path.exists(os.path.join(the_dir, "error.log")):
             dir_path: str = get_dir_path_from(the_dir, "analysis")
@@ -799,6 +883,7 @@ def make_entry_umap_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
             # add diagram data
             dir_path: str = get_dir_path_from(the_dir, "analysis")
             next_entry.diagram_image = dir_path + "UMAP_Diagram.png"
+            next_entry.title = read_file_to_string(os.path.join(the_dir, "UMAP_Title.txt"))
             next_entry.legend_image = dir_path + "UMAP_Legend.png"
             next_entry.umap_batches = dir_path + "UMAP_Data-batc.tsv"
             next_entry.umap_samples = dir_path + "UMAP_Data-meta.tsv"
@@ -806,20 +891,21 @@ def make_entry_umap_subdirs(the_dir: str, the_parent: MBatchEntry) -> None:
     the_parent.dropdown_entries.append(next_entry)
 
 
-def make_entry_umap(the_dir: str) -> MBatchEntry:
+def make_entry_umap(the_dir: str, the_info_dir: str) -> MBatchEntry:
     """
     Builds MBatchEntry for algorithm directory structure.
     Must match MBatch output.
     :param the_dir: Algorithm directory to be populated
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: populated MBatchEntry object
     """
-    my_obj: MBatchEntry = MBatchEntry("UMAP", "Batch Type", "")
+    my_obj: MBatchEntry = MBatchEntry("UMAP", "Batch Type", "", the_info_dir)
     # add Diagram Type entries
     subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
     dir_entry: os.DirEntry
     for dir_entry in subdir_list:
         # second argument, dropdown label, will be Batch Type or Data/Test Version
-        make_entry_umap_subdirs(dir_entry.path, my_obj)
+        make_entry_umap_subdirs(dir_entry.path, my_obj, the_info_dir)
     return my_obj
 
 # ##################################################################

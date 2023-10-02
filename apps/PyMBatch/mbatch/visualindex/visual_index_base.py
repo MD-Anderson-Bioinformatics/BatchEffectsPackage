@@ -148,6 +148,10 @@ class VisualIndexElementBase:
     # pylint: enable=too-many-arguments,too-many-locals
 
     def get_key(self: 'VisualIndexElementBase') -> str:
+        """
+        Make key for this portion of index
+        :return: concatenate a bunch of member values
+        """
         return f"{self.m_source}--{self.m_program}--{self.m_project}--{self.m_category}--{self.m_platform}--{self.m_data}--{self.m_details}--{self.m_data_version}--{self.m_test_version}--{self.job_type}"
 
     def get_str_dict_batch_type_unk_pct(self: 'VisualIndexElementBase') -> str:
@@ -206,6 +210,11 @@ class VisualIndexElementBase:
 
     # noinspection DuplicatedCode
     def write_element(self: 'VisualIndexElementBase', the_out: io.TextIOWrapper) -> None:
+        """
+        Write the self element to the_out
+        :param the_out: write to this stream
+        :return: nothing
+        """
         # PathResults
         # PathData
         the_out.write(self.m_path_results)
@@ -294,11 +303,20 @@ class VisualIndexBase:
     m_base_dir: str
 
     def __init__(self: 'VisualIndexBase', the_filename: str, the_base_dir: str) -> None:
+        """
+        initialize base values
+        :param the_filename: filename for this element
+        :param the_base_dir: base directory for paths/etc
+        """
         self.m_filename = the_filename
         self.m_ele_dict = {}
         self.m_base_dir = the_base_dir
 
     def populate_index(self: 'VisualIndexBase') -> None:
+        """
+        build index from this node of the data
+        :return: nothing
+        """
         print(f"VisualIndexBase::populate_index m_filename={self.m_filename}", flush=True)
         if os.path.exists(self.m_filename):
             print("populate index from file", flush=True)
@@ -335,6 +353,10 @@ class VisualIndexBase:
             print("use empty index, since file does not exist", flush=True)
 
     def write_index_file(self: 'VisualIndexBase') -> None:
+        """
+        write index file from this element
+        :return: nothing
+        """
         out_file: io.TextIOWrapper
         write_list: List[VisualIndexElementBase] = list(self.m_ele_dict.values())
         write_list.sort(key=lambda my_element: my_element.m_path_data, reverse=False)
@@ -371,6 +393,34 @@ class VisualIndexBase:
                   the_single_batch: Dict[str, int], the_unique_batch_count: Dict[str, int],
                   the_corr_batch_types: Dict[str, int], the_batch_type_count: int,
                   the_pipeline_status: str, the_job_type: str) -> None:
+        """
+        Add a node to the index/data list
+        :param the_path_results:
+        :param the_path_data:
+        :param the_id:
+        :param the_files:
+        :param the_source:
+        :param the_program:
+        :param the_project:
+        :param the_category:
+        :param the_platform:
+        :param the_data:
+        :param the_details:
+        :param the_data_version:
+        :param the_test_version:
+        :param the_samples_matrix:
+        :param the_samples_mutations:
+        :param the_features_matrix:
+        :param the_features_mutations:
+        :param the_batch_type_unk_pct:
+        :param the_single_batch:
+        :param the_unique_batch_count:
+        :param the_corr_batch_types:
+        :param the_batch_type_count:
+        :param the_pipeline_status:
+        :param the_job_type:
+        :return:
+        """
         newval: VisualIndexElementBase = VisualIndexElementBase(the_path_results, the_path_data,
                                                                 the_id, the_files,
                                                                 the_source, the_program,
@@ -396,6 +446,16 @@ class VisualIndexBase:
     def find_and_add_entries(self: 'VisualIndexBase', the_output_dir: str, the_results_zip: str,
                              the_data_zip: str, the_result_dir: str, the_test_version: str,
                              the_data_path: str) -> None:
+        """
+        find completed data analysis and add it to the entries
+        :param the_output_dir:
+        :param the_results_zip:
+        :param the_data_zip:
+        :param the_result_dir:
+        :param the_test_version:
+        :param the_data_path:
+        :return:
+        """
         print(f"VisualIndexDsc::find_and_add_entries populate for {the_output_dir}", flush=True)
         # for the_results_zip and the_data_zip, replace the_output_dir with /DAPI/DATA, to get PathResults and PathData
         val_path_results: str = the_results_zip.replace(the_output_dir, self.m_base_dir)
@@ -665,7 +725,7 @@ def get_batch_type_corr_pct(the_data_path: str, the_file: str) -> Dict[str, int]
             for col_name, df_series in df_corr.iterrows():
                 row_name: str
                 cor_value: float
-                for row_name, cor_value in df_series.iteritems():
+                for row_name, cor_value in df_series.items():
                     if row_name != col_name:
                         if cor_value >= 0.5:
                             ind_list: List[str] = sorted([row_name, col_name])

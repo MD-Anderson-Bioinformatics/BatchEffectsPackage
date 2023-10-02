@@ -25,35 +25,35 @@ from mbatch.gdcapi.gdcapi import update_clinical_index, download_clinical_index
 from mbatch.gdcapi.gdcapi import convert_update_datasets, convert_biospecimen_files, convert_clinical_files
 from mbatch.test.common import print_errors, print_warnings
 
-index_file_clinical: str = '/your/data/path/Pipeline-GDC/indexes/gdc_clinical.tsv'
-index_file_biospecimen: str = '/your/data/path/Pipeline-GDC/indexes/gdc_biospecimen.tsv'
-index_file_datafiles: str = '/your/data/path/Pipeline-GDC/indexes/gdc_datafiles.tsv'
-index_file_samples_dir: str = '/your/data/path/Pipeline-GDC/indexes/samples'
+index_file_clinical: str = '/BEA/DVLP/Pipeline-GDC/indexes/gdc_clinical.tsv'
+index_file_biospecimen: str = '/BEA/DVLP/Pipeline-GDC/indexes/gdc_biospecimen.tsv'
+index_file_datafiles: str = '/BEA/DVLP/Pipeline-GDC/indexes/gdc_datafiles.tsv'
+index_file_samples_dir: str = '/BEA/DVLP/Pipeline-GDC/indexes/samples'
 
-dir_download_datafiles: str = '/your/data/path/Pipeline-GDC/downloaded/data'
-dir_download_biospecimen: str = '/your/data/path/Pipeline-GDC/downloaded/biospecimen'
-dir_download_clinical: str = '/your/data/path/Pipeline-GDC/downloaded/clinical'
+dir_download_datafiles: str = '/BEA/DVLP/Pipeline-GDC/downloaded/data'
+dir_download_biospecimen: str = '/BEA/DVLP/Pipeline-GDC/downloaded/biospecimen'
+dir_download_clinical: str = '/BEA/DVLP/Pipeline-GDC/downloaded/clinical'
 
-dir_convert_datafiles: str = '/your/data/path/Pipeline-GDC/converted/data'
-dir_convert_biospecimen: str = '/your/data/path/Pipeline-GDC/converted/biospecimen'
-dir_convert_clinical: str = '/your/data/path/Pipeline-GDC/converted/clinical'
+dir_convert_datafiles: str = '/BEA/DVLP/Pipeline-GDC/converted/data'
+dir_convert_biospecimen: str = '/BEA/DVLP/Pipeline-GDC/converted/biospecimen'
+dir_convert_clinical: str = '/BEA/DVLP/Pipeline-GDC/converted/clinical'
 
-dir_convert_utils: str = '/your/data/path/Pipeline-GDC/util'
-dir_convert_temp: str = '/your/data/path/Pipeline-GDC/CONVERT_TEMP'
+dir_convert_utils: str = '/BEA/DVLP/Pipeline-GDC/util'
+dir_convert_temp: str = '/BEA/DVLP/Pipeline-GDC/CONVERT_TEMP'
 
 if __name__ == '__main__':
     # ########################################################
     # download information about biospecimen files
     # ########################################################
-    update_biospecimen_index(index_file_biospecimen)
+    update_biospecimen_index(index_file_biospecimen, True)
     # ########################################################
     # download information about (public) clinical files
     # ########################################################
-    update_clinical_index(index_file_clinical)
+    update_clinical_index(index_file_clinical, True)
     # ########################################################
     # download information about datafiles and their samples
     # ########################################################
-    update_datafile_index(index_file_datafiles, index_file_samples_dir)
+    update_datafile_index(index_file_datafiles, index_file_samples_dir, True)
     # ########################################################
     # download new clinical files
     # ########################################################

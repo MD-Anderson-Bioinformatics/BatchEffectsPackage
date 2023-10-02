@@ -11,6 +11,17 @@
 
 ################################################################################
 
+cleanAndShortPath <- function(theDir)
+{
+  theDir <- gsub("[^[:alnum:]]", "", theDir)
+  if (nchar(theDir)>32)
+  {
+    milliseconds <- substr(format(as.numeric(Sys.time())*100000, digits=15), 11, 15)
+    theDir <- paste(substr(theDir, 0, 32), milliseconds, sep="", collapse="")
+  }
+  theDir
+}
+
 cleanFilePath <- function(theDir, theNewDir)
 {
   #cleanDir <- iconv(theNewDir, from = "UTF-8", to = "ASCII", sub = "byte")

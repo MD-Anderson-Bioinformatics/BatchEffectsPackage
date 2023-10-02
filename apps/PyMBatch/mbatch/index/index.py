@@ -22,10 +22,14 @@ MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/rese
 
 import os
 import shutil
-from typing import Tuple
+import typing
+from typing import Tuple, List
 from mbatch.index.index_original_data import OriginalData, read_json_original_data
 from mbatch.index.index_mbatch import MBatchIndex, make_mbatch_index
+from mbatch.index.index_repos import populate_from_existing_repo
 from mbatch.test.common import read_file_to_string, get_newest_dir
+from mbatch.test.common import timestamp_file_if_exists
+from mbatch.pipeline.std_data import StandardizedData
 
 
 M_AUTOCORRECT_NOTICE: str = "This dataset has been corrected using an automated system without human input. " \
@@ -94,12 +98,18 @@ def populate_values_from_files(the_directory: str) -> Tuple[OriginalData, str, s
     return original_data, source_id, data_version, test_version, job_id, job_type, ac_notice
 
 
-def create_index_archive(the_results_dir: str, the_data_dir: str, the_zip_dir: str) -> Tuple[str, str]:
+# pylint: disable=too-many-locals,too-many-arguments
+def create_index_archive(the_results_dir: str, the_data_dir: str, the_zip_dir: str, the_info_dir: str,
+                         the_new_data: typing.Optional[StandardizedData],
+                         the_std_list: typing.Optional[List[StandardizedData]]) -> Tuple[str, str]:
     """
     Build index and create zip archive
     :param the_results_dir: directory with MBatch results
     :param the_data_dir: directory with actual data
     :param the_zip_dir: directory in which to place ZIP file
+    :param the_info_dir: full path to directory containing TEST_<version> labels
+    :param the_new_data: new data object for latest analysis
+    :param the_std_list: dictionary of data objects
     :return: full pathname for ZIP file
     """
     print(f"create_index_archive the_results_dir={the_results_dir}", flush=True)
@@ -123,25 +133,35 @@ def create_index_archive(the_results_dir: str, the_data_dir: str, the_zip_dir: s
     print(f"create_index_archive job_type={job_type}", flush=True)
     print(f"create_index_archive ac_notice={ac_notice}", flush=True)
     analysis_dir: str = os.path.join(the_results_dir, "analysis")
+    # use dataset_id to look for existing ZIPs
+    dataset_file_id: str = dataset_id
+    if the_new_data is not None:
+        if the_std_list is not None:
+            print("create_index_archive check for existing repo", flush=True)
+            new_dataset_id: str = populate_from_existing_repo(the_data_dir, the_results_dir, the_new_data, the_std_list)
+            if new_dataset_id != '':
+                dataset_file_id = new_dataset_id
+                print(f"create_index_archive new dataset_file_id={dataset_file_id}", flush=True)
     print("create_index_archive call make_mbatch_index", flush=True)
-    mbatch_index: MBatchIndex = make_mbatch_index(original_data, dataset_id, data_version, test_version,
-                                                  job_id, job_type, ac_notice, analysis_dir)
+    mbatch_index: MBatchIndex = make_mbatch_index(original_data, dataset_id, analysis_dir, the_info_dir)
     print(f"create_index_archive call after 1 make_mbatch_index {os.path.join(newest_dir, 'index.json')}", flush=True)
     mbatch_index.write_to_json(os.path.join(newest_dir, "index.json"))
-    # TODO: make full index for all below
     print(f"create_index_archive call after 2 make_mbatch_index {os.path.join(the_results_dir, 'index.json')}", flush=True)
     mbatch_index.write_to_json(os.path.join(the_results_dir, "index.json"))
     # create results zip
-    zip_file_results: str = os.path.join(the_zip_dir, dataset_id + "-results")
+    zip_file_results: str = os.path.join(the_zip_dir, dataset_file_id + "-results")
     print(f"create_index_archive zip_file_results={zip_file_results}", flush=True)
+    timestamp_file_if_exists(f"{zip_file_results + '.zip'}", test_version)
     shutil.make_archive(zip_file_results, "zip", root_dir=the_results_dir)
     print(f"create_index_archive zip={zip_file_results + '.zip'}", flush=True)
     # create data zip
-    zip_file_data: str = os.path.join(the_zip_dir, dataset_id + "-data")
+    zip_file_data: str = os.path.join(the_zip_dir, dataset_file_id + "-data")
     print(f"create_index_archive zip_file_data={zip_file_data}", flush=True)
     print(f"create_index_archive the_data_dir={the_data_dir}", flush=True)
+    timestamp_file_if_exists(f"{zip_file_data + '.zip'}", test_version)
     shutil.make_archive(zip_file_data, "zip", root_dir=the_data_dir)
     print(f"create_index_archive zip={zip_file_data + '.zip'}", flush=True)
     print(f"create_index_archive completed 1 {zip_file_results + '.zip'}", flush=True)
     print(f"create_index_archive completed 2 {zip_file_data + '.zip'}", flush=True)
     return f"{zip_file_results}.zip", f"{zip_file_data}.zip"
+# pylint: enable=too-many-locals,too-many-arguments

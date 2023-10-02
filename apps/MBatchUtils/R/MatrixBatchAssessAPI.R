@@ -43,6 +43,8 @@ mutBatchSingle <- function(theMBatchData, theTitle,
                            theBatchTypes=c("BatchId", "PlateId", "ShipDate", "TSS"))
 {
   message("mutBatchSingle")
+  origTitle <- theTitle
+  message("origTitle=", origTitle)
   message("theOutputDir=", theOutputDir)
   baseDir <- theOutputDir
   theOutputDir <- cleanFilePath(theOutputDir, "Discrete")
@@ -79,23 +81,25 @@ mutBatchSingle <- function(theMBatchData, theTitle,
       # if Dunn's test returned batch names, put them into parens to put in diagram otherwise, put an empty string
       batchAddOns <- getBatchAddOn(collectBatches)
       # write the PNG for Kruskal's output
-      makeKruskalPng(outfile, loggedPvalues, collectBatches, myBatchType, batchAddOns, thePvalueCutoff)
+      mytitle <- makeKruskalPng(outfile, loggedPvalues, collectBatches, myBatchType, batchAddOns, thePvalueCutoff)
       datasetTitle <- gsub(baseDir, "", titleVector)
       if (!startsWith(datasetTitle, "/"))
       {
         datasetTitle <- paste("/", datasetTitle, sep="")
       }
       names(loggedPvalues) <- datasetTitle
-      makeKruskalTsv(outfileTSV, loggedPvalues, collectBatches, myBatchType, batchAddOns, thePvalueCutoff)
+      saveTitle <- paste(origTitle, " / ", myBatchType, " / ", "Kruskal-Wallis Dunns-Test", sep="")
+      makeKruskalTsv(outfileTSV, loggedPvalues, collectBatches, myBatchType, batchAddOns, thePvalueCutoff, saveTitle, outfile)
     }
   },
-  warning=function(e)
-  {
-    message("1 Unable to generate Kruskal-Wallis (discrete)")
-    writeErrorsForAllBatchTypesDiscrete("Kruskal-Wallis/Dunn's Test Failed",
-                                        theBatchTypes, theOutputDir,
-                                        theTitle, theDataVersion, theTestVersion)
-  },
+  # don't catch warnings
+  #warning=function(e)
+  #{
+  #  message("1 Unable to generate Kruskal-Wallis (discrete)")
+  #  writeErrorsForAllBatchTypesDiscrete("Kruskal-Wallis/Dunn's Test Failed",
+  #                                      theBatchTypes, theOutputDir,
+  #                                      theTitle, theDataVersion, theTestVersion)
+  #},
   error=function(e)
   {
     message("2 Unable to generate Kruskal-Wallis (discrete)")

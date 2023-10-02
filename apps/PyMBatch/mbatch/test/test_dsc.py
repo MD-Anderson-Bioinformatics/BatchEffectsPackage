@@ -330,27 +330,27 @@ class TestDsc(unittest.TestCase):
         :return: nothing
         """
         # data files and seed
-        self.sta_matrix = "/BatchEffectsPackage_data/testing_static/PyMBatch/StdData/TCGA/matrix_data.tsv"
-        self.sta_batches = "/BatchEffectsPackage_data/testing_static/PyMBatch/StdData/TCGA/batches.tsv"
+        self.sta_matrix = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/StdData/TCGA/matrix_data.tsv"
+        self.sta_batches = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/StdData/TCGA/batches.tsv"
         self.seed: int = 314
         # test_dsc_calc_toy
-        self.sta_toy = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/dsc_toy.txt"
-        self.dyn_toy = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/dsc_toy.txt"
+        self.sta_toy = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/dsc_toy.txt"
+        self.dyn_toy = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/dsc_toy.txt"
         # test_dsc_calc_file
-        self.sta_file = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/dsc_file.txt"
-        self.dyn_file = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/dsc_file.txt"
+        self.sta_file = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/dsc_file.txt"
+        self.dyn_file = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/dsc_file.txt"
         # test_dsc_perm_toy
-        self.sta_perm_toy = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/perm_toy.txt"
-        self.dyn_perm_toy = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/perm_toy.txt"
+        self.sta_perm_toy = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/perm_toy.txt"
+        self.dyn_perm_toy = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/perm_toy.txt"
         # test_dsc_perm_file
-        self.sta_perm_file = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/perm_file.txt"
-        self.dyn_perm_file = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/perm_file.txt"
+        self.sta_perm_file = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/perm_file.txt"
+        self.dyn_perm_file = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/perm_file.txt"
         # test_dsc_count_toy
-        self.sta_count_toy = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/count_toy.txt"
-        self.dyn_count_toy = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/count_toy.txt"
+        self.sta_count_toy = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/count_toy.txt"
+        self.dyn_count_toy = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/count_toy.txt"
         # test_dsc_count_file
-        self.sta_count_file = "/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/count_file.txt"
-        self.dyn_count_file = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/count_file.txt"
+        self.sta_count_file = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/dsc/count_file.txt"
+        self.dyn_count_file = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/dsc/count_file.txt"
         # pylint: enable=too-many-instance-attributes
         if os.path.exists(os.path.dirname(self.dyn_toy)):
             shutil.rmtree(os.path.dirname(self.dyn_toy))

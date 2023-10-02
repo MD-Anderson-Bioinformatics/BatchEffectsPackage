@@ -103,10 +103,19 @@ class VisualIndexElementKwd:
     # pylint: enable=too-many-locals,too-many-arguments
 
     def get_key(self: 'VisualIndexElementDsc') -> str:
+        """
+        create a key based on all members
+        :return: key formed from member variables
+        """
         return f"{self.m_source}--{self.m_program}--{self.m_project}--{self.m_category}--{self.m_platform}--{self.m_data}--{self.m_details}--{self.m_data_version}--{self.m_test_version}--{self.m_analysis_path}--{self.job_type}"
 
     # noinspection DuplicatedCode
     def write_element(self: 'VisualIndexElementDsc', the_out: io.TextIOWrapper) -> None:
+        """
+        write self element to given stream
+        :param the_out: output stream for element
+        :return: nothing
+        """
         the_out.write(self.m_path_results)
         the_out.write("\t")
         the_out.write(self.m_path_data)
@@ -158,11 +167,20 @@ class VisualIndexKwd:
     m_base_dir: str
 
     def __init__(self: 'VisualIndexKwd', the_filename: str, the_base_dir: str) -> None:
+        """
+        initialize base values
+        :param the_filename: filename for this element
+        :param the_base_dir: base directory for paths/etc
+        """
         self.m_filename = the_filename
         self.m_ele_dict = {}
         self.m_base_dir = the_base_dir
 
     def populate_index(self: 'VisualIndexKwd') -> None:
+        """
+        build index from this node of the data
+        :return: nothing
+        """
         print(f"VisualIndexKwd::populate_index m_filename={self.m_filename}", flush=True)
         if os.path.exists(self.m_filename):
             print("VisualIndexKwd::populate_index populate index from file", flush=True)
@@ -189,6 +207,10 @@ class VisualIndexKwd:
             print("VisualIndexKwd::populate_index use empty index, since file does not exist", flush=True)
 
     def write_index_file(self: 'VisualIndexKwd') -> None:
+        """
+        write index file from this element
+        :return: nothing
+        """
         out_file: io.TextIOWrapper
         write_list: List[VisualIndexElementKwd] = list(self.m_ele_dict.values())
         write_list.sort(key=lambda my_element: my_element.m_path_data, reverse=False)
@@ -205,6 +227,27 @@ class VisualIndexKwd:
                   the_platform: str, the_data: str, the_details: str, the_data_version: str, the_test_version: str,
                   the_analysis_path: str, the_neg_log10_pvalue: str,
                   the_batches_called: str, the_neg_log10_cutoff: str, the_job_type: str) -> None:
+        """
+        Add a node to the index/data list
+        :param the_path_results:
+        :param the_path_data:
+        :param the_id:
+        :param the_source:
+        :param the_program:
+        :param the_project:
+        :param the_category:
+        :param the_platform:
+        :param the_data:
+        :param the_details:
+        :param the_data_version:
+        :param the_test_version:
+        :param the_analysis_path:
+        :param the_neg_log10_pvalue:
+        :param the_batches_called:
+        :param the_neg_log10_cutoff:
+        :param the_job_type:
+        :return:
+        """
         newval: VisualIndexElementKwd = VisualIndexElementKwd(the_path_results, the_path_data, the_id,
                                                               the_source, the_program, the_project, the_category,
                                                               the_platform, the_data, the_details, the_data_version,
@@ -221,6 +264,16 @@ class VisualIndexKwd:
     # pylint: disable=too-many-locals
     # noinspection DuplicatedCode
     def find_and_add_entries(self: 'VisualIndexKwd', the_output_dir: str, the_results_zip: str, the_data_zip: str, the_result_dir: str) -> None:
+        """
+        find completed data analysis and add it to the entries
+        :param the_output_dir:
+        :param the_results_zip:
+        :param the_data_zip:
+        :param the_result_dir:
+        :param the_test_version:
+        :param the_data_path:
+        :return:
+        """
         data_file_list: List[str] = get_newest_file_list(os.path.join(the_result_dir, "analysis"), "KW_Dunns_Diagram.tsv")
         data_file: str
         for data_file in data_file_list:

@@ -118,6 +118,8 @@ createBatchEffectsOutput_umap<-function(theMatrix, theDataframeBatchData, theTit
         # ############################
         logDebug("UMAP diagrams")
         diagramFilename = createDirPlusFilename(umapBatchDir, "UMAP_Diagram.png")
+        mytitle <- paste(theTitle, "/", "UMAP", batchTypeName, sep=" ")
+        writeTitleFile(mytitle, diagramFilename)
         legendFilename = createDirPlusFilename(umapBatchDir, "UMAP_Legend.png")
         color <- beaRainbow(length(uniqueBatchIds), v=0.7)
         title <- paste(theTitle, "UMAP (PCA)", batchTypeName, sep=" ")
@@ -193,12 +195,6 @@ createBatchEffectsOutput_umap<-function(theMatrix, theDataframeBatchData, theTit
         }
       }
     }
-  }, warning = function(err)
-  {
-    logError("1 createBatchEffectsOutput_umap caught an error", err)
-    rdataFiles <- NULL
-    writeErrorsForAllBatchTypesUMAP(err, theDataframeBatchData, theUmapOutputDir,
-                                    theTitle, theDataVersion, theTestVersion)
   }, error = function(err)
   {
     logError("2 createBatchEffectsOutput_umap caught an error", err)

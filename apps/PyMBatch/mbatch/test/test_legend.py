@@ -24,9 +24,9 @@ import unittest
 import os
 import shutil
 from typing import List
+from PIL import Image, ImageChops
 from mbatch.legend.legend import export_legend, export_legend_convert_shapes
 from mbatch.legend.legend import convert_java_to_python_shape, combine_legends
-from mbatch.test.common import generate_file_md5
 
 
 def test_legend(the_shape_flag: bool, the_file_path: str, the_empty_symbols: bool, the_empty_colors: bool,
@@ -86,6 +86,23 @@ def test_legend(the_shape_flag: bool, the_file_path: str, the_empty_symbols: boo
     return the_file_path
 
 
+def two_png_same_p(the_file_a: str, the_file_b: str) -> bool:
+    """
+    Use ImageChops to see if images are indentical
+    :param the_file_a: full path to image file a
+    :param the_file_b: full path to image file b
+    :return: true if they are the same
+    """
+    im1: Image
+    im2: Image
+    with Image.open(the_file_a) as im1:
+        with Image.open(the_file_b) as im2:
+            diff: Image = ImageChops.difference(im2, im1)
+            if None is diff.getbbox():
+                return True
+    return False
+
+
 # pylint: disable=too-many-instance-attributes
 class TestLegend(unittest.TestCase):
     """
@@ -108,20 +125,20 @@ class TestLegend(unittest.TestCase):
 
     def setUp(self: 'TestLegend'):
         # called from init
-        self.dyn_leg_java: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_java.png"
-        self.dyn_leg_java_no_symbol: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_java_no_symbol.png"
-        self.dyn_leg_java_no_color: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_java_no_color.png"
-        self.dyn_leg_java_no_color_symbol: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_java_no_color_symbol.png"
-        self.dyn_leg_pyth: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_python.png"
-        self.dyn_leg_pyth_no_symbol: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_python_no_symbol.png"
-        self.dyn_leg_pyth_no_color: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_python_no_color.png"
-        self.dyn_leg_pyth_no_color_symbol: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_python_no_color_symbol.png"
-        self.dyn_leg_comb: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_combined.png"
-        self.dyn_leg_comb_single: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_combined_single.png"
-        self.dyn_leg_huge: str = "/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_huge.png"
-        self.sta_leg_java: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/Legend/legend_java.png"
-        self.sta_leg_pyth: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/Legend/legend_python.png"
-        self.sta_leg_comb: str = "/BatchEffectsPackage_data/testing_static/PyMBatch/Legend/legend_combined.png"
+        self.dyn_leg_java: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_java.png"
+        self.dyn_leg_java_no_symbol: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_java_no_symbol.png"
+        self.dyn_leg_java_no_color: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_java_no_color.png"
+        self.dyn_leg_java_no_color_symbol: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_java_no_color_symbol.png"
+        self.dyn_leg_pyth: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_python.png"
+        self.dyn_leg_pyth_no_symbol: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_python_no_symbol.png"
+        self.dyn_leg_pyth_no_color: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_python_no_color.png"
+        self.dyn_leg_pyth_no_color_symbol: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_python_no_color_symbol.png"
+        self.dyn_leg_comb: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_combined.png"
+        self.dyn_leg_comb_single: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_combined_single.png"
+        self.dyn_leg_huge: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_huge.png"
+        self.sta_leg_java: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/Legend/legend_java.png"
+        self.sta_leg_pyth: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/Legend/legend_python.png"
+        self.sta_leg_comb: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/Legend/legend_combined.png"
         if os.path.exists(os.path.dirname(self.dyn_leg_java)):
             shutil.rmtree(os.path.dirname(self.dyn_leg_java))
         os.makedirs(os.path.dirname(self.dyn_leg_java))
@@ -159,9 +176,7 @@ class TestLegend(unittest.TestCase):
         test_legend(True, self.dyn_leg_pyth_no_color, False, True, False)
         test_legend(True, self.dyn_leg_pyth_no_color_symbol, True, True, False)
         # compare self.dyn_leg_pyth to self.sta_leg_pyth
-        dyn_md5: str = generate_file_md5(self.dyn_leg_pyth)
-        sta_md5: str = generate_file_md5(self.sta_leg_pyth)
-        self.assertEqual(dyn_md5, sta_md5)
+        self.assertTrue(two_png_same_p(self.dyn_leg_pyth, self.sta_leg_pyth))
 
     def test_export_huge_legend(self: 'TestLegend') -> None:
         """
@@ -183,9 +198,7 @@ class TestLegend(unittest.TestCase):
         test_legend(False, self.dyn_leg_java_no_color, False, True, False)
         test_legend(False, self.dyn_leg_java_no_color_symbol, True, True, False)
         # compare self.dyn_leg_java to self.sta_leg_java
-        dyn_md5: str = generate_file_md5(self.dyn_leg_java)
-        sta_md5: str = generate_file_md5(self.sta_leg_java)
-        self.assertEqual(dyn_md5, sta_md5)
+        self.assertTrue(two_png_same_p(self.dyn_leg_java, self.sta_leg_java))
 
     def test_combine_legends_multiple(self: 'TestLegend') -> None:
         """
@@ -195,9 +208,7 @@ class TestLegend(unittest.TestCase):
         print("test_combine_legends_multiple", flush=True)
         combine_legends([self.sta_leg_java, self.sta_leg_pyth, self.sta_leg_java, self.sta_leg_pyth, self.sta_leg_java], self.dyn_leg_comb)
         # compare self.dyn_leg_java to self.sta_leg_java
-        dyn_md5: str = generate_file_md5(self.dyn_leg_comb)
-        sta_md5: str = generate_file_md5(self.sta_leg_comb)
-        self.assertEqual(dyn_md5, sta_md5)
+        self.assertTrue(two_png_same_p(self.dyn_leg_comb, self.sta_leg_comb))
 
     def test_combine_legends_single(self: 'TestLegend') -> None:
         """

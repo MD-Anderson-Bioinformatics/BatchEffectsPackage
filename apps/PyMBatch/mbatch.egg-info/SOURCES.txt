@@ -6,6 +6,8 @@ mbatch.egg-info/SOURCES.txt
 mbatch.egg-info/dependency_links.txt
 mbatch.egg-info/requires.txt
 mbatch.egg-info/top_level.txt
+mbatch/correct/__init__.py
+mbatch/correct/correct.py
 mbatch/dsc/__init__.py
 mbatch/dsc/dsc_calc.py
 mbatch/dsc/dsc_info.py
@@ -38,6 +40,7 @@ mbatch/index/index.py
 mbatch/index/index_entry.py
 mbatch/index/index_mbatch.py
 mbatch/index/index_original_data.py
+mbatch/index/index_repos.py
 mbatch/legend/__init__.py
 mbatch/legend/legend.py
 mbatch/pipeline/__init__.py
@@ -57,9 +60,17 @@ mbatch/visualindex/visual_index_base.py
 mbatch/visualindex/visual_index_dsc.py
 mbatch/visualindex/visual_index_kwd.py
 scripts/__init__.py
+scripts/analysis_gdc.py
+scripts/analysis_gdc_check.py
+scripts/analysis_gdc_local.py
+scripts/analysis_gdc_reindex.py
+scripts/analysis_mwb.py
+scripts/analysis_mwb_check.py
+scripts/convert_gdc.py
+scripts/convert_gdc_check.py
+scripts/correct_gdc_0-check.py
+scripts/correct_gdc_1-initiate.py
+scripts/correct_gdc_2-continue.py
 scripts/dsc_main.py
-scripts/gdcapi_main.py
 scripts/index_main.py
 scripts/legend_main.py
-scripts/pipeline_main_gdc.py
-scripts/pipeline_main_mwb.py

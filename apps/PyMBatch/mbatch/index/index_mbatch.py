@@ -36,10 +36,6 @@ from mbatch.test.common import get_sorted_dirs
 class MBatchIndex:
     """
     dataset_id:   dataset id from conversion step
-    data_version: job id from BEI or other processing step
-    test_version: get data version from data_stamp.txt
-    job_id:       get test version from test_stamp.txt
-    job_type:     get version type (such as Original-Analyzed) from version_type.txt
     source:       value from original_data.json, used to populate dropdown menus for dataset
     variant:      value from original_data.json, used to populate dropdown menus for dataset
     project:      value from original_data.json, used to populate dropdown menus for dataset
@@ -49,14 +45,9 @@ class MBatchIndex:
     algorithm:    value from original_data.json, used to populate dropdown menus for dataset
     details:      value from original_data.json, used to populate dropdown menus for dataset
     mbatch:       object representing results for algorithm menu
-    notice:       autocorrection notice string (if needed)
     """
     # do not set method variables, as they should be initialized in the init function
     dataset_id: str
-    data_version: str
-    test_version: str
-    job_id: str
-    job_type: str
     source: str
     program: str
     project: str
@@ -65,29 +56,16 @@ class MBatchIndex:
     data: str
     details: str
     mbatch: Optional[MBatchEntry]
-    notice: str
 
-    def __init__(self: 'MBatchIndex', the_dataset_id: str,
-                 the_data_version: str, the_test_version: str,
-                 the_job_id: str, the_job_type: str,
-                 the_notice: str, the_orig_data: OriginalData) -> None:
+    def __init__(self: 'MBatchIndex', the_dataset_id: str, the_orig_data: OriginalData) -> None:
         """
         Values with which to initialize this object
         :param the_dataset_id:   dataset id from conversion step
-        :param the_data_version: job id from BEI or other processing step
-        :param the_test_version: get data version from data_stamp.txt
-        :param the_job_id:       get test version from test_stamp.txt
-        :param the_job_type:     get version type (such as Original-Analyzed) from version_type.txt
-        :param the_notice:       autocorrection notice string (if needed)
         :param the_orig_data:    original_data.json data (source, variant, etc)
         """
         # init and empty/nan values.
         # Members described at class level
         self.dataset_id = the_dataset_id
-        self.data_version = the_data_version
-        self.test_version = the_test_version
-        self.job_id = the_job_id
-        self.job_type = the_job_type
         self.source = the_orig_data.source
         self.program = the_orig_data.program
         self.project = the_orig_data.project
@@ -95,7 +73,6 @@ class MBatchIndex:
         self.platform = the_orig_data.platform
         self.data = the_orig_data.data
         self.details = the_orig_data.details
-        self.notice = the_notice
         self.mbatch = None
 
     def write_to_json(self: 'MBatchIndex', the_filepath: str) -> None:
@@ -111,34 +88,25 @@ class MBatchIndex:
 
 
 # pylint: disable=too-many-arguments
-def make_mbatch_index(the_original_data: OriginalData, the_dataset_id: str,
-                      the_data_version: str, the_test_version: str,
-                      the_job_id: str, the_job_type: str,
-                      the_ac_notice: str, the_analysis_dir: str) -> MBatchIndex:
+def make_mbatch_index(the_original_data: OriginalData, the_dataset_id: str, the_analysis_dir: str, the_info_dir: str) -> MBatchIndex:
     """
     Completely populated MBatchIndex object, ready to be written to json index.
     :param the_original_data: original_data.json data (source, variant, etc)
     :param the_dataset_id:    dataset id from conversion step
-    :param the_data_version:  job id from BEI or other processing step
-    :param the_test_version:  get data version from data_stamp.txt
-    :param the_job_id:        get test version from test_stamp.txt
-    :param the_job_type:      get version type (such as Original-Analyzed) from version_type.txt
-    :param the_ac_notice:     autocorrection notice string (if needed)
     :param the_analysis_dir:  Directory named 'analysis' with results of MBatch run
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: MBatchIndex object completely populated
     """
     # build base object
-    my_obj: MBatchIndex = MBatchIndex(the_dataset_id,
-                                      the_data_version, the_test_version, the_job_id, the_job_type,
-                                      the_ac_notice, the_original_data)
+    my_obj: MBatchIndex = MBatchIndex(the_dataset_id, the_original_data)
     # TODO handle corrected data
     # build menu options from available results on disk
-    my_obj.mbatch = make_top_mbatch_entry(the_analysis_dir)
+    my_obj.mbatch = make_top_mbatch_entry(the_analysis_dir, the_info_dir)
     return my_obj
 # pylint: enable=too-many-arguments
 
 
-def make_top_mbatch_entry(the_analysis_dir: str) -> MBatchEntry:
+def make_top_mbatch_entry(the_analysis_dir: str, the_info_dir: str) -> MBatchEntry:
     """
     Make top-lebel MBatchEntry instance representing menu structure
     for all the algorithms in this directory.
@@ -146,32 +114,33 @@ def make_top_mbatch_entry(the_analysis_dir: str) -> MBatchEntry:
     Directory must be named 'analysis'
     Will throw an exception if unknown algorithm is found.
     :param the_analysis_dir: Directory named 'analysis' with results of MBatch run
+    :param the_info_dir: full path to directory containing TEST_<version> labels
     :return: MBatchEntry instance representing MBatch results.
     """
     # build base object
-    my_obj: MBatchEntry = MBatchEntry("", "Algorithm", "")
+    my_obj: MBatchEntry = MBatchEntry("", "Algorithm", "", the_info_dir)
     # build menu options from available results on disk
     subdir_list: List[os.DirEntry] = get_sorted_dirs(the_analysis_dir)
     dir_entry: os.DirEntry
     for dir_entry in subdir_list:
         if dir_entry.name == "BoxPlot":
-            my_obj.dropdown_entries.append(make_entry_boxplot(dir_entry.path))
+            my_obj.dropdown_entries.append(make_entry_boxplot(dir_entry.path, the_info_dir))
         elif dir_entry.name == "CDP":
-            my_obj.dropdown_entries.append(make_entry_cdp(dir_entry.path))
+            my_obj.dropdown_entries.append(make_entry_cdp(dir_entry.path, the_info_dir))
         elif dir_entry.name == "Discrete":
-            my_obj.dropdown_entries.append(make_entry_discrete(dir_entry.path))
+            my_obj.dropdown_entries.append(make_entry_discrete(dir_entry.path, the_info_dir))
         elif dir_entry.name == "HierarchicalClustering":
-            my_obj.dropdown_entries.append(make_entry_hc(dir_entry.path))
+            my_obj.dropdown_entries.append(make_entry_hc(dir_entry.path, the_info_dir))
         elif dir_entry.name == "NGCHM":
-            my_obj.dropdown_entries.append(make_entry_ngchm(dir_entry.path))
+            my_obj.dropdown_entries.append(make_entry_ngchm(dir_entry.path, the_info_dir))
         elif dir_entry.name == "PCA":
-            my_obj.dropdown_entries.append(make_entry_pca(dir_entry.path))
+            my_obj.dropdown_entries.append(make_entry_pca(dir_entry.path, the_info_dir))
         elif dir_entry.name == "DSC":
-            my_obj.dropdown_entries.append(make_entry_dsc(dir_entry.path))
+            my_obj.dropdown_entries.append(make_entry_dsc(dir_entry.path, the_info_dir))
         elif dir_entry.name == "SupervisedClustering":
-            my_obj.dropdown_entries.append(make_entry_sc(dir_entry.path))
+            my_obj.dropdown_entries.append(make_entry_sc(dir_entry.path, the_info_dir))
         elif dir_entry.name == "UMAP":
-            my_obj.dropdown_entries.append(make_entry_umap(dir_entry.path))
+            my_obj.dropdown_entries.append(make_entry_umap(dir_entry.path, the_info_dir))
         else:
             # signal error, unknown algorithm
             raise ValueError(f"The directory {dir_entry.path} does not represent a known algorithm")

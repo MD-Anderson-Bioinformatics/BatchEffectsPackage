@@ -10,7 +10,7 @@ importFrom("MBatch", "EBNPlus_TrainAndValidateFromVector_Structures", "EBNPlus_T
 importFrom("MBatch", "mbatchLoadStructures", "mbatchWriteSuccessfulLog", "readAsGenericMatrix", "mbatchTrimData")
 importFrom("MBatch", "RBN_Pseudoreplicates", "RBN_Replicates", "getReplicatesForRBN")
 importFrom("MBatch", "as.numericWithIssues", "UMAP_Structures", "addVersionsIfNeeded")
-importFrom("MBatch", "checkIfTestError", "setGlobalMBatchErrorTest")
+importFrom("MBatch", "checkIfTestError", "setGlobalMBatchErrorTest", "cleanAndShortPath", "writeTitleFile")
 importFrom("utils", "read.csv", "write.table")
 #importFrom("methods", "new")
 importFrom("utils", "read.table")
@@ -28,6 +28,7 @@ importFrom("MBatch", "setGlobalMBatchEnv", "getGlobalMBatchEnv", "setGlobalMBatc
 importFrom("Cairo", "CairoPNG")
 importFrom("reticulate", "import")
 importFrom("readr", "read_file")
+importFrom("jsonlite", "read_json")
 
 
 export(mbatchRunFromConfig)

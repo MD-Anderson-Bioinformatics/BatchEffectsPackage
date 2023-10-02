@@ -123,11 +123,6 @@ hierClust_calc<-function(theMatrixGeneData)
   			    #subMatrix <- subMatrix[!is.infinite(rowSums(subMatrix)),]
   				  uDend<-hclust(d, method="ward.D2")
   				},
-  				warning=function(e)
-  				{
-  				  logWarn("1 Unable to calculate hclust--too many NAs, Infinities or NaNs in data")
-  				  uDend <- NULL
-  				},
   				error=function(e)
   				{
   				  logWarn("2 Unable to calculate hclust--too many NAs, Infinities or NaNs in data")
@@ -181,6 +176,7 @@ getListOfColorsForHierClust<-function(theDataframeBatchData, theShuffle=FALSE)
 writeClusteringImage<-function(theHierClustOutputDir, theHierClustFileBase, uDend, theDataframeBatchData, theTitle, theMatrixOfColors)
 {
 	filename<-makeHCFileName_PNG(theHierClustOutputDir, "Diagram")
+	writeTitleFile(theTitle, filename)
 	logDebug("writeClusteringImage", filename)
 	CairoPNG(filename=filename, width = 1000, height = 1000, pointsize=24)
 	###defaultPar <- par(no.readonly = TRUE)
@@ -337,21 +333,25 @@ writeHCDataTSVs<-function(uDend, theHierClustOutputDir, theOutputHCDataFileName,
                           theUdendRData)
 {
   rdataFile <- cleanFilePath(theHierClustOutputDir,theUdendRData)
-  logInfo("writeHCDataTSVs rdataFile=", rdataFile)
+  logInfo("writeHCDataTSVs start")
 	if (!is.null(uDend))
 	{
+	  logInfo("writeHCDataTSVs udend")
 	  data<-cbind(uDend$merge, uDend$height, deparse.level=0)
 	  colnames(data)<-c("A", "B", "Height")
   	###Write out the data as a Tab separated file to the specified location
-  	write.table(data, file = cleanFilePath(theHierClustOutputDir,theOutputHCDataFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
-
+	  logInfo("writeHCDataTSVs HCData=", cleanFilePath(theHierClustOutputDir,theOutputHCDataFileName))
+	  write.table(data, file = cleanFilePath(theHierClustOutputDir,theOutputHCDataFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
   	data<-cbind(uDend$labels, uDend$order, deparse.level=0)
   	colnames(data)<-c("Id", "Order")
   	###Write out the order data as a Tab separated file to the specified location (1 more row than data file)
+  	logInfo("writeHCDataTSVs HCOrder=", cleanFilePath(theHierClustOutputDir,theOutputHCOrderFileName))
   	write.table(data, file = cleanFilePath(theHierClustOutputDir,theOutputHCOrderFileName), append = FALSE, quote = FALSE, sep = "\t", row.names=FALSE)
     # write udend RData file
+  	logInfo("writeHCDataTSVs rdataFile=", rdataFile)
   	save(uDend, file=rdataFile)
 	}
+  logInfo("writeHCDataTSVs done")
 	rdataFile
 }
 
