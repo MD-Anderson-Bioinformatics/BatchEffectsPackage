@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -22,7 +22,7 @@ MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/rese
 from mbatch.test.test_legend import test_legend
 from mbatch.legend.legend import combine_legends
 
-
+# update this for internal paths when running for release pipeline
 dyn_leg_java: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_java.png"
 dyn_leg_pyth: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_python.png"
 dyn_leg_comb: str = "/BEA/BatchEffectsPackage_data/testing_dynamic/PyMBatch/Legend/legend_combined.png"

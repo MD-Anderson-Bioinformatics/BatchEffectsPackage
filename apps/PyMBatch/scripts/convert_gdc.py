@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -25,21 +25,22 @@ from mbatch.gdcapi.gdcapi import update_clinical_index, download_clinical_index
 from mbatch.gdcapi.gdcapi import convert_update_datasets, convert_biospecimen_files, convert_clinical_files
 from mbatch.test.common import print_errors, print_warnings
 
-index_file_clinical: str = '/BEA/DVLP/Pipeline-GDC/indexes/gdc_clinical.tsv'
-index_file_biospecimen: str = '/BEA/DVLP/Pipeline-GDC/indexes/gdc_biospecimen.tsv'
-index_file_datafiles: str = '/BEA/DVLP/Pipeline-GDC/indexes/gdc_datafiles.tsv'
-index_file_samples_dir: str = '/BEA/DVLP/Pipeline-GDC/indexes/samples'
+# update this for internal paths when running for release pipeline
+index_file_clinical: str = '/BEA/DAPI_GDC/indexes/gdc_clinical.tsv'
+index_file_biospecimen: str = '/BEA/DAPI_GDC/indexes/gdc_biospecimen.tsv'
+index_file_datafiles: str = '/BEA/DAPI_GDC/indexes/gdc_datafiles.tsv'
+index_file_samples_dir: str = '/BEA/DAPI_GDC/indexes/samples'
 
-dir_download_datafiles: str = '/BEA/DVLP/Pipeline-GDC/downloaded/data'
-dir_download_biospecimen: str = '/BEA/DVLP/Pipeline-GDC/downloaded/biospecimen'
-dir_download_clinical: str = '/BEA/DVLP/Pipeline-GDC/downloaded/clinical'
+dir_download_datafiles: str = '/BEA/DAPI_GDC/downloaded/data'
+dir_download_biospecimen: str = '/BEA/DAPI_GDC/downloaded/biospecimen'
+dir_download_clinical: str = '/BEA/DAPI_GDC/downloaded/clinical'
 
-dir_convert_datafiles: str = '/BEA/DVLP/Pipeline-GDC/converted/data'
-dir_convert_biospecimen: str = '/BEA/DVLP/Pipeline-GDC/converted/biospecimen'
-dir_convert_clinical: str = '/BEA/DVLP/Pipeline-GDC/converted/clinical'
+dir_convert_datafiles: str = '/BEA/DAPI_GDC/converted/data'
+dir_convert_biospecimen: str = '/BEA/DAPI_GDC/converted/biospecimen'
+dir_convert_clinical: str = '/BEA/DAPI_GDC/converted/clinical'
 
-dir_convert_utils: str = '/BEA/DVLP/Pipeline-GDC/util'
-dir_convert_temp: str = '/BEA/DVLP/Pipeline-GDC/CONVERT_TEMP'
+dir_convert_utils: str = '/BEA/DAPI_GDC/util'
+dir_convert_temp: str = '/BEA/DAPI_GDC/CONVERT_TEMP'
 
 if __name__ == '__main__':
     # ########################################################

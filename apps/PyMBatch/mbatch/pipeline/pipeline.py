@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -23,7 +23,7 @@ import glob
 import os
 import shutil
 from typing import List
-from mbatch.pipeline.std_data import StandardizedData, build_std_pipeline_index
+from mbatch.pipeline.std_data import StandardizedData, build_std_pipeline_index, build_update_pipeline_index
 from mbatch.pipeline.std_data import write_std_pipeline_index, read_std_pipeline_index
 from mbatch.pipeline.job import create_job, queue_job
 from mbatch.test.common import add_error, delete_from_dirs, delete_directory_contents, extract_zip_to_dir
@@ -35,11 +35,9 @@ from mbatch.visualindex.visual_index_dsc import VisualIndexDsc
 from mbatch.visualindex.visual_index_kwd import VisualIndexKwd
 
 
-# noinspection DuplicatedCode
-# pylint: disable=too-many-arguments,too-many-locals,too-many-statements,too-many-branches
 def execute_pipeline(the_input_dir: str, the_output_dir: str, the_index_file: str, the_util_dir: str,
                      the_bei_url: str, the_bei_dir: str, the_run_version: str, the_run_source: str,
-                     the_base_dir: str, the_sample_column_name: str) -> None:
+                     the_base_dir: str, the_sample_column_name: str, the_update_only_flag: bool) -> None:
     """
     Execute the pipeline, running MBatch on any unprocessed datasets
     :param the_input_dir: full directory path containing standardized data ZIP files (uses Standardized Data std_archive path)
@@ -52,6 +50,7 @@ def execute_pipeline(the_input_dir: str, the_output_dir: str, the_index_file: st
     :param the_run_source: string source, GDC or MWB
     :param the_base_dir: string detailing Docker internal path like /DAPI_MQA/DATA
     :param the_sample_column_name: column string for samples in batch (different for GDC vs MWB)
+    :param the_update_only_flag: if True, only run the custom update only option of the pipeline, to add new analysis to existing datasets
     :return: nothing
     """
     # read index files
@@ -65,82 +64,96 @@ def execute_pipeline(the_input_dir: str, the_output_dir: str, the_index_file: st
     vik: VisualIndexKwd = VisualIndexKwd(kwd_index_file, the_base_dir)
     vik.populate_index()
     # process pipeline
-    std_list: List[StandardizedData] = build_std_pipeline_index(the_input_dir, the_index_file, True)
-    my_std: StandardizedData
-    for my_std in std_list:
-        print(f'Standardized Data {my_std.std_archive}', flush=True)
-        if my_std.job_id == '':
-            if my_std.has_valid_data_p(the_input_dir):
-                # Handle Start New Job
-                print(f'Start New Job {my_std.version} {my_std.std_archive}', flush=True)
-                create_job(my_std, the_bei_url, the_bei_dir, the_input_dir, the_run_version,
-                           my_std.has_batch_info_p(the_input_dir), 'TCGA' in my_std.std_archive,
-                           the_util_dir, the_run_source, the_sample_column_name, "null", "null", "null")
-            else:
-                print(f'No-Data for Job {my_std.version} {my_std.std_archive}', flush=True)
-                my_std.job_id = "no-processing"
-                my_std.job_status = "no-processing"
-            # write index file update
-            print(f"write updated index {the_index_file}", flush=True)
-            write_std_pipeline_index(the_index_file, std_list)
+    std_list: List[StandardizedData]
+    if the_update_only_flag:
+        if os.path.exists(the_index_file):
+            std_list = read_std_pipeline_index(the_index_file)
         else:
-            if my_std.job_id == 'no-processing':
-                print(f'No-Processing for {my_std.version} {my_std.std_archive}', flush=True)
+            std_list = build_update_pipeline_index(the_input_dir, the_index_file, True)
+    else:
+        std_list = build_std_pipeline_index(the_input_dir, the_index_file, True)
+    my_std: StandardizedData
+    # TODO: TMP
+    done_one: bool = False
+    print('Pipeline Start Loop', flush=True)
+    for my_std in std_list:
+        if not done_one:
+            print(f'Standardized Data {my_std.std_archive}', flush=True)
+            if my_std.job_id == '':
+                if my_std.has_valid_data_p(the_input_dir):
+                    # Handle Start New Job
+                    done_one = True
+                    print(f'Start New Job {my_std.version} {my_std.std_archive}', flush=True)
+                    create_job(my_std, the_bei_url, the_bei_dir, the_input_dir, the_run_version,
+                               my_std.has_batch_info_p(the_input_dir), 'TCGA' in my_std.std_archive,
+                               the_util_dir, the_run_source, the_sample_column_name,
+                               "null", "null", "null",
+                               the_update_only_flag)
+                else:
+                    print(f'No-Data for Job {my_std.version} {my_std.std_archive}', flush=True)
+                    my_std.job_id = "no-processing"
+                    my_std.job_status = "no-processing"
+                # write index file update
+                print(f"write updated index {the_index_file}", flush=True)
+                write_std_pipeline_index(the_index_file, std_list)
             else:
-                # status_job -> created, queued, running, succeeded, failed, no-processing
-                # call returns and *updates* instance status
-                changed: bool = my_std.status_job(the_bei_url)
-                job_status: str = my_std.job_status
-                if changed & ('succeeded' == job_status):
-                    # Handle succeeded Job
-                    print(f'Succeeded {my_std.version} {my_std.std_archive}', flush=True)
-                    zip_dir: str = my_std.build_results_path(the_output_dir, the_run_source)
-                    job_dir: str = os.path.join(the_bei_dir, my_std.job_id)
-                    result_dir: str = os.path.join(job_dir, "ZIP-RESULTS")
-                    data_dir: str = os.path.join(job_dir, "ZIP-DATA")
-                    results_zip: str
-                    data_zip: str
-                    # clean up Rplots.pdf files left by other packages
-                    delete_from_dirs(job_dir, "Rplots.pdf")
-                    results_zip, data_zip = create_index_archive(result_dir, data_dir, zip_dir, os.path.join(result_dir, "info"), my_std, std_list)
-                    my_std.result_archive = results_zip
-                    my_std.data_archive = data_zip
-                    # add dataset information to index and write index
-                    data_path: str = os.path.join(job_dir, "ZIP-DATA", "current", "pipeline")
-                    vib.find_and_add_entries(the_output_dir, results_zip, data_zip, result_dir, the_run_version, data_path)
-                    vib.write_index_file()
-                    # add DSC information to index (also for corrections) and write index
-                    vid.find_and_add_entries(the_output_dir, results_zip, data_zip, result_dir)
-                    vid.write_index_file()
-                    # add KWD information to index (also for corrections?) and write index
-                    vik.find_and_add_entries(the_output_dir, results_zip, data_zip, result_dir)
-                    vik.write_index_file()
-                elif changed & ('failed' == job_status):
-                    # Handle Failed Job - basically by ignoring
-                    print(f'Failure {my_std.version} {my_std.std_archive}', flush=True)
-                    add_error(f'Failure Job {my_std.job_id} Version {my_std.version} Archive {my_std.std_archive}')
-                elif changed & ('running' == job_status):
-                    # Handle Running Job
-                    print(f'Running {my_std.version} {my_std.std_archive}', flush=True)
-                elif changed & ('queued' == job_status):
-                    # Handle queued Job
-                    print(f'Queued {my_std.version} {my_std.std_archive}', flush=True)
-                if changed:
-                    # write index file update
-                    print(f"write updated index {the_index_file}", flush=True)
-                    write_std_pipeline_index(the_index_file, std_list)
-        if my_std.job_status == 'created':
-            # make HTTP call to run job and change job_status to running
-            queue_job(my_std, the_bei_url)
-            # write index file update
-            print(f"write updated index {the_index_file}", flush=True)
-            write_std_pipeline_index(the_index_file, std_list)
+                if my_std.job_id == 'no-processing':
+                    print(f'No-Processing for {my_std.version} {my_std.std_archive}', flush=True)
+                else:
+                    # status_job -> created, queued, running, succeeded, failed, no-processing
+                    # call returns and *updates* instance status
+                    changed: bool = my_std.status_job(the_bei_url)
+                    job_status: str = my_std.job_status
+                    if changed & ('succeeded' == job_status):
+                        # Handle succeeded Job
+                        print(f'Succeeded {my_std.version} {my_std.std_archive}', flush=True)
+                        zip_dir: str = my_std.build_results_path(the_output_dir, the_run_source)
+                        job_dir: str = os.path.join(the_bei_dir, my_std.job_id)
+                        result_dir: str = os.path.join(job_dir, "ZIP-RESULTS")
+                        data_dir: str = os.path.join(job_dir, "ZIP-DATA")
+                        results_zip: str
+                        data_zip: str
+                        # clean up Rplots.pdf files left by other packages
+                        delete_from_dirs(job_dir, "Rplots.pdf")
+                        results_zip, data_zip = create_index_archive(result_dir, data_dir, zip_dir, os.path.join(result_dir, "info"), the_update_only_flag, my_std, std_list)
+                        my_std.result_archive = results_zip
+                        my_std.data_archive = data_zip
+                        # add dataset information to index and write index
+                        data_path: str = os.path.join(job_dir, "ZIP-DATA", "current", "pipeline")
+                        vib.find_and_add_entries(the_output_dir, results_zip, data_zip, result_dir, the_run_version, data_path)
+                        vib.write_index_file()
+                        # add DSC information to index (also for corrections) and write index
+                        vid.find_and_add_entries(the_output_dir, results_zip, data_zip, result_dir)
+                        vid.write_index_file()
+                        # add KWD information to index (also for corrections?) and write index
+                        vik.find_and_add_entries(the_output_dir, results_zip, data_zip, result_dir)
+                        vik.write_index_file()
+                    elif changed & ('failed' == job_status):
+                        # Handle Failed Job - basically by ignoring
+                        print(f'Failure {my_std.version} {my_std.std_archive}', flush=True)
+                        add_error(f'Failure Job {my_std.job_id} Version {my_std.version} Archive {my_std.std_archive}')
+                    elif changed & ('running' == job_status):
+                        # Handle Running Job
+                        print(f'Running {my_std.version} {my_std.std_archive}', flush=True)
+                    elif changed & ('queued' == job_status):
+                        # Handle queued Job
+                        print(f'Queued {my_std.version} {my_std.std_archive}', flush=True)
+                    if changed:
+                        # write index file update
+                        print(f"write updated index {the_index_file}", flush=True)
+                        write_std_pipeline_index(the_index_file, std_list)
+            if my_std.job_status == 'created':
+                # make HTTP call to run job and change job_status to running
+                queue_job(my_std, the_bei_url)
+                # write index file update
+                print(f"write updated index {the_index_file}", flush=True)
+                write_std_pipeline_index(the_index_file, std_list)
+    print('Pipeline After Loop', flush=True)
     # corrections done elsewhere, separately
-# pylint: enable=too-many-arguments,too-many-locals,too-many-statements,too-many-branches
 
 
 # noinspection DuplicatedCode
-# pylint: disable=too-many-arguments,too-many-locals,too-many-statements
+# pylint: disable=too-many-arguments,too-many-locals,too-many-statements,unused-argument
 def check_pipeline(the_input_dir: str, the_output_dir: str, the_index_file: str, the_util_dir: str,
                      the_bei_url: str, the_bei_dir: str, the_run_version: str, the_run_source: str,
                      the_base_dir: str, the_sample_column_name: str) -> None:
@@ -183,10 +196,10 @@ def check_pipeline(the_input_dir: str, the_output_dir: str, the_index_file: str,
             if my_std.job_id == 'no-processing':
                 print(f'No-Processing for {my_std.version} {my_std.std_archive}', flush=True)
     print('*************************************************', flush=True)
-# pylint: enable=too-many-arguments,too-many-locals,too-many-statements
+# pylint: enable=too-many-arguments,too-many-locals,too-many-statements,unused-argument
 
 
-# pylint: disable=too-many-arguments,too-many-locals,too-many-statements
+# pylint: disable=too-many-arguments,too-many-locals,too-many-statements,unused-argument
 def update_pipeline_data_index(the_input_dir: str, the_output_dir: str, the_index_file: str, the_util_dir: str,
                      the_bei_url: str, the_bei_dir: str, the_run_version: str, the_run_source: str,
                      the_base_dir: str, the_sample_column_name: str) -> None:
@@ -237,10 +250,10 @@ def update_pipeline_data_index(the_input_dir: str, the_output_dir: str, the_inde
                     element.features_matrix = features_matrix
                     element.features_mutations = features_mutations
     vib.write_index_file()
-# pylint: enable=too-many-arguments,too-many-locals,too-many-statements
+# pylint: enable=too-many-arguments,too-many-locals,too-many-statements,unused-argument
 
 
-# pylint: disable=too-many-arguments,too-many-locals,too-many-statements
+# pylint: disable=too-many-arguments,too-many-locals,too-many-statements,unused-argument
 def update_pipeline_rebuild_results_archives(the_input_dir: str, the_output_dir: str, the_index_file: str, the_util_dir: str,
                      the_bei_url: str, the_bei_dir: str, the_run_version: str, the_run_source: str,
                      the_base_dir: str, the_sample_column_name: str) -> None:
@@ -273,10 +286,10 @@ def update_pipeline_rebuild_results_archives(the_input_dir: str, the_output_dir:
             results_zip: str
             data_zip: str
             # should already have old data and results added, but double check
-            results_zip, data_zip = create_index_archive(result_dir, data_dir, zip_dir, os.path.join(result_dir, "info"), my_std, std_list)
+            results_zip, data_zip = create_index_archive(result_dir, data_dir, zip_dir, os.path.join(result_dir, "info"), False, my_std, std_list)
             print(f'results_zip = {results_zip}', flush=True)
             print(f'data_zip = {data_zip}', flush=True)
-# pylint: enable=too-many-arguments,too-many-locals,too-many-statements
+# pylint: enable=too-many-arguments,too-many-locals,too-many-statements,unused-argument
 
 
 # noinspection DuplicatedCode
@@ -325,7 +338,7 @@ def reindex_pipeline(the_dir_result_data: str, the_temp_dir: str, the_old_tag: s
         new_results_zip: str
         new_data_zip: str
         zip_dir: str = the_temp_dir
-        new_results_zip, new_data_zip = create_index_archive(results_dir, data_dir, zip_dir, os.path.join(results_dir, "info"), None, None)
+        new_results_zip, new_data_zip = create_index_archive(results_dir, data_dir, zip_dir, os.path.join(results_dir, "info"), False, None, None)
         print(f'new_results_zip={new_results_zip}', flush=True)
         print(f'new_data_zip={new_data_zip}', flush=True)
         # rename old ZIP files

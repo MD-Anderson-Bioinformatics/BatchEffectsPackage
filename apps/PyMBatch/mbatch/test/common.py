@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -32,6 +32,16 @@ import shutil
 import datetime
 import zipfile
 import pandas
+
+
+def uniq_reduce_string_length(the_string: str, the_len: int) -> str:
+    the_string = remove_unsafe_characters(the_string)
+    if len(the_string) > the_len:
+        md5lib: hashlib = hashlib.md5()
+        md5lib.update(the_string)
+        hex_str: str = md5lib.hexdigest()
+        the_string = f"{the_string[:the_len]}-{hex_str[10:]}"
+    return the_string
 
 
 def timestamp_file_if_exists(the_file_path: str, the_timestamp: str) -> None:
@@ -443,7 +453,9 @@ def add_warnings(the_string: str) -> None:
     :param the_string: Add given string to list of warnings
     :return: nothing
     """
+    # pylint: disable=global-variable-not-assigned
     global WARN_LIST
+    # pylint: enable=global-variable-not-assigned
     print(the_string, flush=True)
     WARN_LIST.append(the_string)
 
@@ -454,7 +466,9 @@ def add_error(the_string: str) -> None:
     :param the_string: Add given string to list of errors
     :return: nothing
     """
+    # pylint: disable=global-variable-not-assigned
     global ERROR_LIST
+    # pylint: enable=global-variable-not-assigned
     print(the_string, flush=True)
     ERROR_LIST.append(the_string)
 
@@ -647,3 +661,21 @@ def remove_unsafe_characters(the_str: str) -> str:
     # remove tab, line feeds and returns and double quotes
     the_str = re.sub("[\t\n\r\"]", "", the_str)
     return the_str
+
+
+def convert_list_str_to_str(the_list: List[str], the_delimiter: str) -> str:
+    return the_delimiter.join(the_list)
+
+
+def convert_list_float_to_str(the_list: List[float], the_delimiter: str) -> str:
+    str_list: List[str] = []
+    val: float
+    for val in the_list:
+        str_list.append(f"{round(float(val), 4)}")
+    return convert_list_str_to_str(str_list, the_delimiter)
+
+
+def convert_to_filename(the_string: str) -> str:
+    filename: str = re.sub(r'[ ]', '_', the_string)
+    filename = re.sub(r'[^ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-]', '', filename)
+    return filename

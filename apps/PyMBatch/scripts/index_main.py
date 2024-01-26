@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -23,6 +23,7 @@ import os
 from mbatch.test.test_index import create_index_archive
 from mbatch.test.common import delete_directory_contents
 
+# update this for internal paths when running for release pipeline
 result_dir: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/index/ZIP-RESULTS"
 info_dir: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/index/RESULTS/info"
 data_dir: str = "/BEA/BatchEffectsPackage_data/testing_static/PyMBatch/index/ZIP-DATA"

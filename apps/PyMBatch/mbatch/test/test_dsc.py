@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -92,208 +92,6 @@ M_TOY_PERM: pandas.DataFrame = pandas.DataFrame({
     index=['Feature1', 'Feature2', 'Feature3', 'Feature4'])
 
 
-def test_perm_only_toy(the_sta_toy: str, the_dyn_toy: str, the_seed: int) -> StdData:
-    """
-    permute dataframe of toy dataset - assert compares new and old output
-    :param the_sta_toy: full path to file with previously permuted toy dataset (compare output against this)
-    :param the_dyn_toy: full path to file to write permuted toy dataset
-    :param the_seed: seed for random number generator
-    :return: permuted dataframe
-    """
-    print("test_perm_only_toy", flush=True)
-    print(f"test_perm_only_toy the_sta_toy={the_sta_toy}", flush=True)
-    print(f"test_perm_only_toy the_dyn_toy={the_dyn_toy}", flush=True)
-    print(f"test_perm_only_toy the_seed={the_seed}", flush=True)
-    mydata: StdData = StdData(M_TOY_PERM)
-    dpp: DscPerm = DscPerm(mydata.m_matrix, M_TOY_BATCHES.to_numpy(dtype=str), the_seed, 0, 1)
-    dpp.perm_only()
-    mydata.m_matrix = dpp.m_matrix
-    mydata.write_matrix_data(the_dyn_toy)
-    print("test_dsc_calc_count_toy calculate md5s", flush=True)
-    dyn_md5: str = generate_file_md5(the_dyn_toy)
-    print(f"test_dsc_calc_count_toy dyn_md5={dyn_md5}", flush=True)
-    sta_md5: str = generate_file_md5(the_sta_toy)
-    print(f"test_dsc_calc_count_toy sta_md5={sta_md5}", flush=True)
-    assert dyn_md5 == sta_md5, "Calculated and historic have different values"
-    print("test_dsc_perm_toy passed", flush=True)
-    return mydata
-
-
-def test_perm_only_file(the_matrix: str, the_sta_file: str, the_dyn_file: str, the_seed: int) -> StdData:
-    """
-    permute dataframe of dataset from file - assert compares new and old output
-    :param the_matrix: full file path to StdData file to read into dataframe
-    :param the_sta_file: full path to file with previously permuted file dataset (compare output against this)
-    :param the_dyn_file: full path to file to write permuted file dataset
-    :param the_seed: seed for random number generator
-    :return: permuted dataframe
-    """
-    print("test_dsc_perm_file", flush=True)
-    print(f"test_dsc_perm_file the_sta_file={the_sta_file}", flush=True)
-    print(f"test_dsc_perm_file the_dyn_toy={the_dyn_file}", flush=True)
-    print(f"test_dsc_perm_file the_seed={the_seed}", flush=True)
-    my_std_data: StdData = StdData()
-    # read StdData DF
-    my_std_data.read_matrix_data(the_matrix)
-    dpp: DscPerm = DscPerm(my_std_data.m_matrix, numpy.empty((0, 0), str), the_seed, 0, 1)
-    dpp.perm_only()
-    my_std_data.m_matrix = dpp.m_matrix
-    my_std_data.write_matrix_data(the_dyn_file)
-    print("test_dsc_perm_file calculate md5s", flush=True)
-    dyn_md5: str = generate_file_md5(the_dyn_file)
-    print(f"test_dsc_perm_file dyn_md5={dyn_md5}", flush=True)
-    sta_md5: str = generate_file_md5(the_sta_file)
-    print(f"test_dsc_perm_file sta_md5={sta_md5}", flush=True)
-    assert dyn_md5 == sta_md5, "Calculated and historic have different values"
-    print("test_dsc_perm_file passed", flush=True)
-    return my_std_data
-
-
-def test_dsc_once_toy(the_sta_toy: str, the_dyn_toy: str) -> DscInfo:
-    """
-    single dsc calculation on toy dataset - assert compares new and old output
-    :param the_sta_toy: full path to file with previously calculated DscInfo for toy dataset
-    :param the_dyn_toy: full path to file to write newly calculated DscInfo for toy dataset
-    :return: DscInfo with calculation results
-    """
-    print("test_dsc_calc_toy", flush=True)
-    print(f"test_dsc_calc_toy the_sta_toy={the_sta_toy}", flush=True)
-    print(f"test_dsc_calc_toy the_dyn_toy={the_dyn_toy}", flush=True)
-    mydata: StdData = StdData(M_TOY_DATA)
-    # print(f"TOY DATASET 25 samples, 4 features", flush=True)
-    # print(f"mydata.m_matrix.shape={mydata.m_matrix.shape}", flush=True)
-    result: DscInfo = dsc_calc(mydata.m_matrix, M_TOY_BATCHES.to_numpy(dtype=str))
-    result.write_to_file(the_dyn_toy)
-    print("test_dsc_calc_toy calculate md5s", flush=True)
-    dyn_md5: str = generate_file_md5(the_dyn_toy)
-    print(f"test_dsc_calc_toy dyn_md5={dyn_md5}", flush=True)
-    sta_md5: str = generate_file_md5(the_sta_toy)
-    print(f"test_dsc_calc_toy sta_md5={sta_md5}", flush=True)
-    assert dyn_md5 == sta_md5, "Calculated and historic have different values"
-    print("test_dsc_calc_toy passed", flush=True)
-    return result
-
-
-def test_dsc_once_file(the_matrix: str, the_batches: str,
-                       the_sta_file: str, the_dyn_file: str) -> DscInfo:
-    """
-    single dsc calculation on dataset from file - assert compares new and old output
-    :param the_matrix: full file path to StdData file to read into dataframe
-    :param the_batches: batches for samples
-    :param the_sta_file: full path to file with previously calculated file dataset DSC results (compare output against this)
-    :param the_dyn_file: full path to file to write file dataset DSC results
-    :return: DscInfo for results
-    """
-    print(f"test_dsc_calc_file the_matrix={the_matrix}", flush=True)
-    print(f"test_dsc_calc_file the_batches={the_batches}", flush=True)
-    print(f"test_dsc_calc_file the_sta_file={the_sta_file}", flush=True)
-    print(f"test_dsc_calc_file the_dyn_file={the_dyn_file}", flush=True)
-    # read StdData DF
-    mydata: StdData = StdData()
-    mydata.read_matrix_data(the_matrix)
-    mydata.read_batches_data(the_batches)
-    my_batch_list: numpy.ndarray = mydata.get_batch_data_for_column('ShipDate')
-    result: DscInfo = dsc_calc(mydata.m_matrix, my_batch_list)
-    result.write_to_file(the_dyn_file)
-    # print(result, flush=True)
-    print("test_dsc_calc_file calculate md5s", flush=True)
-    dyn_md5: str = generate_file_md5(the_dyn_file)
-    print(f"test_dsc_calc_file dyn_md5={dyn_md5}", flush=True)
-    sta_md5: str = generate_file_md5(the_sta_file)
-    print(f"test_dsc_calc_file sta_md5={sta_md5}", flush=True)
-    assert dyn_md5 == sta_md5, "Calculated and historic have different values"
-    print("test_dsc_calc_file passed", flush=True)
-    return result
-
-
-# noinspection DuplicatedCode
-def test_dsc_multi_toy(the_sta_toy: str, the_dyn_toy: str, the_seed: int, the_perms: int) -> List[DscInfo]:
-    """
-    do permutations of toy dataset, calculate DSC, and write to file - assert compares new and old output
-    :param the_sta_toy: full path to file with previously calculated list of DscInfo for toy dataset
-    :param the_dyn_toy: full path to file to write newly calculated list of DscInfo for toy dataset
-    :param the_seed: random number generator seed
-    :param the_perms: number of permutations to do
-    :return: list of DscInfo with permuted DSC values
-    """
-    print("test_dsc_multi_toy", flush=True)
-    print(f"test_dsc_multi_toy the_sta_toy={the_sta_toy}", flush=True)
-    print(f"test_dsc_multi_toy the_dyn_toy={the_dyn_toy}", flush=True)
-    print(f"test_dsc_multi_toy the_seed={the_seed}", flush=True)
-    print(f"test_dsc_multi_toy the_perms={the_perms}", flush=True)
-    print("test_dsc_multi_toy call dsc_perm_calc_count", flush=True)
-    mydata: StdData = StdData(M_TOY_DATA)
-    dpp: DscPerm = DscPerm(mydata.m_matrix, M_TOY_BATCHES.to_numpy(dtype=str), the_seed, the_perms, 10)
-    info_list: List[DscInfo] = dpp.perm_dsc_multi()
-    info: DscInfo
-    flag: str = 'w'
-    print(f"test_dsc_multi_toy write to={the_dyn_toy}", flush=True)
-    for info in info_list:
-        # print(f"test_dsc_count_toy write flag={flag}", flush=True)
-        # print(f"test_dsc_count_toy write info={info}", flush=True)
-        info.write_to_file(the_dyn_toy, flag)
-        if 'w' == flag:
-            flag = 'a'
-    print("test_dsc_multi_toy calculate md5s", flush=True)
-    dyn_md5: str = generate_file_md5(the_dyn_toy)
-    print(f"test_dsc_multi_toy dyn_md5={dyn_md5}", flush=True)
-    sta_md5: str = generate_file_md5(the_sta_toy)
-    print(f"test_dsc_multi_toy sta_md5={sta_md5}", flush=True)
-    assert dyn_md5 == sta_md5, "Calculated and historic have different values"
-    print("test_dsc_multi_toy passed", flush=True)
-    return info_list
-
-
-# pylint: disable=too-many-arguments
-# noinspection DuplicatedCode
-def test_dsc_multi_file(the_matrix: str, the_batches: str,
-                        the_sta_file: str, the_dyn_file: str,
-                        the_seed: int, the_perms: int) -> List[DscInfo]:
-    """
-    do permutations of file-based dataset, calculate DSC, and write to file - assert compares new and old output
-    :param the_matrix: full file path to StdData file to read into dataframe
-    :param the_batches: batches for samples
-    :param the_sta_file: full path to file with previously calculated list of file dataset DSC results (compare output against this)
-    :param the_dyn_file: full path to file to write list of file dataset DSC results
-    :return: list of DscInfo for results
-    """
-    print("test_dsc_multi_file", flush=True)
-    print(f"test_dsc_multi_file the_matrix={the_matrix}", flush=True)
-    print(f"test_dsc_multi_file the_batches={the_batches}", flush=True)
-    print(f"test_dsc_multi_file the_sta_file={the_sta_file}", flush=True)
-    print(f"test_dsc_multi_file the_dyn_file={the_dyn_file}", flush=True)
-    print(f"test_dsc_multi_file the_seed={the_seed}", flush=True)
-    print(f"test_dsc_multi_file the_perms={the_perms}", flush=True)
-    print("test_dsc_multi_file call dsc_perm_calc_count", flush=True)
-    # read StdData DF
-    my_std_data: StdData = StdData()
-    my_std_data.read_matrix_data(the_matrix)
-    my_std_data.read_batches_data(the_batches)
-    # build batch List
-    my_batch_list: numpy.ndarray = my_std_data.get_batch_data_for_column('ShipDate')
-    # call dsc permutations
-    dpp: DscPerm = DscPerm(my_std_data.m_matrix, my_batch_list, the_seed, the_perms, 10)
-    info_list: List[DscInfo] = dpp.perm_dsc_multi()
-    info: DscInfo
-    flag: str = 'w'
-    print(f"test_dsc_multi_file write to={the_dyn_file}", flush=True)
-    for info in info_list:
-        # print(f"test_dsc_calc_count_file write flag={flag}", flush=True)
-        # print(f"test_dsc_calc_count_file write info={info}", flush=True)
-        info.write_to_file(the_dyn_file, flag)
-        if 'w' == flag:
-            flag = 'a'
-    print("test_dsc_multi_file calculate md5s", flush=True)
-    dyn_md5: str = generate_file_md5(the_dyn_file)
-    print(f"test_dsc_multi_file dyn_md5={dyn_md5}", flush=True)
-    sta_md5: str = generate_file_md5(the_sta_file)
-    print(f"test_dsc_multi_file sta_md5={sta_md5}", flush=True)
-    assert dyn_md5 == sta_md5, "Calculated and historic have different values"
-    print("test_dsc_multi_file passed", flush=True)
-    return info_list
-# pylint: enable=too-many-arguments
-
-
 class TestDsc(unittest.TestCase):
     """
     Class for setting up Dsc testing - clear/make directory for output
@@ -356,23 +154,170 @@ class TestDsc(unittest.TestCase):
             shutil.rmtree(os.path.dirname(self.dyn_toy))
         os.makedirs(os.path.dirname(self.dyn_toy))
 
-    def test_dsc_functions(self: 'TestDsc') -> None:
-        """
-        Test all the functions -- asserts thrown if test fails
-        :return: nothing
-        """
-        # single dsc calculation on toy dataset
-        test_dsc_once_toy(self.sta_toy, self.dyn_toy)
-        # single dsc calculation on dataset from file
-        test_dsc_once_file(self.sta_matrix, self.sta_batches, self.sta_file, self.dyn_file)
-        # permute dataframe of toy dataset
-        test_perm_only_toy(self.sta_perm_toy, self.dyn_perm_toy, self.seed)
-        # permute dataframe of dataset from file
-        test_perm_only_file(self.sta_matrix, self.sta_perm_file, self.dyn_perm_file, self.seed)
-        # do 20 permutations of toy dataset, calculate DSC, and write to file
-        test_dsc_multi_toy(self.sta_count_toy, self.dyn_count_toy, self.seed, 20)
-        # do 20 permutations of file-based dataset, calculate DSC, and write to file
-        test_dsc_multi_file(self.sta_matrix, self.sta_batches, self.sta_count_file, self.dyn_count_file, self.seed, 2)
+    def test_perm_only_toy(self: 'TestDsc') -> None:
+        the_sta_toy: str = self.sta_perm_toy
+        the_dyn_toy: str = self.dyn_perm_toy
+        the_seed: int = self.seed
+        print("test_perm_only_toy", flush=True)
+        print(f"test_perm_only_toy the_sta_toy={the_sta_toy}", flush=True)
+        print(f"test_perm_only_toy the_dyn_toy={the_dyn_toy}", flush=True)
+        print(f"test_perm_only_toy the_seed={the_seed}", flush=True)
+        mydata: StdData = StdData(M_TOY_PERM)
+        dpp: DscPerm = DscPerm(mydata.m_matrix, M_TOY_BATCHES.to_numpy(dtype=str), the_seed, 0, 1)
+        dpp.perm_only()
+        mydata.m_matrix = dpp.m_matrix
+        mydata.write_matrix_data(the_dyn_toy)
+        print("test_dsc_calc_count_toy calculate md5s", flush=True)
+        dyn_md5: str = generate_file_md5(the_dyn_toy)
+        print(f"test_dsc_calc_count_toy dyn_md5={dyn_md5}", flush=True)
+        sta_md5: str = generate_file_md5(the_sta_toy)
+        print(f"test_dsc_calc_count_toy sta_md5={sta_md5}", flush=True)
+        assert dyn_md5 == sta_md5, "Calculated and historic have different values"
+        print("test_dsc_perm_toy passed", flush=True)
+
+    def test_perm_only_file(self: 'TestDsc') -> None:
+        the_matrix: str = self.sta_matrix
+        the_sta_file: str = self.sta_perm_file
+        the_dyn_file: str = self.dyn_perm_file
+        the_seed: int = self.seed
+        print("test_dsc_perm_file", flush=True)
+        print(f"test_dsc_perm_file the_sta_file={the_sta_file}", flush=True)
+        print(f"test_dsc_perm_file the_dyn_toy={the_dyn_file}", flush=True)
+        print(f"test_dsc_perm_file the_seed={the_seed}", flush=True)
+        my_std_data: StdData = StdData()
+        # read StdData DF
+        my_std_data.read_matrix_data(the_matrix)
+        dpp: DscPerm = DscPerm(my_std_data.m_matrix, numpy.empty((0, 0), str), the_seed, 0, 1)
+        dpp.perm_only()
+        my_std_data.m_matrix = dpp.m_matrix
+        my_std_data.write_matrix_data(the_dyn_file)
+        print("test_dsc_perm_file calculate md5s", flush=True)
+        dyn_md5: str = generate_file_md5(the_dyn_file)
+        print(f"test_dsc_perm_file dyn_md5={dyn_md5}", flush=True)
+        sta_md5: str = generate_file_md5(the_sta_file)
+        print(f"test_dsc_perm_file sta_md5={sta_md5}", flush=True)
+        assert dyn_md5 == sta_md5, "Calculated and historic have different values"
+        print("test_dsc_perm_file passed", flush=True)
+
+    def test_dsc_once_toy(self: 'TestDsc') -> None:
+        the_sta_toy: str = self.sta_toy
+        the_dyn_toy: str = self.dyn_toy
+        print("test_dsc_calc_toy", flush=True)
+        print(f"test_dsc_calc_toy the_sta_toy={the_sta_toy}", flush=True)
+        print(f"test_dsc_calc_toy the_dyn_toy={the_dyn_toy}", flush=True)
+        mydata: StdData = StdData(M_TOY_DATA)
+        # print(f"TOY DATASET 25 samples, 4 features", flush=True)
+        # print(f"mydata.m_matrix.shape={mydata.m_matrix.shape}", flush=True)
+        result: DscInfo = dsc_calc(mydata.m_matrix, M_TOY_BATCHES.to_numpy(dtype=str))
+        result.write_to_file(the_dyn_toy)
+        print("test_dsc_calc_toy calculate md5s", flush=True)
+        dyn_md5: str = generate_file_md5(the_dyn_toy)
+        print(f"test_dsc_calc_toy dyn_md5={dyn_md5}", flush=True)
+        sta_md5: str = generate_file_md5(the_sta_toy)
+        print(f"test_dsc_calc_toy sta_md5={sta_md5}", flush=True)
+        assert dyn_md5 == sta_md5, "Calculated and historic have different values"
+        print("test_dsc_calc_toy passed", flush=True)
+
+    def test_dsc_once_file(self: 'TestDsc') -> None:
+        the_matrix: str = self.sta_matrix
+        the_batches: str = self.sta_batches
+        the_sta_file: str = self.sta_file
+        the_dyn_file: str = self.dyn_file
+        print(f"test_dsc_calc_file the_matrix={the_matrix}", flush=True)
+        print(f"test_dsc_calc_file the_batches={the_batches}", flush=True)
+        print(f"test_dsc_calc_file the_sta_file={the_sta_file}", flush=True)
+        print(f"test_dsc_calc_file the_dyn_file={the_dyn_file}", flush=True)
+        # read StdData DF
+        mydata: StdData = StdData()
+        mydata.read_matrix_data(the_matrix)
+        mydata.read_batches_data(the_batches)
+        my_batch_list: numpy.ndarray = mydata.get_batch_data_for_column('ShipDate')
+        result: DscInfo = dsc_calc(mydata.m_matrix, my_batch_list)
+        result.write_to_file(the_dyn_file)
+        # print(result, flush=True)
+        print("test_dsc_calc_file calculate md5s", flush=True)
+        dyn_md5: str = generate_file_md5(the_dyn_file)
+        print(f"test_dsc_calc_file dyn_md5={dyn_md5}", flush=True)
+        sta_md5: str = generate_file_md5(the_sta_file)
+        print(f"test_dsc_calc_file sta_md5={sta_md5}", flush=True)
+        assert dyn_md5 == sta_md5, "Calculated and historic have different values"
+        print("test_dsc_calc_file passed", flush=True)
+
+    # noinspection DuplicatedCode
+    def test_dsc_multi_toy(self: 'TestDsc') -> None:
+        the_sta_toy: str = self.sta_count_toy
+        the_dyn_toy: str = self.dyn_count_toy
+        the_seed: int = self.seed
+        the_perms: int = 20
+        print("test_dsc_multi_toy", flush=True)
+        print(f"test_dsc_multi_toy the_sta_toy={the_sta_toy}", flush=True)
+        print(f"test_dsc_multi_toy the_dyn_toy={the_dyn_toy}", flush=True)
+        print(f"test_dsc_multi_toy the_seed={the_seed}", flush=True)
+        print(f"test_dsc_multi_toy the_perms={the_perms}", flush=True)
+        print("test_dsc_multi_toy call dsc_perm_calc_count", flush=True)
+        mydata: StdData = StdData(M_TOY_DATA)
+        dpp: DscPerm = DscPerm(mydata.m_matrix, M_TOY_BATCHES.to_numpy(dtype=str), the_seed, the_perms, 10)
+        info_list: List[DscInfo] = dpp.perm_dsc_multi()
+        info: DscInfo
+        flag: str = 'w'
+        print(f"test_dsc_multi_toy write to={the_dyn_toy}", flush=True)
+        for info in info_list:
+            # print(f"test_dsc_count_toy write flag={flag}", flush=True)
+            # print(f"test_dsc_count_toy write info={info}", flush=True)
+            info.write_to_file(the_dyn_toy, flag)
+            if 'w' == flag:
+                flag = 'a'
+        print("test_dsc_multi_toy calculate md5s", flush=True)
+        dyn_md5: str = generate_file_md5(the_dyn_toy)
+        print(f"test_dsc_multi_toy dyn_md5={dyn_md5}", flush=True)
+        sta_md5: str = generate_file_md5(the_sta_toy)
+        print(f"test_dsc_multi_toy sta_md5={sta_md5}", flush=True)
+        assert dyn_md5 == sta_md5, "Calculated and historic have different values"
+        print("test_dsc_multi_toy passed", flush=True)
+
+    # pylint: disable=too-many-arguments
+    # noinspection DuplicatedCode
+    def test_dsc_multi_file(self: 'TestDsc') -> None:
+        the_matrix: str = self.sta_matrix
+        the_batches: str = self.sta_batches
+        the_sta_file: str = self.sta_count_file
+        the_dyn_file: str = self.dyn_count_file
+        the_seed: int = self.seed
+        the_perms: int = 2
+        print("test_dsc_multi_file", flush=True)
+        print(f"test_dsc_multi_file the_matrix={the_matrix}", flush=True)
+        print(f"test_dsc_multi_file the_batches={the_batches}", flush=True)
+        print(f"test_dsc_multi_file the_sta_file={the_sta_file}", flush=True)
+        print(f"test_dsc_multi_file the_dyn_file={the_dyn_file}", flush=True)
+        print(f"test_dsc_multi_file the_seed={the_seed}", flush=True)
+        print(f"test_dsc_multi_file the_perms={the_perms}", flush=True)
+        print("test_dsc_multi_file call dsc_perm_calc_count", flush=True)
+        # read StdData DF
+        my_std_data: StdData = StdData()
+        my_std_data.read_matrix_data(the_matrix)
+        my_std_data.read_batches_data(the_batches)
+        # build batch List
+        my_batch_list: numpy.ndarray = my_std_data.get_batch_data_for_column('ShipDate')
+        # call dsc permutations
+        dpp: DscPerm = DscPerm(my_std_data.m_matrix, my_batch_list, the_seed, the_perms, 10)
+        info_list: List[DscInfo] = dpp.perm_dsc_multi()
+        info: DscInfo
+        flag: str = 'w'
+        print(f"test_dsc_multi_file write to={the_dyn_file}", flush=True)
+        for info in info_list:
+            # print(f"test_dsc_calc_count_file write flag={flag}", flush=True)
+            # print(f"test_dsc_calc_count_file write info={info}", flush=True)
+            info.write_to_file(the_dyn_file, flag)
+            if 'w' == flag:
+                flag = 'a'
+        print("test_dsc_multi_file calculate md5s", flush=True)
+        dyn_md5: str = generate_file_md5(the_dyn_file)
+        print(f"test_dsc_multi_file dyn_md5={dyn_md5}", flush=True)
+        sta_md5: str = generate_file_md5(the_sta_file)
+        print(f"test_dsc_multi_file sta_md5={sta_md5}", flush=True)
+        assert dyn_md5 == sta_md5, "Calculated and historic have different values"
+        print("test_dsc_multi_file passed", flush=True)
+    # pylint: enable=too-many-arguments
 
 
 if __name__ == '__main__':

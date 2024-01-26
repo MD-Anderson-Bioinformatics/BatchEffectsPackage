@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -91,20 +91,21 @@ class StdData:
                                                       encoding='utf-8', index_col=0)
         self.process_panda_matrix(my_matrix)
 
-    def read_batches_data(self: 'StdData', the_file: str) -> None:
+    def read_batches_data(self: 'StdData', the_file: str, the_sample_id_col: str = "Sample") -> None:
         """
         Load standardized data from file into StdData object.
         Uses Pandas for easy loading. But stores in numpy
         :param the_file: batches data file to load, with Sample as first column, and rows sorted by sample
+        :param the_sample_id_col: string name of sample id column
         :return: nothing
         """
         my_batches: pandas.DataFrame = pandas.read_csv(the_file, sep='\t', quoting=csv.QUOTE_NONE,
                                                        encoding='utf-8', index_col=0, dtype=str)
-        my_batches = my_batches.sort_values(by="Sample")
+        my_batches = my_batches.sort_values(by=the_sample_id_col)
         self.m_batches = my_batches.to_numpy(dtype=str)
         self.m_columns = my_batches.columns.to_numpy(dtype=str)
         # sample is not in .columns so needs to be added
-        self.m_columns = numpy.insert(self.m_columns, 0, "Sample")
+        self.m_columns = numpy.insert(self.m_columns, 0, the_sample_id_col)
 
     def write_matrix_data(self: 'StdData', the_file: str) -> None:
         """

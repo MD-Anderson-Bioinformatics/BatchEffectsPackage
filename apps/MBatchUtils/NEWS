@@ -5,6 +5,14 @@
 	*						 *
 	**************************************************
 
+		CHANGES IN R VERSION 2.1.0
+
+NEW FEATURES
+
+    o Pipeline tweaks.
+    o Update handling titles.
+    o Volcano Plot / Fold Change code is currently in BETA - DO NOT USE.
+
 		CHANGES IN R VERSION 2.0.2
 
 NEW FEATURES

@@ -76,14 +76,18 @@ Then do required installs, similar to this:
 ```
 conda create -y -n gendev
 conda activate gendev
-conda install -y -c conda-forge python==3.10
+conda install -y -c conda-forge python==3.11.*
 conda install -y -c conda-forge pandas
 conda install -y -c conda-forge numpy
 conda install -y -c conda-forge matplotlib
+conda install -y -c conda-forge scanpy
 conda install -y -c conda-forge pillow
 conda install -y -c conda-forge jsonpickle
+conda install -y -c conda-forge requests
 conda install -y -c conda-forge xmltodict
-conda install -y -c conda-forge pillow
+conda install -y -c conda-forge cryptography
+conda install -y -c conda-forge urllib3
+conda install -y -c conda-forge scipy
 ```
 Then you can install the MBatch Python Package:
 

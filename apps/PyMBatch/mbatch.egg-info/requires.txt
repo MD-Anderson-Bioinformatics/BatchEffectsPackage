@@ -1,7 +1,11 @@
 matplotlib
 pandas
 numpy
+scanpy
 pillow
 jsonpickle
 requests
 xmltodict
+cryptography
+urllib3
+scipy

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -29,10 +29,11 @@ from mbatch.gdcapi.gdcapi import update_clinical_index
 from mbatch.gdcapi.gdcapi import update_datafile_index
 from mbatch.test.common import print_errors, print_warnings
 
-index_file_clinical: str = '/BEA/DVLP/Pipeline-GDC/indexes/gdc_clinical.tsv'
-index_file_biospecimen: str = '/BEA/DVLP/Pipeline-GDC/indexes/gdc_biospecimen.tsv'
-index_file_datafiles: str = '/BEA/DVLP/Pipeline-GDC/indexes/gdc_datafiles.tsv'
-index_file_samples_dir: str = '/BEA/DVLP/Pipeline-GDC/indexes/samples'
+# update this for internal paths when running for release pipeline
+index_file_clinical: str = '/BEA/DAPI_GDC/indexes/gdc_clinical.tsv'
+index_file_biospecimen: str = '/BEA/DAPI_GDC/indexes/gdc_biospecimen.tsv'
+index_file_datafiles: str = '/BEA/DAPI_GDC/indexes/gdc_datafiles.tsv'
+index_file_samples_dir: str = '/BEA/DAPI_GDC/indexes/samples'
 
 
 if __name__ == '__main__':

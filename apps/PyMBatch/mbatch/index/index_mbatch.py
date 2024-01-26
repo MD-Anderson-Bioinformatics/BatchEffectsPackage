@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -24,6 +24,8 @@ import io
 import os
 from typing import List, Optional
 import jsonpickle
+
+from mbatch.index.index_entry import make_entry_volcanoplot
 from mbatch.index.index_original_data import OriginalData
 from mbatch.index.index_entry import MBatchEntry
 from mbatch.index.index_entry import make_entry_boxplot, make_entry_cdp, make_entry_discrete
@@ -125,6 +127,8 @@ def make_top_mbatch_entry(the_analysis_dir: str, the_info_dir: str) -> MBatchEnt
     for dir_entry in subdir_list:
         if dir_entry.name == "BoxPlot":
             my_obj.dropdown_entries.append(make_entry_boxplot(dir_entry.path, the_info_dir))
+        elif dir_entry.name == "VolcanoPlot":
+            my_obj.dropdown_entries.append(make_entry_volcanoplot(dir_entry.path, the_info_dir))
         elif dir_entry.name == "CDP":
             my_obj.dropdown_entries.append(make_entry_cdp(dir_entry.path, the_info_dir))
         elif dir_entry.name == "Discrete":

@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+# Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -24,6 +24,12 @@ install.packages("dunn.test", dependencies=TRUE, repos = "http://cran.r-project.
 # need timeout for larger packages
 options(timeout=9999999)
 
+# used in UMAP and Seurat - needed to fix https://github.com/satijalab/seurat/issues/8100
+message("#*#* Matrix source")
+install.packages("Matrix", type="source", dependencies=TRUE, repos = "http://cran.r-project.org")
+message("#*#* irlba source")
+install.packages("irlba", type="source", dependencies=TRUE, repos = "http://cran.r-project.org")
+
 # used for UMAP
 message("#*#* uwot")
 install.packages("uwot", dependencies=TRUE, repos = "http://cran.r-project.org")
@@ -38,5 +44,9 @@ library(devtools)
 # required for UMAP embeds
 message("#*#* jlmelville/vizier")
 devtools::install_github("jlmelville/vizier")
+
+# install for Seurat object conversion
+message("#*#* satijalab/seurat - seurat5")
+remotes::install_github("satijalab/seurat", "seurat5", upgrade="never")
 
 message("done installForMBatch3")

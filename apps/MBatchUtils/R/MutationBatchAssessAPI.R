@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -1134,7 +1134,12 @@ loadAndRunForKruskal <- function(theMBatchData, theBatchTypes, thePvalueCutoff, 
 												 			message(myBatchType, " changing from NA to 1")
 												 			testResult$p.value <- 1
 												 		}
-												 		else if (-log10(testResult$p.value)>=-log10(thePvalueCutoff))
+												 		if (0 == testResult$p.value)
+												 		{
+												 		  # kruskal.test replaces values < 2.2e-16 with zero
+												 		  testResult$p.value = 2.2e-16
+												 		}
+												 		if (-log10(testResult$p.value)>=-log10(thePvalueCutoff))
 												 		{
 												 			# if the p-balue result is greater than or equal to the cutoff, do a Dunn's test
 												 			batchesWithEffects <- dunnTestBatches(dataVector, batchValues, thePvalueCutoff, theZScoreCutoff)

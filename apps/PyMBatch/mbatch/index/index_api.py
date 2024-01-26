@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -100,6 +100,7 @@ def populate_values_from_files(the_directory: str) -> Tuple[OriginalData, str, s
 
 # pylint: disable=too-many-locals,too-many-arguments
 def create_index_archive(the_results_dir: str, the_data_dir: str, the_zip_dir: str, the_info_dir: str,
+                         the_update_only_flag: bool,
                          the_new_data: typing.Optional[StandardizedData],
                          the_std_list: typing.Optional[List[StandardizedData]]) -> Tuple[str, str]:
     """
@@ -108,6 +109,7 @@ def create_index_archive(the_results_dir: str, the_data_dir: str, the_zip_dir: s
     :param the_data_dir: directory with actual data
     :param the_zip_dir: directory in which to place ZIP file
     :param the_info_dir: full path to directory containing TEST_<version> labels
+    :param the_update_only_flag: if True, don't check for job id, as this is a update run, for sets that already exist
     :param the_new_data: new data object for latest analysis
     :param the_std_list: dictionary of data objects
     :return: full pathname for ZIP file
@@ -138,9 +140,11 @@ def create_index_archive(the_results_dir: str, the_data_dir: str, the_zip_dir: s
     if the_new_data is not None:
         if the_std_list is not None:
             print("create_index_archive check for existing repo", flush=True)
-            new_dataset_id: str = populate_from_existing_repo(the_data_dir, the_results_dir, the_new_data, the_std_list)
-            if new_dataset_id != '':
-                dataset_file_id = new_dataset_id
+            reuse_old_dataset_id: str = populate_from_existing_repo(the_data_dir, the_results_dir, the_new_data, the_std_list, the_update_only_flag)
+            if reuse_old_dataset_id != '':
+                dataset_file_id = reuse_old_dataset_id
+                print(f"create_index_archive reuse_old_dataset_id={dataset_file_id}", flush=True)
+            else:
                 print(f"create_index_archive new dataset_file_id={dataset_file_id}", flush=True)
     print("create_index_archive call make_mbatch_index", flush=True)
     mbatch_index: MBatchIndex = make_mbatch_index(original_data, dataset_id, analysis_dir, the_info_dir)

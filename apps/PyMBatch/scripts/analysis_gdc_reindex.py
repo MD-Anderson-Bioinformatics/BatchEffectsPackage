@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -19,10 +19,10 @@ MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/rese
 @author: Tod Casasent
 """
 
-import io
 from mbatch.pipeline.pipeline import reindex_pipeline
 from mbatch.test.common import print_errors, print_warnings
 
+# update this for internal paths when running for release pipeline
 dir_result_data: str = '/BEA/DAPI_MQA/DATA'
 dir_result_indexes: str = '/BEA/DAPI_MQA/INDEXES'
 dir_temp: str = '/BEA/PIPELINE_TMP'

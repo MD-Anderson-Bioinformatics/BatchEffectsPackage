@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -212,7 +212,8 @@ def filter_usable_batch_types(the_batch_info: pandas.DataFrame, the_tcga_flag: b
 def create_job(the_std_data: StandardizedData, the_bei_url: str, the_bei_dir: str, the_input_dir: str,
                the_run_version: str, the_has_batch_info_flag: bool, the_tcga_flag: bool,
                the_util_dir: str, the_run_source: str, the_sample_column_name: str,
-               the_correct_batch_type: str, the_correction_algorithm: str, the_correction_reason: str) -> None:
+               the_correct_batch_type: str, the_correction_algorithm: str, the_correction_reason: str,
+               the_update_only_flag: bool) -> None:
     """
     Create the job and populate its job directories.
     :param the_std_data: object representing a standardized data set
@@ -228,6 +229,7 @@ def create_job(the_std_data: StandardizedData, the_bei_url: str, the_bei_dir: st
     :param the_correct_batch_type: string, batch type to correct
     :param the_correction_algorithm: string, correction algorithm to use
     :param the_correction_reason: string, correction reason to use (DSC or KWD)
+    :param the_update_only_flag: if True, only do the update analysis call in MBatchUtils
     :return: Nothing
     """
     print(f'create_job start {the_std_data.version} {the_std_data.std_archive}', flush=True)
@@ -316,6 +318,7 @@ def create_job(the_std_data: StandardizedData, the_bei_url: str, the_bei_dir: st
     file_data = file_data.replace('<selectedBatchToCorrect>', the_correct_batch_type)
     file_data = file_data.replace('<selectedCorrection>', the_correction_algorithm)
     file_data = file_data.replace('<selectedCorrectionReason>', the_correction_reason)
+    file_data = file_data.replace('<runUpdateOnly>', str(the_update_only_flag).upper())
     config_file_path: str = os.path.join(result_dir, "MBatchConfig.tsv")
     with open(config_file_path, 'w', encoding='utf-8') as config_file:
         config_file.write(file_data)

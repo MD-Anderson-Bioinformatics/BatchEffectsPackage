@@ -5,6 +5,15 @@
 	*						 *
 	**************************************************
 
+		CHANGES IN R VERSION 2.1.0
+
+NEW FEATURES
+
+    o Added DapiQuery API for accesssing standardized data.
+    o Added Seurat conversion objects.
+    o Added Volcano Plot / Fold Change code.
+    o Volcano Plot / Fold Change code is currently in BETA - DO NOT USE.
+
 		CHANGES IN R VERSION 2.0.0
 
 NEW FEATURES

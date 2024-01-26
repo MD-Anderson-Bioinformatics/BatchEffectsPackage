@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -283,7 +283,7 @@ class StandardizedData:
             self.job_id = response.text
             self.job_status = 'created'
         else:
-            raise f"create_new_job error {response.status_code}"
+            raise BaseException(f"create_new_job error {response.status_code}")
         self.job_status = 'created'
         return self.job_id
 
@@ -300,7 +300,7 @@ class StandardizedData:
         if response.ok:
             self.job_status = 'queued'
         else:
-            raise f"queue_job error {response.status_code}"
+            raise BaseException(f"queue_job error {response.status_code}")
 
     def status_job(self: 'StandardizedData', the_url: str) -> bool:
         """
@@ -337,7 +337,7 @@ class StandardizedData:
                         self.job_status = 'failed'
                         changed = True
             else:
-                raise f"status_job error {response.status_code} for job_id={self.job_id}"
+                raise BaseException(f"status_job error {response.status_code} for job_id={self.job_id}")
         return changed
 
     def make_fake_batch_info(self: 'StandardizedData', the_base_zip_dir: str, the_batch_file: str,
@@ -562,4 +562,28 @@ def build_std_pipeline_index(the_input_dir: str, the_index_file: str, the_write_
         if found:
             print(f"write index {the_index_file}", flush=True)
             write_std_pipeline_index(the_index_file, std_list)
+    return std_list
+
+
+def build_update_pipeline_index(the_input_dir: str, the_index_file: str, the_write_flag: bool) -> List[StandardizedData]:
+    """
+    Load current "pipline_index.tsv" file, use it to build the_index_file for update run
+    :param the_index_file: full path including file name to index file for MBatch index file
+    :param the_write_flag: if True, skip writing index. Used for checking new status of pipeline
+    :return: Dictionary with keys being tuples of std_archive and version, and values being StandardizedData
+    """
+    regular_index: str = f"{os.path.dirname(the_index_file)}/pipline_index.tsv"
+    std_list: List[StandardizedData] = []
+    print(f"read regular_index {regular_index}", flush=True)
+    regular_list: List[StandardizedData] = read_std_pipeline_index(regular_index)
+    # loop through existing datasets
+    std_data: StandardizedData
+    for std_data in regular_list:
+        if not std_list_contains(std_list, std_data.std_archive, std_data.version):
+            new_std: StandardizedData = StandardizedData(std_data.std_archive, std_data.version,
+                                                         std_data.data_archive, std_data.result_archive,
+                                                         "", "")
+            std_list.append(new_std)
+    print(f"write index {the_index_file}", flush=True)
+    write_std_pipeline_index(the_index_file, std_list)
     return std_list

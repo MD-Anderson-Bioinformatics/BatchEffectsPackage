@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -25,33 +25,35 @@ from mbatch.test.common import print_errors, print_warnings
 
 # update_pipeline_data_index, update_pipeline_rebuild_results_archives
 
-dir_datafiles: str = '/scratch/tdcasasent/LOCAL/Pipeline-GDC/converted/data'
+# update this for internal paths when running for release pipeline
+DIR_DATAFILES: str = '/scratch/tdcasasent/LOCAL/DAPI_GDC/converted/data'
 
-dir_pipeline_index: str = '/scratch/tdcasasent/LOCAL/Pipeline-MQA/index/pipline_index.tsv'
-# dir_pipeline_results: str = '/BEA/DAPI_MQA/DATA'
-dir_pipeline_results: str = '/scratch/tdcasasent/LOCAL/Pipeline-MQA/results'
-# dir_pipeline_util: str = '/BEA/DAPI_MQA/CONFIG'
-dir_pipeline_util: str = '/scratch/tdcasasent/LOCAL/Pipeline-MQA/util'
+DIR_PIPELINE_INDEX: str = '/scratch/tdcasasent/LOCAL/DAPI_MQA/INDEXES/pipline_index.tsv'
+# DIR_PIPELINE_RESULTS: str = '/BEA/DAPI_MQA/DATA'
+DIR_PIPELINE_RESULTS: str = '/scratch/tdcasasent/LOCAL/DAPI_MQA/DATA'
+# DIR_PIPELINE_UTIL: str = '/BEA/DAPI_MQA/CONFIG'
+DIR_PIPELINE_UTIL: str = '/scratch/tdcasasent/LOCAL/DAPI_MQA/CONFIG'
 
-server_file: str = '/scratch/tdcasasent/LOCAL/Pipeline-MQA/pipeline_server.txt'
-bei_url: str = ''
-bei_dir: str = "/BEA/DVLP/BEI/OUTPUT"
-# index_base_dir: str = "/BEA/DAPI_MQA/DATA"
-index_base_dir: str = "/scratch/tdcasasent/LOCAL/Pipeline-MQA/results"
+SERVER_FILE: str = '/scratch/tdcasasent/LOCAL/DAPI_MQA/pipeline_server.txt'
+BEI_URL: str = ''
+BEI_DIR: str = "/BEA/BEI/OUTPUT"
+# INDEX_BASE_DIR: str = "/BEA/DAPI_MQA/DATA"
+INDEX_BASE_DIR: str = "/scratch/tdcasasent/LOCAL/DAPI_MQA/DATA"
 
-run_version: str = "2023_07_01_1200"
-run_source: str = "GDC"
+RUN_VERSION: str = "2023_07_01_1200"
+RUN_SOURCE: str = "GDC"
 
 if __name__ == '__main__':
     # read URL file
     my_file: io.BufferedReader
-    with open(server_file, 'r', encoding='utf-8') as my_file:
-        bei_url = str(my_file.read().rstrip())
+    with open(SERVER_FILE, 'r', encoding='utf-8') as my_file:
+        BEI_URL = str(my_file.read().rstrip())
     # ########################################################
     # pipeline
     # ########################################################
-    execute_pipeline(dir_datafiles, dir_pipeline_results, dir_pipeline_index, dir_pipeline_util,
-                     bei_url, bei_dir, run_version, run_source, index_base_dir, "aliquot_barcode")
+    execute_pipeline(DIR_DATAFILES, DIR_PIPELINE_RESULTS, DIR_PIPELINE_INDEX, DIR_PIPELINE_UTIL,
+                     BEI_URL, BEI_DIR, RUN_VERSION, RUN_SOURCE, INDEX_BASE_DIR,
+                     "aliquot_barcode", False)
     # below is used to update pipeline data index after problems.
     # update_pipeline_data_index(dir_datafiles, dir_pipeline_results, dir_pipeline_index, dir_pipeline_util,
     #                            bei_url, bei_dir, run_version, run_source, index_base_dir, "aliquot_barcode")

@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -57,12 +57,12 @@ createBatchEffectsOutput_pca<-function(theMatrixGeneData, theDataframeBatchData,
 		batchIdsForSamples <- as.character(as.vector(unlist(theDataframeBatchData[batchTypeIndex])))
 		###logDebug("createBatchEffectsOutput_pca - before sync length(batchIdsForSamples)=", length(batchIdsForSamples))
 		pca <- doSamplePcaCall(theMatrixGeneData, theMinBatchSize, batchIdsForSamples, theListOfComponentsToPlot, theSeed, theGeneLimit)
+		dscOutputDir <- checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), "ManyToMany")
+		dscOutputDir <- addVersionsIfNeeded(dscOutputDir, theDataVersion, theTestVersion)
 		if (is.null(pca))
 		{
-			dscOutputDir <- checkCreateDir(checkCreateDir(theOutputDir, batchTypeName), "ManyToMany")
-			dscOutputDir <- addVersionsIfNeeded(dscOutputDir, theDataVersion, theTestVersion)
-			checkDirForCreation(dscOutputDir)
-			openAndWriteIssuesLogFile(dscOutputDir)
+		  checkDirForCreation(dscOutputDir)
+		  openAndWriteIssuesLogFile(dscOutputDir)
 		}
 		else
 		{
@@ -373,7 +373,7 @@ createBatchEffectsOutput_pca_one2many<-function(theMatrixGeneData, theDataframeB
 				}
 				### RData output here for one2many, write pca (scores has Principle Component and Sample ids), dscAllResults and batchTypeName and batchIdsForSamples
 				logDebug("Write PCA Files 3 ", batchTypeOutputDir)
-				mytitle <- paste(theTitle, "/", "PCA+", batchTypeName, sep=" ")
+				mytitle <- paste(thePcaPlainTitle, "/", "PCA+", batchTypeName, sep=" ")
 				writePcaDataFilesForDataset(batchTypeOutputDir, theDSCPermutations, pca, dscAllResults, theListOfComponentsToPlot)
 				####
 				writeSharedFveWeightScoresFiles(theDoSampleLocatorFlag, batchTypeOutputDir, pca, theSampleIds=rownames(theMatrixGeneData), theGeneIds=colnames(theMatrixGeneData))

@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -348,7 +348,7 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
     # General MBatch Run
     #
     title <- myConfig["Title",]
-    if ("" == title)
+    if ((is.na(title)) || ("" == title))
     {
       message("Title entry empty - check for original.json file")
       jsonFile <- file.path(dirname(theConfigFile), "original_data.json")
@@ -371,6 +371,7 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
       else
       {
         message("no json ", jsonFile)
+        title <- ""
       }
     }
     titleFile <- file.path(dirname(theConfigFile), "title.txt")
@@ -459,6 +460,8 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
     message("mutBatchThreads ", mutBatchThreads)
     message("mutBatchPvalueCutoff ", mutBatchPvalueCutoff)
     message("mutBatchZscoreCutoff ", mutBatchZscoreCutoff)
+    runUpdateOnly <- as.logical(convertNulls(convertNA(myConfig["runUpdateOnly",])))
+    message("runUpdateOnly ", runUpdateOnly)
     ####################################################################
     if("null"==filteringBatchType)
     {
@@ -489,6 +492,11 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
     }
     filterMaxValue <- as.numeric(filterMaxValue)
     filterLogTransformFlag <- as.logical(convertNulls(convertNA(filterLogTransformFlag)))
+    theLogFrameFlag <- FALSE
+    if (filterLogTransformFlag)
+    {
+      theLogFrameFlag <- TRUE
+    }
     filterLogTransformFlag2 <- as.logical(convertNulls(convertNA(filterLogTransformFlag2)))
     selectedCorrectionMinBatchSize <- as.numeric(selectedCorrectionMinBatchSize)
     selectedDSCPermutations <- as.numeric(selectedDSCPermutations)
@@ -695,102 +703,131 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
                                          theMinSd=0,
                                          theMinMad=0)
       }
-      #
-      # MutBatch single-dataset is now part of normal run
-      #
-      mutBatchSingle(myMBatchData, title, analysisOutputDir, myDataVersion, myTestVersion,
-                     theThreads=mutBatchThreads,
-                     thePvalueCutoff=mutBatchPvalueCutoff,
-                     theZScoreCutoff=mutBatchZscoreCutoff,
-                     theBatchTypes=batchTypesForMBatch)
-      #### do assessments
-      # do not use sampleidBatchType, since that column has been changed to "Sample"
-      rdataHCvector <- doAssessmentsFromConfig(theOutputDir=analysisOutputDir,
-                                         theDataVersion=myDataVersion,
-                                         theTestVersion=myTestVersion,
-                              theDataObject=myMBatchData,
-                              theTitle=title,
-                              thePermutations=selectedDSCPermutations,
-                              thePermutationThreads=selectedDSCThreads,
-                              theMaxSize=filterMaxValue,
-                              theSeed=selectedDSCSeed,
-                              theDSCMaxGenes=selectedDSCMaxGeneCount,
-                              theBoxplotMaxGenes=selectedBoxplotMaxGeneCount,
-                              theMinBatchSize=selectedDSCMinBatchSize,
-                              theNgchmRowType=ngchmRowType,
-                              theNgchmColumnType=ngchmColumnType,
-                              theShaidyMapGen=theShaidyMapGen,
-                              theNgchmWidgetJs=theNgchmWidgetJs,
-                              theShaidyMapGenJava=theShaidyMapGenJava,
-                              theNGCHMShaidyMem=theNGCHMShaidyMem,
-                              theNgchmFeatureMapFile=ngchmFeatureMapFile)
-      message("rdataHCvector=", paste(rdataHCvector, sep=", ", collase=", "))
-      rdataHCsample <- rdataHCvector[[1]]
-      rdataHCfeature <- rdataHCvector[[2]]
-      message("rdataHCsample=", rdataHCsample)
-      message("rdataHCfeature=", rdataHCfeature)
-      if(isTRUE(theRunPostFlag))
+      if (isTRUE(runUpdateOnly))
       {
-        pcaOutputDir <- cleanFilePath(analysisOutputDir, "PCA")
-        dscOutputDir <- cleanFilePath(analysisOutputDir, "DSC")
-        dscOutputDir <- addVersionsIfNeeded(dscOutputDir, myDataVersion, myTestVersion)
-        message("buildDSCOverviewFile analysisOutputDir = ", analysisOutputDir)
-        message("buildDSCOverviewFile dscOutputDir = ", dscOutputDir)
-        buildDSCOverviewFile(pcaOutputDir, dscOutputDir, analysisOutputDir, "DSCOverview.tsv")
+        # DO UPDATE ONLY
+        updateFromConfig(theOutputDir=analysisOutputDir,
+                         theDataVersion=myDataVersion,
+                         theTestVersion = myTestVersion,
+                         theDataObject = myMBatchData,
+                         theTitle = title,
+                         thePermutations = selectedDSCPermutations,
+                         thePermutationThreads = selectedDSCThreads,
+                         theMaxSize = filterMaxValue,
+                         theSeed = selectedDSCSeed,
+                         theDSCMaxGenes = selectedDSCMaxGeneCount,
+                         theBoxplotMaxGenes = selectedBoxplotMaxGeneCount,
+                         theMinBatchSize = selectedDSCMinBatchSize,
+                         theNgchmRowType = ngchmRowType,
+                         theNgchmColumnType = ngchmColumnType,
+                         theShaidyMapGen = theShaidyMapGen,
+                         theNgchmWidgetJs = theNgchmWidgetJs,
+                         theShaidyMapGenJava = theShaidyMapGenJava,
+                         theNGCHMShaidyMem = theNGCHMShaidyMem,
+                         theNgchmFeatureMapFile = ngchmFeatureMapFile,
+                         theLogFrameFlag = theLogFrameFlag)
       }
-      #############################################################################
-      if (isTRUE(selectedNgchmFlag))
+      else
       {
-        warnLevel<-getOption("warn")
-        on.exit(options(warn=warnLevel))
-        options(warn=-1)
-        myBatchType <- "All"
-        message("title ", title)
-        message("myBatchType ", myBatchType)
-        message("theShaidyMapGen ", theShaidyMapGen)
-        message("theShaidyMapGenJava ", theShaidyMapGenJava)
-        message("dim(myMBatchData@mData) ", dim(myMBatchData@mData))
-        message("dim(myMBatchData@mBatches) ", dim(myMBatchData@mBatches))
-        message("trim to same size as hierarchical 1")
-        myMBatchData <- as.numericWithIssues(myMBatchData)
-        ngchmData <- mbatchTrimData(myMBatchData@mData, theMaxSize = (selectedBoxplotMaxGeneCount * ncol(myMBatchData@mData)))
-        buildBatchHeatMapFromHC_Structures(theMatrixData=ngchmData,
-                                     theBatchData=myMBatchData@mBatches,
-                                     theTitle=paste(title, "/", myBatchType, "NGCHM", sep=" "),
-                                     theOutputDir=cleanFilePath(analysisOutputDir, "NGCHM"),
-                                     theDataVersion=myDataVersion,
-                                     theTestVersion=myTestVersion,
-                                     theOutputFilename=paste(myBatchType, "ngchm.ngchm", sep="_"),
-                                     theColDendRDataFile=rdataHCsample,
-                                     theRowDendRDataFile=NULL,
-                                     theNgchmFeatureMapFile=ngchmFeatureMapFile,
-                                     theRowType=ngchmRowType, theColType=ngchmColumnType,
-                                     theRowCluster=c("pearson", "ward.D2"),
-                                     theShaidyMapGen=theShaidyMapGen,
-                                     theNgchmWidgetJs=theNgchmWidgetJs,
-                                     theShaidyMapGenJava=theShaidyMapGenJava,
-                                     theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
-      }
-      #############################################################################
-      if (isTRUE(CDP_Flag))
-      {
-        graphics.off()
-        warnLevel<-getOption("warn")
-        on.exit(options(warn=warnLevel))
-        options(warn=-1)
-        outdir <- addVersionsIfNeeded(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion, myTestVersion)
-        if (!file.exists(outdir))
+        #
+        # MutBatch single-dataset is now part of normal run
+        #
+        mutBatchSingle(myMBatchData, title, analysisOutputDir, myDataVersion, myTestVersion,
+                       theThreads=mutBatchThreads,
+                       thePvalueCutoff=mutBatchPvalueCutoff,
+                       theZScoreCutoff=mutBatchZscoreCutoff,
+                       theBatchTypes=batchTypesForMBatch)
+        #### do assessments
+        # do not use sampleidBatchType, since that column has been changed to "Sample"
+        rdataHCvector <- doAssessmentsFromConfig(
+          theOutputDir = analysisOutputDir,
+          theDataVersion = myDataVersion,
+          theTestVersion = myTestVersion,
+          theDataObject = myMBatchData,
+          theTitle = title,
+          thePermutations = selectedDSCPermutations,
+          thePermutationThreads = selectedDSCThreads,
+          theMaxSize = filterMaxValue,
+          theSeed = selectedDSCSeed,
+          theDSCMaxGenes = selectedDSCMaxGeneCount,
+          theBoxplotMaxGenes = selectedBoxplotMaxGeneCount,
+          theMinBatchSize = selectedDSCMinBatchSize,
+          theNgchmRowType = ngchmRowType,
+          theNgchmColumnType = ngchmColumnType,
+          theShaidyMapGen = theShaidyMapGen,
+          theNgchmWidgetJs = theNgchmWidgetJs,
+          theShaidyMapGenJava = theShaidyMapGenJava,
+          theNGCHMShaidyMem = theNGCHMShaidyMem,
+          theNgchmFeatureMapFile = ngchmFeatureMapFile,
+          theLogFrameFlag = theLogFrameFlag)
+        message("rdataHCvector=", paste(rdataHCvector, sep=", ", collase=", "))
+        rdataHCsample <- rdataHCvector[[1]]
+        rdataHCfeature <- rdataHCvector[[2]]
+        message("rdataHCsample=", rdataHCsample)
+        message("rdataHCfeature=", rdataHCfeature)
+        if(isTRUE(theRunPostFlag))
         {
-          dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
+          pcaOutputDir <- cleanFilePath(analysisOutputDir, "PCA")
+          dscOutputDir <- cleanFilePath(analysisOutputDir, "DSC")
+          dscOutputDir <- addVersionsIfNeeded(dscOutputDir, myDataVersion, myTestVersion)
+          message("buildDSCOverviewFile analysisOutputDir = ", analysisOutputDir)
+          message("buildDSCOverviewFile dscOutputDir = ", dscOutputDir)
+          buildDSCOverviewFile(pcaOutputDir, dscOutputDir, analysisOutputDir, "DSCOverview.tsv")
         }
-        CDP_Structures(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion,
-                       myTestVersion, "CDP_Plot_Data1_Diagram.PNG", myOriginalData@mData,
-                       myMBatchData@mData, "Primary-Dataset", theTitle=title)
-        if (!is.null(myOriginalData2))
+        #############################################################################
+        if (isTRUE(selectedNgchmFlag))
         {
+          warnLevel<-getOption("warn")
+          on.exit(options(warn=warnLevel))
+          options(warn=-1)
+          myBatchType <- "All"
+          message("title ", title)
+          message("myBatchType ", myBatchType)
+          message("theShaidyMapGen ", theShaidyMapGen)
+          message("theShaidyMapGenJava ", theShaidyMapGenJava)
+          message("dim(myMBatchData@mData) ", dim(myMBatchData@mData))
+          message("dim(myMBatchData@mBatches) ", dim(myMBatchData@mBatches))
+          message("trim to same size as hierarchical 1")
+          myMBatchData <- as.numericWithIssues(myMBatchData)
+          ngchmData <- mbatchTrimData(myMBatchData@mData, theMaxSize = (selectedBoxplotMaxGeneCount * ncol(myMBatchData@mData)))
+          buildBatchHeatMapFromHC_Structures(theMatrixData=ngchmData,
+                                       theBatchData=myMBatchData@mBatches,
+                                       theTitle=paste(title, "/", myBatchType, "NGCHM", sep=" "),
+                                       theOutputDir=cleanFilePath(analysisOutputDir, "NGCHM"),
+                                       theDataVersion=myDataVersion,
+                                       theTestVersion=myTestVersion,
+                                       theOutputFilename=paste(myBatchType, "ngchm.ngchm", sep="_"),
+                                       theColDendRDataFile=rdataHCsample,
+                                       theRowDendRDataFile=NULL,
+                                       theNgchmFeatureMapFile=ngchmFeatureMapFile,
+                                       theRowType=ngchmRowType, theColType=ngchmColumnType,
+                                       theRowCluster=c("pearson", "ward.D2"),
+                                       theShaidyMapGen=theShaidyMapGen,
+                                       theNgchmWidgetJs=theNgchmWidgetJs,
+                                       theShaidyMapGenJava=theShaidyMapGenJava,
+                                       theShaidyMapGenArgs=c(paste(c("-Xms", "-Xmx"), theNGCHMShaidyMem, sep=""), "-Djava.awt.headless=true"))
+        }
+        #############################################################################
+        if (isTRUE(CDP_Flag))
+        {
+          graphics.off()
+          warnLevel<-getOption("warn")
+          on.exit(options(warn=warnLevel))
+          options(warn=-1)
+          outdir <- addVersionsIfNeeded(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion, myTestVersion)
+          if (!file.exists(outdir))
+          {
+            dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
+          }
           CDP_Structures(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion,
-                         myTestVersion, "CDP_Plot_Data2_Diagram.PNG", myOriginalData2@mData,
-                         myMBatchData@mData, "Secondary-Dataset", theTitle=title)
+                         myTestVersion, "CDP_Plot_Data1_Diagram.PNG", myOriginalData@mData,
+                         myMBatchData@mData, "Primary-Dataset", theTitle=title)
+          if (!is.null(myOriginalData2))
+          {
+            CDP_Structures(cleanFilePath(analysisOutputDir, "CDP"), myDataVersion,
+                           myTestVersion, "CDP_Plot_Data2_Diagram.PNG", myOriginalData2@mData,
+                           myMBatchData@mData, "Secondary-Dataset", theTitle=title)
+          }
         }
       }
     }
@@ -822,6 +859,41 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
   }
 }
 
+updateFromConfig <- function(theOutputDir, theDataVersion, theTestVersion,
+                             theDataObject, theTitle,
+                             thePermutations, thePermutationThreads, theMaxSize,
+                             theSeed, theDSCMaxGenes, theBoxplotMaxGenes,
+                             theMinBatchSize,
+                             theNgchmRowType,
+                             theNgchmColumnType,
+                             theShaidyMapGen,
+                             theNgchmWidgetJs,
+                             theShaidyMapGenJava, theNGCHMShaidyMem,
+                             theNgchmFeatureMapFile, theLogFrameFlag)
+{
+  if (theBoxplotMaxGenes>5000)
+  {
+    message("Limit boxplot to at most 5000 genes");
+    theBoxplotMaxGenes <- 5000
+  }
+  # reduce size
+  theDataObject@mData <- mbatchTrimData(theDataObject@mData, theMaxSize)
+  ####
+  ####
+  #### Volcano Plot
+  ###
+  message("call callMBatch_VolcanoPlot_Structures")
+  print("call callMBatch_VolcanoPlot_Structures")
+  callMBatch_VolcanoPlot_Structures(theOutputDir, theDataVersion, theTestVersion, theDataObject,
+                                    theTitle, theLogFrameFlag, theBoxplotMaxGenes)
+  ####
+  #### write success
+  ###
+  message("Processing success")
+  mbatchWriteSuccessfulLog()
+  list()
+}
+
 
 doAssessmentsFromConfig <- function(theOutputDir, theDataVersion, theTestVersion,
                                     theDataObject, theTitle,
@@ -833,7 +905,7 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataVersion, theTestVersion
                                     theShaidyMapGen,
                                     theNgchmWidgetJs,
                                     theShaidyMapGenJava, theNGCHMShaidyMem,
-                                    theNgchmFeatureMapFile)
+                                    theNgchmFeatureMapFile, theLogFrameFlag)
 {
   if (theBoxplotMaxGenes>5000)
   {
@@ -896,6 +968,13 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataVersion, theTestVersion
   callMBatch_BoxplotGroup_Structures(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle,
                                      theMaxGeneCount=theBoxplotMaxGenes,
                                      theFunction=list(pipelineMean), theFunctionName=list("Mean"))
+  ####
+  #### Volcano Plot
+  ###
+  message("call callMBatch_VolcanoPlot_Structures")
+  print("call callMBatch_VolcanoPlot_Structures")
+  callMBatch_VolcanoPlot_Structures(theOutputDir, theDataVersion, theTestVersion, theDataObject,
+                                    theTitle, theLogFrameFlag, theBoxplotMaxGenes)
   ####
   #### write success
   ###

@@ -1,4 +1,4 @@
-# MBatchUtils Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+# MBatchUtils Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -41,8 +41,8 @@ buildSingleArchive <- function(theResultDir, theDataDir, theZipDir)
   # :param the_new_data: new data object for latest analysis
   # :param the_std_list: dictionary of data objects
   # :return: full pathname for ZIP file
-  message("buildSingleArchive - import(mbatch.index.index)")
-  calc <- import("mbatch.index.index")
+  message("buildSingleArchive - import(mbatch.index.index_api)")
+  calc <- import("mbatch.index.index_api")
   zipFile <- calc$create_index_archive(theResultDir, theDataDir, theZipDir, file.path(theResultDir, "info"), NULL, NULL)
   message("buildSingleArchive - after Python")
   zipFile

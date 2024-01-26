@@ -94,3 +94,22 @@ export(mbatchStandardCombineLegends)
 
 # used for comapring DSC computation times
 export(pvalueDSC_scores)
+
+# DAPI Query functions
+export(getTestDapiURL)
+export(getDapiQuery)
+export(updateDapiQuery)
+export(getDownloadableForDataset)
+export(downloadDataMatrix)
+export(downloadDataBatches)
+export(downloadNgchmNgchm)
+export(downloadNgchmHtml)
+
+# Seurat Conversions
+export(convertSeuratObjtoStdDataObj)
+export(convertSeuratRDStoStdDataFiles)
+export(updateOrBuildSeuratObjectFromStdDataFiles)
+export(updateOrBuildSeuratObjectFromStdDataObjs)
+
+# Volcano
+export(Volcano_Structures)

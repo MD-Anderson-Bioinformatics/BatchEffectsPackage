@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -29,7 +29,7 @@ sortMatrix <- function(theMatrix)
       {
         # order rows, columns
         Sys.setlocale("LC_COLLATE", "C")
-        theMatrix <- theMatrix[order(rownames(theMatrix)), order(colnames(theMatrix))]
+        theMatrix <- theMatrix[order(rownames(theMatrix)), order(colnames(theMatrix)),drop=FALSE]
       }
     }
   }
@@ -427,7 +427,8 @@ asmatrixWithIssues<-function(...)
 
 filterGeneDataMatrix<-function(theMatrixGeneData, theMinIqr, theMinSd, theMinMad)
 {
-	logDebug("rows pre filter ", nrow(theMatrixGeneData))
+  preRows <- nrow(theMatrixGeneData)
+	logDebug("rows pre filter ", preRows)
   ### clear NaN and INF
   theMatrixGeneData[is.nan(theMatrixGeneData)] <- NA
   theMatrixGeneData[is.infinite(theMatrixGeneData)] <- NA
@@ -436,15 +437,20 @@ filterGeneDataMatrix<-function(theMatrixGeneData, theMinIqr, theMinSd, theMinMad
   #geneData<-theMatrixGeneData[!na.gene,]
   naLengene<-as.vector(unlist(apply(!is.na(theMatrixGeneData),1,function(row)
   {
-    return (sum(row)>1)
+    return (!is.na(sum(row)))
   })))
-  geneData<-theMatrixGeneData[naLengene,]
+  # need 2 commas to avoid dropping matrix-ness
+  geneData<-theMatrixGeneData[naLengene, , drop=FALSE]
   ### do IQR, SD and MAD
   iqr<-as.vector(unlist(apply(geneData,1, IQR, na.rm=TRUE)))
   Sd<-as.vector(unlist(apply(geneData,1, sd, na.rm=TRUE)))
+  # replace NA with 0, to retain single sample data
+  Sd[is.na(Sd)] <- 0
   Mad<-as.vector(unlist(apply(geneData, 1, mad, na.rm=TRUE)))
-  temp<-geneData[(iqr>=theMinIqr) & (Sd>=theMinSd) & (Mad>=theMinMad),]
-  logDebug("rows post filter ", nrow(temp))
+  # need 2 commas to avoid dropping matrix-ness
+  temp<-geneData[(iqr>=theMinIqr) & (Sd>=theMinSd) & (Mad>=theMinMad), , drop=FALSE]
+  postRows <- nrow(temp)
+  logDebug("rows post filter ", postRows)
 	return(temp)
 }
 
@@ -1076,6 +1082,18 @@ mbatchStandardCombineLegends<-function(theTitle, theFilenamePath, theListOfFiles
 ####################################################################
 ###
 ####################################################################
+
+getTestDapiURL <- function()
+{
+  value <- Sys.getenv("MBATCH_TEST_DAPI_URL")
+  if (!isTRUE(file.exists(value)))
+  {
+    value <- ""
+    # uncomment this for next release - currently test would fail since endpoint does not exist
+    # value <- "https://bioinformatics.mdanderson.org/MQA"
+  }
+  value
+}
 
 getTestInputDir <- function()
 {

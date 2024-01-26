@@ -1,4 +1,4 @@
-FROM mdabcb/bcb_base:2023-08-14-1010
+FROM mdabcb/bcb_base:2024-01-11-0900
 
 # NOTE: above version should match build from Dockerfile for BCBBase, which is manually done.
 #       manual build of BCBBase is because of the extended build time to generate the image.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -25,7 +25,6 @@ from mbatch.pipeline.std_data import StandardizedData, build_std_pipeline_index
 from mbatch.pipeline.std_data import find_historical_standardized_data, write_std_pipeline_index
 from mbatch.visualindex.visual_index_base import VisualIndexBase, VisualIndexElementBase
 from mbatch.visualindex.visual_index_dsc import VisualIndexDsc, VisualIndexElementDsc
-from mbatch.visualindex.visual_index_kwd import VisualIndexKwd, VisualIndexElementKwd
 from mbatch.pipeline.job import create_job, queue_job
 from mbatch.test.common import add_error, delete_from_dirs
 from mbatch.test.test_index import create_index_archive
@@ -43,7 +42,7 @@ def extract_batch(the_analysis_path: str) -> str:
 
 
 # noinspection DuplicatedCode
-# pylint: disable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches
+# pylint: disable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches,unused-argument
 def continue_correct(the_input_dir: str, the_output_dir: str, the_index_file: str, the_util_dir: str,
                      the_bei_url: str, the_bei_dir: str, the_run_version: str, the_run_source: str,
                      the_base_dir: str, the_sample_column_name: str) -> None:
@@ -97,7 +96,7 @@ def continue_correct(the_input_dir: str, the_output_dir: str, the_index_file: st
                     data_zip: str
                     # clean up Rplots.pdf files left by other packages
                     delete_from_dirs(job_dir, "Rplots.pdf")
-                    results_zip, data_zip = create_index_archive(result_dir, data_dir, zip_dir, os.path.join(result_dir, "info"), my_std, std_list)
+                    results_zip, data_zip = create_index_archive(result_dir, data_dir, zip_dir, os.path.join(result_dir, "info"), False, my_std, std_list)
                     my_std.result_archive = results_zip
                     my_std.data_archive = data_zip
                     # add dataset information to index and write index
@@ -125,11 +124,11 @@ def continue_correct(the_input_dir: str, the_output_dir: str, the_index_file: st
                     print(f"write updated index {the_index_file}", flush=True)
                     write_std_pipeline_index(the_index_file, std_list)
     print('*************************************************', flush=True)
-# pylint: enable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches
+# pylint: enable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches,unused-argument
 
 
 # noinspection DuplicatedCode
-# pylint: disable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches
+# pylint: disable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches,unused-argument
 def initiate_correct(the_input_dir: str, the_output_dir: str, the_index_file: str, the_util_dir: str,
                      the_bei_url: str, the_bei_dir: str, the_run_version: str, the_run_source: str,
                      the_base_dir: str, the_sample_column_name: str) -> None:
@@ -226,7 +225,7 @@ def initiate_correct(the_input_dir: str, the_output_dir: str, the_index_file: st
             create_job(my_std, the_bei_url, the_bei_dir, the_input_dir,
                        the_run_version, my_std.has_batch_info_p(the_input_dir), 'TCGA' in my_std.std_archive,
                        the_util_dir, the_run_source, the_sample_column_name,
-                       extract_batch(my_dsc.m_analysis_path), "EB_withPara", "DSC")
+                       extract_batch(my_dsc.m_analysis_path), "EB_withPara", "DSC", False)
             # write pipeline index std_list
             if my_std.job_status == 'created':
                 # NOTE: std_list cannot directly track back to vib unfortunately
@@ -262,11 +261,11 @@ def initiate_correct(the_input_dir: str, the_output_dir: str, the_index_file: st
     #             print(f"write updated index {the_index_file}", flush=True)
     #             write_std_pipeline_index(the_index_file, std_list)
     print('*************************************************', flush=True)
-# pylint: enable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches
+# pylint: enable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches,unused-argument
 
 
 # noinspection DuplicatedCode
-# pylint: disable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches
+# pylint: disable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches,unused-argument
 def check_correct(the_input_dir: str, the_output_dir: str, the_index_file: str, the_util_dir: str,
                   the_bei_url: str, the_bei_dir: str, the_run_version: str, the_run_source: str,
                   the_base_dir: str, the_sample_column_name: str) -> None:
@@ -360,4 +359,4 @@ def check_correct(the_input_dir: str, the_output_dir: str, the_index_file: str, 
     #     # Handle Start New CORRECTION Job
     #     print(f'Start New CORRECTION-KWD Job {round(float(my_kwd.m_neg_log10_pvalue),2)} {my_kwd.m_neg_log10_cutoff} {my_kwd.m_data_version} {my_kwd.m_path_data} {extract_batch(my_kwd.m_analysis_path)} {my_kwd.m_batches_called}', flush=True)
     print('*************************************************', flush=True)
-# pylint: enable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches
+# pylint: enable=too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches,unused-argument

@@ -24,7 +24,7 @@ importFrom("NGCHM", "chmNewCovariateBar", "chmAddCovariateBar", "chmAddProperty"
 importFrom("dunn.test", "dunn.test")
 importFrom("utils", "zip")
 importFrom("MBatch", "readAsGenericDataframe", "writeAsGenericMatrix", "mbatchFilterData", "removeBatchAndValue", "setGenesToSameAsSamples")
-importFrom("MBatch", "setGlobalMBatchEnv", "getGlobalMBatchEnv", "setGlobalMBatchErrorTest")
+importFrom("MBatch", "setGlobalMBatchEnv", "getGlobalMBatchEnv", "setGlobalMBatchErrorTest", "Volcano_Structures")
 importFrom("Cairo", "CairoPNG")
 importFrom("reticulate", "import")
 importFrom("readr", "read_file")

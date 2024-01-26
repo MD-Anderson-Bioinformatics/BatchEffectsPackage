@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -25,6 +25,9 @@ import os
 from mbatch.test.common import get_sorted_dirs, next_sub_dir_starts_with, get_sorted_files, read_file_to_string
 
 
+# pylint: disable=too-many-lines
+
+
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class MBatchEntry:
     """
@@ -36,6 +39,10 @@ class MBatchEntry:
     job_id: str
     job_type: str
     notice: str
+    # #####
+    volcano_data: str
+    batch_id: str
+    batch_type: str
     # #####
     # hierarchy level values
     # error log location (empty string if no error)
@@ -85,6 +92,10 @@ class MBatchEntry:
         self.job_id: str = ""
         self.job_type: str = ""
         self.notice: str = ""
+        # volcano
+        self.volcano_data = ""
+        self.batch_id = ""
+        self.batch_type = ""
         # hierarchy level values
         self.error = ""
         self.diagram_image = ""  # failover or static image
@@ -906,6 +917,115 @@ def make_entry_umap(the_dir: str, the_info_dir: str) -> MBatchEntry:
     for dir_entry in subdir_list:
         # second argument, dropdown label, will be Batch Type or Data/Test Version
         make_entry_umap_subdirs(dir_entry.path, my_obj, the_info_dir)
+    return my_obj
+
+# ##################################################################
+# ##################################################################
+
+
+def make_entry_volcanoplot_diagram(the_dir: str, the_parent: MBatchEntry, the_info_dir: dir, the_batch_type: str,) -> None:
+    """
+    Make the diagram entry.
+    :param the_dir: current directory to be investigated
+    :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
+    :param the_batch_type: batch type being plotted/calculated
+    :return: None - populate the_parent and new objects (if any)
+    """
+    # build Batch Type diagram menu entries
+    if os.path.exists(os.path.join(the_dir, "error.log")):
+        # error generated
+        next_entry: MBatchEntry = MBatchEntry("Diagram", "", "volcano", the_info_dir)
+        dir_path: str = get_dir_path_from(the_dir, "analysis")
+        next_entry.error = dir_path + "error.log"
+        the_parent.dropdown_entries.append(next_entry)
+    else:
+        # build results based on available files
+        # get list of batch ids from file names
+        batch_ids: List[str] = []
+        file_list: List[os.DirEntry] = get_sorted_files(the_dir)
+        dir_entry: os.DirEntry
+        for dir_entry in file_list:
+            filename: str = dir_entry.name
+            if filename.startswith("Volcano-Diagram-"):
+                if filename.endswith(".png"):
+                    batch_id: str = filename[16:][:-4]
+                    batch_ids.append(batch_id)
+        batch_ids = list(set(batch_ids))
+        batch_ids.sort()
+        ####
+        # use batch ids to generate menu entries
+        ####
+        # analysis is the top level directory (within ZIP-RESULTS)
+        # that is added to the archive zip
+        dir_path: str = get_dir_path_from(the_dir, "analysis")
+        batch_id: str
+        for batch_id in batch_ids:
+            next_entry: MBatchEntry = MBatchEntry(batch_id, "", "volcano", the_info_dir)
+            next_entry.volcano_data = f"{dir_path}Volcano-Data-{batch_id}.json"
+            next_entry.batch_id = batch_id
+            next_entry.batch_type = the_batch_type
+            next_entry.diagram_image = f'{dir_path}Volcano-Diagram-{batch_id}.png'
+            # do not read title file as it hasn't been written
+            next_entry.title = read_file_to_string(os.path.join(the_dir, f"Volcano-Title-{batch_id}.txt"))
+            the_parent.dropdown_entries.append(next_entry)
+
+
+def make_entry_volcanoplot_subdirs(the_dir: str, the_parent: MBatchEntry, the_info_dir: str, the_batch_type: str) -> None:
+    """
+    Recursive function that drills through directory structure.
+    Handles optional DATA and TEST version directories.
+    :param the_dir: current directory to be investigated
+    :param the_parent: parent MBatchEntry object -- add or edit
+    :param the_info_dir: full path to directory containing TEST_<version> labels
+    :param the_batch_type: batch type being plotted/calculated
+    :return: None - populate the_parent and new objects
+    """
+    # handles data and test versions, and then the results
+    dir_name: str = os.path.basename(the_dir)
+    next_entry: MBatchEntry
+    do_dirs: bool
+    # determine labels for next level of directory/menu
+    if next_sub_dir_starts_with(the_dir, "DATA"):
+        # add optional data version
+        next_entry = MBatchEntry(dir_name, "Data Version", "", the_info_dir)
+        do_dirs = True
+    elif next_sub_dir_starts_with(the_dir, "TEST"):
+        # add optional test version
+        next_entry = MBatchEntry(dir_name, "Test Version", "", the_info_dir)
+        do_dirs = True
+    else:
+        # add diagram entry
+        next_entry = MBatchEntry(dir_name, "Batch", "", the_info_dir)
+        do_dirs = False
+    if do_dirs:
+        # add other subdirectories
+        subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
+        dir_entry: os.DirEntry
+        for dir_entry in subdir_list:
+            make_entry_volcanoplot_subdirs(dir_entry.path, next_entry, the_info_dir, the_batch_type)
+    else:
+        # add diagram data for each batch found in PNG file names
+        make_entry_volcanoplot_diagram(the_dir, next_entry, the_info_dir, the_batch_type)
+    the_parent.dropdown_entries.append(next_entry)
+
+
+def make_entry_volcanoplot(the_dir: str, the_info_dir: str) -> MBatchEntry:
+    """
+    Builds MBatchEntry for algorithm directory structure.
+    Must match MBatch output.
+    :param the_dir: Algorithm directory to be populated
+    :param the_info_dir: full path to directory containing TEST_<version> labels
+    :return: populated MBatchEntry object
+    """
+    my_obj: MBatchEntry = MBatchEntry("Volcano Plot", "Batch Type", "", the_info_dir)
+    # add Diagram Type entries
+    subdir_list: List[os.DirEntry] = get_sorted_dirs(the_dir)
+    dir_entry: os.DirEntry
+    for dir_entry in subdir_list:
+        # second argument, dropdown label, will be Batch Type or Data/Test Version
+        # this info dir is batch type
+        make_entry_volcanoplot_subdirs(dir_entry.path, my_obj, the_info_dir, dir_entry.name)
     return my_obj
 
 # ##################################################################

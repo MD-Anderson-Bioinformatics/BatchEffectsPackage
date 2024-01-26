@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -289,7 +289,9 @@ def convert_biospecimen_files(the_biospecimen_index: str,
     for key_var, val_list in files_to_convert.items():
         print(f"convert_biospecimen_files key_var={key_var}", flush=True)
         # find largest release date (use as version)
+        # pylint: disable=consider-using-generator
         version: str = max([biospecimen.history_release_date for biospecimen in val_list])
+        # pylint: enable=consider-using-generator
         batches_file: str = os.path.join(the_convert_dir, key_var[0], key_var[1], version, 'batches.tsv')
         if not os.path.exists(batches_file):
             convert_biospecimen_batches(the_download_dir, batches_file, val_list,
@@ -350,7 +352,9 @@ def convert_clinical_files(the_clinical_index: str, the_download_dir: str, the_c
         for my_project, project_list in project_dict.items():
             print(f"convert_clinical_files my_project={my_project}", flush=True)
             # find largest release date (use as version)
+            # pylint: disable=consider-using-generator
             version: str = max([clinical.history_release_date for clinical in project_list])
+            # pylint: enable=consider-using-generator
             clinical_file: str = os.path.join(the_convert_dir, my_program, my_project, version, 'clinical.tsv')
             if not os.path.exists(clinical_file):
                 convert_clinical_batches(the_download_dir, clinical_file, project_list)

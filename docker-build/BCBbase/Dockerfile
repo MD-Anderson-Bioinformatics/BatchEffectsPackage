@@ -1,15 +1,15 @@
 FROM fedora:38
 
-# docker build -t mdabcb/bcb_base:2023-08-14-1010 .
+# docker build -t mdabcb/bcb_base:2024-01-11-0900 .
 # Login to docker hub with: docker login
 # repo may need be created on Docker Hub before pushing (depends on versions of stuff)
-# Push to Docker Hub with: docker push mdabcb/bcb_base:2023-08-14-1010
+# Push to Docker Hub with: docker push mdabcb/bcb_base:2024-01-11-0900
 
 # reminder, use {} around environmental variables, otherwise docker uses it as a literal
 
 LABEL edu.mda.bcb.name="BCBBase" \
       edu.mda.bcb.sub="coj" \
-      edu.mda.bcb.coj.version="2023-08-14-1010" \
+      edu.mda.bcb.coj.version="2024-01-11-0900" \
       edu.mda.bcb.coj.Rversion="4.x" \
       edu.mda.bcb.coj.Javaversion="17" \
       edu.mda.bcb.coj.Linuxversion="Fedora 38"
@@ -67,8 +67,8 @@ RUN dnf upgrade -y && \
     dnf -y install dnf-plugins-core && \
     dnf -y install libstdc++ ffmpeg-free ffmpeg-free-devel unzip diffutils openssl-devel libxml2-devel cairo-devel libXt-devel udunits2-devel proj-devel geos-devel gdal-devel sqlite sqlite-devel perl-Tk git git-gui ant maven nodejs file wget harfbuzz fribidi harfbuzz-devel fribidi-devel libcurl-devel freetype-devel libpng-devel libtiff-devel libjpeg-turbo-devel tesseract tesseract-devel leptonica-devel cargo poppler-cpp-devel ImageMagick-c++-devel libwebp-devel librsvg2-devel libgit2-devel gsl gsl-devel && \
     dnf upgrade -y && \
-    dnf clean all && \
-    npm install -g express-generator
+    dnf clean all
+# npm install -g express-generator -- check if needed, has unpatched critical vulnerability
 
 # Install all TexLive
 RUN dnf upgrade -y && \
@@ -160,22 +160,26 @@ ENV LD_LIBRARY_PATH=/usr/lib64/:/home/bcbuser/conda/envs/gendev/lib:/usr/lib/jvm
 RUN . /home/bcbuser/conda/bin/activate && \
     conda init && \
     conda activate /home/bcbuser/conda/envs/gendev && \
-    conda install -y -c conda-forge python==3.11 && \
+    conda install -y -c conda-forge python==3.11.* && \
     conda install -y -c conda-forge pyinstaller && \
     conda install -y -c conda-forge flask && \
     conda install -y -c conda-forge waitress && \
     conda install -y -c conda-forge pylint && \
+    conda install -y -c conda-forge setuptools && \
     conda install -y -c conda-forge pandas && \
     conda install -y -c conda-forge numpy && \
     conda install -y -c conda-forge matplotlib && \
-    conda install -y -c conda-forge xmltodict && \
-    conda install -y -c conda-forge setuptools && \
+    conda install -y -c conda-forge scanpy && \
     conda install -y -c conda-forge pillow && \
     conda install -y -c conda-forge jsonpickle && \
     conda install -y -c conda-forge requests && \
-    pip install pex && \
+    conda install -y -c conda-forge xmltodict && \
+    conda install -y -c conda-forge cryptography && \
+    conda install -y -c conda-forge urllib3 && \
+    conda install -y -c conda-forge scipy && \
     conda clean --all --yes && \
     chmod -R 777 /home/bcbuser/conda/envs/gendev
+#    pip install pex && \  -- check if needed, has unpatched high vulnerability
 
 # add universal access to conda
 RUN cat /etc/bashrc /bcbsetup/conda.txt >> /bcbsetup/bashrc && \

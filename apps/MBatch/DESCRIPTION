@@ -1,7 +1,7 @@
 Package: MBatch
 Title: MD Anderson Batch Assessment Tools (MBatch) Package
-Version: 2.0.3
-Date: 2023-09-12
+Version: 2.1.0
+Date: 2024-09-11-0900
 Author: Rehan Akbani <rakbani@mdanderson.org>,
 				Tod Casasent <tdcasasent@mdanderson.org>,
 				Bradley Broom <bbroom@mdanderson.org>,
@@ -9,9 +9,7 @@ Author: Rehan Akbani <rakbani@mdanderson.org>,
 Maintainer: Rehan Akbani <rakbani@mdanderson.org>
 Depends: R (>= 4.0)
 Imports: Cairo, ClassDiscovery, squash, methods, parallel, stats, uwot, vizier, reticulate
-Suggests: batchcorr,
-    knitr,
-    rmarkdown
+Suggests: batchcorr, knitr, rmarkdown, Seurat
 Description: BEA_VERSION_TIMESTAMP An R package, MBatch, for assessment of batch effects in high throughput data such as microarray data. It includes R implementations of several conventional methods such as principal component analysis, clustering analysis , also includes novel correlation of correlation based methods such as CZR, CZN, CZNS, CZNL, and CZS. This package is mainly to deal with data with multiple batches and multiple batch effect sources such as data from The Cancer Genome Atlas (TCGA). Some novel visulization methods such as PCA plot with centroid are also included in this package. It also requires the Python 3 package PyMBatch.
 License: GPL (>=2)
 Encoding: UTF-8

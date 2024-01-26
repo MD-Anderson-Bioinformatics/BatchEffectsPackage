@@ -1,4 +1,4 @@
-# MBatch Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+# MBatch Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
 #
@@ -232,6 +232,26 @@ Boxplot_Group_Structures <- function(theData, theTitle, theOutputDir,
   {
     writeBatchDataTsvForBoxplot(newOutDir, theData@mBatches)
   }
+}
+
+#############################################################################
+### Volcano Plots
+#############################################################################
+
+
+Volcano_Structures <- function(theData, theTitle, theOutputDir, theLogFrameFlag,
+                               theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
+                               theDataVersion, theTestVersion,
+                               theMaxFeatureCount=20000)
+{
+  theData <- as.numericWithIssues(theData)
+  theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
+                              theBatchTypeAndValuePairsToKeep=theBatchTypeAndValuePairsToKeep)
+  theData@mData <- mbatchTrimData(theData@mData, theMaxSize=(theMaxFeatureCount*ncol(theData@mData)))
+  theTitle <- breakIntoTitle(theTitle)
+  # calculate Volcano plot, write Volcano plot data, write Volcano plot PNGs
+  calcAndWriteVolcano(theData, theTitle, theOutputDir, theLogFrameFlag,
+                      theDataVersion, theTestVersion)
 }
 
 #############################################################################

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -23,12 +23,12 @@ MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/rese
 from setuptools import setup, find_packages
 
 setup(name='mbatch',
-      version='1.0',
+      version='2.1',
       # list folders, not files
       packages=find_packages(),
       # script files
-      scripts=['scripts/legend_main.py', 'scripts/dsc_main.py'],
+      scripts=['scripts/legend_main.py'],
       # No package data (yet)
       # package_data={'capitalize': ['data/cap_data.txt']},
-      install_requires=['matplotlib', 'pandas', 'numpy', 'pillow', 'jsonpickle', 'requests', 'xmltodict'],
+      install_requires=['matplotlib', 'pandas', 'numpy', 'scanpy', 'pillow', 'jsonpickle', 'requests', 'xmltodict', 'cryptography', 'urllib3', 'scipy'],
       )

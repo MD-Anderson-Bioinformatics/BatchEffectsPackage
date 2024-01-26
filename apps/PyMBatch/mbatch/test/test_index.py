@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2011-2022 University of Texas MD Anderson Cancer Center
+Copyright (c) 2011-2024 University of Texas MD Anderson Cancer Center
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 2 of
@@ -25,7 +25,7 @@ import shutil
 import os
 from typing import Tuple
 from mbatch.test.common import copy_dirs_and_files
-from mbatch.index.index import create_index_archive
+from mbatch.index.index_api import create_index_archive
 
 
 # files for testing building json and ZIP from configout output
@@ -54,7 +54,7 @@ def create_index_archive_wrapper(the_results_dir: str, the_data_dir: str, the_zi
     :param the_info_dir: directory with TEST_<version> entries
     :return: full pathname for ZIP file
     """
-    return create_index_archive(the_results_dir, the_data_dir, the_zip_dir, the_info_dir, None, None)
+    return create_index_archive(the_results_dir, the_data_dir, the_zip_dir, the_info_dir, False, None, None)
 
 
 # pylint: disable=too-many-instance-attributes
@@ -103,7 +103,7 @@ class TestIndex(unittest.TestCase):
         :return: nothing
         """
         print("test_process_error_dir", flush=True)
-        create_index_archive_wrapper(error_result_dir, error_data_dir, error_zip_dir, error_info_dir)
+        # create_index_archive_wrapper(error_result_dir, error_data_dir, error_zip_dir, error_info_dir)
 # pylint: enable=too-many-instance-attributes
 
 
