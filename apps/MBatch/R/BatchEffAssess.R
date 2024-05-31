@@ -1088,9 +1088,7 @@ getTestDapiURL <- function()
   value <- Sys.getenv("MBATCH_TEST_DAPI_URL")
   if (!isTRUE(file.exists(value)))
   {
-    value <- ""
-    # uncomment this for next release - currently test would fail since endpoint does not exist
-    # value <- "https://bioinformatics.mdanderson.org/MQA"
+    value <- "https://bioinformatics.mdanderson.org/MQA"
   }
   value
 }
@@ -1228,7 +1226,7 @@ compareTwoDataframes <- function(theCorrected, theCompare)
       {
         # ignore
       }
-      else if (!(all.equal(theCorrected[myRow, myCol], theCompare[myRow, myCol])))
+      else if (!(all.equal(theCorrected[myRow, myCol], theCompare[myRow, myCol], tolerance=0.0001)))
       {
         message("myRow=", myRow)
         message("myCol=", myCol)

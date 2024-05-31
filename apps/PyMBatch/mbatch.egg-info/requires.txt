@@ -9,3 +9,4 @@ xmltodict
 cryptography
 urllib3
 scipy
+scikit-learn

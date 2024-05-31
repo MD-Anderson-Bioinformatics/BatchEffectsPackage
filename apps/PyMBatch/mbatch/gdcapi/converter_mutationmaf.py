@@ -198,7 +198,7 @@ def read_and_process_file_dataframe(the_matrix: pandas.DataFrame, the_file_zip: 
                             # "Normal_Depth"
                             value_dict["Normal_Depth"] = tsv_dict['n_depth']
                             # "Normal_Reference_Count"
-                            value_dict["Normal_Variant_Count"] = tsv_dict['n_ref_count']
+                            value_dict["Normal_Reference_Count"] = tsv_dict['n_ref_count']
                             # "Normal_Variant_Count"
                             value_dict["Normal_Variant_Count"] = tsv_dict['n_alt_count']
                             # "HGVSp_Short"

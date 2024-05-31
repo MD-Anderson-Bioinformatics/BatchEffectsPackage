@@ -43,7 +43,15 @@ buildSingleArchive <- function(theResultDir, theDataDir, theZipDir)
   # :return: full pathname for ZIP file
   message("buildSingleArchive - import(mbatch.index.index_api)")
   calc <- import("mbatch.index.index_api")
-  zipFile <- calc$create_index_archive(theResultDir, theDataDir, theZipDir, file.path(theResultDir, "info"), NULL, NULL)
+  # the_results_dir: str,
+  # the_data_dir: str,
+  # the_zip_dir: str,
+  # the_info_dir: str,
+  # the_update_only_flag: bool,
+  # the_new_data: typing.Optional[StandardizedData],
+  # the_std_list: typing.Optional[List[StandardizedData]])
+  zipFile <- calc$create_index_archive(theResultDir, theDataDir, theZipDir,
+                                       file.path(theResultDir, "info"), FALSE, NULL, NULL)
   message("buildSingleArchive - after Python")
   zipFile
 }

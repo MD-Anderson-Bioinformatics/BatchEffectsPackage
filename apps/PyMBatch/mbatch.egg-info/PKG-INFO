@@ -1,3 +1,15 @@
 Metadata-Version: 2.1
 Name: mbatch
-Version: 1.0
+Version: 2.1
+Requires-Dist: matplotlib
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: scanpy
+Requires-Dist: pillow
+Requires-Dist: jsonpickle
+Requires-Dist: requests
+Requires-Dist: xmltodict
+Requires-Dist: cryptography
+Requires-Dist: urllib3
+Requires-Dist: scipy
+Requires-Dist: scikit-learn

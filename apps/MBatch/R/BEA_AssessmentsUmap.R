@@ -82,7 +82,7 @@ createBatchEffectsOutput_umap<-function(theMatrix, theDataframeBatchData, theTit
         saveCompListDscData(cleanFilePath(theUmapOutputDir, "ALL__CompListDSC.RData"), c("PC1", "PC2", "PC3", "PC4"))
       }
       logInfo("createBatchEffectsOutput_umap neighbors=", neighbors)
-      umap_data <- uwot::umap(pca_data$x, n_neighbors = neighbors)
+      umap_data <- uwot::umap(pca_data$x, n_neighbors = neighbors, seed=theSeed)
       # do not recast to dataframe, it changes the column names in a way that breaks UTF-8 characters
       #myDF <- data.frame(theDataframeBatchData, stringsAsFactors=FALSE)
       samplesIds <- as.vector(unlist(theDataframeBatchData[1]))

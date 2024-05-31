@@ -56,6 +56,8 @@ def extract_results(the_zip_path: str, the_out_dir: str) -> None:
         for file_name in zip_file.namelist():
             if file_name.startswith('analysis/'):
                 zip_file.extract(file_name, the_out_dir)
+            if file_name.startswith('correction/'):
+                zip_file.extract(file_name, the_out_dir)
             if file_name.startswith('info/'):
                 zip_file.extract(file_name, the_out_dir)
 

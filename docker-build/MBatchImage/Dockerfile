@@ -4,16 +4,16 @@ FROM mdabcb/bcb_base:2024-01-11-0900
 #       manual build of BCBBase is because of the extended build time to generate the image.
 #       it is generally rebuilt very seldomly.
 
-## This can be built with: docker build -t mdabcb/mbatchsa_image:HUB_2024-01-26-1200 .
+## This can be built with: docker build -t mdabcb/mbatchsa_image:HUB_2024-05-29-1000 .
 ## Login to docker hub with: docker login
 ## repo may need be created on Docker Hub before pushing (depends on versions of stuff)
-## Push to Docker Hub with: docker push mdabcb/mbatchsa_image:HUB_2024-01-26-1200
+## Push to Docker Hub with: docker push mdabcb/mbatchsa_image:HUB_2024-05-29-1000
 
 # reminder, use {} around environmental variables, otherwise docker uses it as a literal
 
 LABEL edu.mda.bcb.name="MBatch" \
       edu.mda.bcb.sub="mba" \
-      edu.mda.bcb.mba.version="2024-01-26-1200"
+      edu.mda.bcb.mba.version="2024-05-29-1000"
 
 # make bcbuser
 RUN groupadd -g 2003 bcbgroup && \

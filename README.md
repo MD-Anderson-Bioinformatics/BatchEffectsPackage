@@ -45,6 +45,8 @@ See documentation at https://github.com/MD-Anderson-Bioinformatics/BatchEffectsP
 
 # MBatch and MBatchUtils R Packages
 
+# **Install documentation is in the process of being updated.**
+
 The documentation directort contains several kinds of documentation for MBatch:
 
  * Files that start MBatch_01 are install documentations.
@@ -93,8 +95,10 @@ Then you can install the MBatch Python Package:
 
 ```
 conda activate gendev
-pip install git+https://github.com/MD-Anderson-Bioinformatics/BatchEffectsPackage.git#egg=mbatch&subdirectory=apps/PyMBatch
+pip install "git+https://github.com/MD-Anderson-Bioinformatics/BatchEffectsPackage.git#egg=mbatch&subdirectory=apps/PyMBatch"
 ```
+
+If needed, you must override the default Python environment of "/BEA/gendev" by setting the environmental variable MBATCH_PYTHON_ENV prior to install. On Linux or OS X, you can create a link from your gendev to /BEA/gendev.
 
 ## MBatch R Package
 

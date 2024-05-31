@@ -258,7 +258,7 @@ class VisualIndexKwd:
             print(f"VisualIndexKwd Adding new entry to index {key}", flush=True)
             self.m_ele_dict[key] = newval
         else:
-            add_warnings(f"VisualIndexKwd *may happen if old run has KWD and new run does not* Found duplicate index {key}")
+            add_warnings(f"VisualIndexKwd *may happen if old run has KWD and new run does not or when updating existing datasets* Found duplicate index {key}")
     # pylint: enable=too-many-arguments,too-many-locals
 
     # pylint: disable=too-many-locals

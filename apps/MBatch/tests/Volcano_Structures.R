@@ -13,10 +13,13 @@ require(MBatch)
 
 inputDir <- getTestInputDir()
 outputDir <- getTestOutputDir()
+compareDir <- getTestCompareDir()
 
 theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
 theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
 theOutputDir=cleanFilePath(outputDir, "Volcano_Structures")
+theCompareFile=cleanFilePath(compareDir, "Volcano-Data-OR_-_University_of_Michigan.json")
+theDynamicFile=cleanFilePath(cleanFilePath(cleanFilePath(cleanFilePath(theOutputDir, "TSS"), "DATA_2022-09-09-1600"), "TEST_2022-10-10-1300"), "Volcano-Data-OR_-_University_of_Michigan.json")
 theRandomSeed=314
 #myRandomSeed <- 314
 #myTestSeed <- 42
@@ -42,13 +45,26 @@ if (!is.null(inputDir))
   Volcano_Structures(theData=myData,
                      theTitle="Test",
                      theOutputDir=theOutputDir,
-                     theLogFrameFlag=False,
+                     theLogFrameFlag=FALSE,
                      theBatchTypeAndValuePairsToRemove=NULL,
                      theBatchTypeAndValuePairsToKeep=NULL,
                      theDataVersion="DATA_2022-09-09-1600",
                      theTestVersion="TEST_2022-10-10-1300",
                      theMaxFeatureCount=50000)
-  TRUE
+  # read Volcano-Data-OR_-_University_of_Michigan.json
+  message("read files to compare")
+  print(theCompareFile)
+  staticLines <- readLines(theCompareFile, warn=FALSE)
+  print(theDynamicFile)
+  dynamicLines <- readLines(theDynamicFile, warn=FALSE)
+  same <- FALSE
+  message("compare")
+  if (all.equal(staticLines, dynamicLines))
+  {
+    message("matched")
+    same <- TRUE
+  }
+  same
 } else {
   message("No test data. Skip test.")
   TRUE

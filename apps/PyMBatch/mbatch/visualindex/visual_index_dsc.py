@@ -326,7 +326,7 @@ class VisualIndexDsc:
             print(f"VisualIndexDsc Adding new entry to index {key}", flush=True)
             self.m_ele_dict[key] = newval
         else:
-            add_warnings(f"VisualIndexDsc *should not happen* Found duplicate index {key}")
+            add_warnings(f"VisualIndexDsc *should not happen except when updating existing datasets* Found duplicate index {key}")
     # pylint: enable=too-many-arguments,too-many-locals
 
     # pylint: disable=too-many-locals

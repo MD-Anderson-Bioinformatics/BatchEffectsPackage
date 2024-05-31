@@ -1,7 +1,7 @@
 # this is the docker compose version
 version: '3.0'
 
-# file version 2024-01-26-1200
+# file version 2024-05-29-1000
 
 
 services:
@@ -16,7 +16,7 @@ services:
             dockerfile: Dockerfile
         container_name: mbatchsa_cont_extr
         # update :latest to desired version
-        image: mdabcb/mbatchsa_image:HUB_2024-01-26-1200
+        image: mdabcb/mbatchsa_image:HUB_2024-05-29-1000
         volumes:
             # outside access for data files outside:inside
             - /MBatchSA/mbatch:/BEA/MBATCH

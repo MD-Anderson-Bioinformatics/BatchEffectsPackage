@@ -18,7 +18,7 @@ compareDir <- getTestCompareDir()
 theGeneFile=cleanFilePath(inputDir, "matrix_data-Tumor.tsv")
 theBatchFile=cleanFilePath(inputDir, "batches-Tumor.tsv")
 theOutputDir=cleanFilePath(outputDir, "UMAP")
-theCompareFile=cleanFilePath(compareDir, "UMAP_Data-batc.tsv")
+theCompareFile=cleanFilePath(compareDir, "UMAP_Data-umap.tsv")
 print(theCompareFile)
 theRandomSeed=314
 #myRandomSeed <- 314
@@ -53,7 +53,7 @@ if (!is.null(inputDir))
                             theDoDscPermsFileFlag=TRUE,
                             theSeed=314)
   umap_tsv <- retval[1]
-  umap_tsv <- file.path(dirname(umap_tsv), "UMAP_Data-batc.tsv")
+  umap_tsv <- file.path(dirname(umap_tsv), "UMAP_Data-umap.tsv")
   print(umap_tsv)
   # compare batch information, since umap file contents is
   # not same from run to run, and UMAP package code does not

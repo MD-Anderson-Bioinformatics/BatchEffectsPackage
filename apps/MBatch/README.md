@@ -18,6 +18,8 @@ The documentation directort contains several kinds of documentation for MBatch:
 
 Downloads and details on Standardized Data are available at http://bioinformatics.mdanderson.org/TCGA/databrowser/
 
+If needed, you must override the default Python environment of "/BEA/gendev" by setting the environmental variable MBATCH_PYTHON_ENV prior to install.
+
 See main README.MD on install instructions.
 
 # Seurat RDS files into Standardized Data Format

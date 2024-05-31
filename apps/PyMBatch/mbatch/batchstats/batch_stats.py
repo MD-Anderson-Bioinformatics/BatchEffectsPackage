@@ -20,15 +20,12 @@ MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/rese
 """
 
 
-from setuptools import setup, find_packages
+from scipy.stats import f_oneway
+from scipy.stats import alexandergovern
 
-setup(name='mbatch',
-      version='2.1',
-      # list folders, not files
-      packages=find_packages(),
-      # script files
-      scripts=['scripts/legend_main.py'],
-      # No package data (yet)
-      # package_data={'capitalize': ['data/cap_data.txt']},
-      install_requires=['matplotlib', 'pandas', 'numpy', 'scanpy', 'pillow', 'jsonpickle', 'requests', 'xmltodict', 'cryptography', 'urllib3', 'scipy', 'scikit-learn'],
-      )
+
+# def calculate_stats() -> [float, float, float, float]:
+#    """
+#    calculate F-Value and S Statistic results
+#    :return: F-Value, F-Value p-value, S-Statistic, S-Statistic p-value
+#    """

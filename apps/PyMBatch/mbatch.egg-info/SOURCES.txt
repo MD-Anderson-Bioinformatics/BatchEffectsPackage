@@ -6,6 +6,8 @@ mbatch.egg-info/SOURCES.txt
 mbatch.egg-info/dependency_links.txt
 mbatch.egg-info/requires.txt
 mbatch.egg-info/top_level.txt
+mbatch/batchstats/__init__.py
+mbatch/batchstats/batch_stats.py
 mbatch/correct/__init__.py
 mbatch/correct/correct.py
 mbatch/dapi/__init__.py
@@ -61,6 +63,7 @@ mbatch/test/test_index.py
 mbatch/test/test_job.py
 mbatch/test/test_ldapjwt.py
 mbatch/test/test_legend.py
+mbatch/test/test_pls.py
 mbatch/test/test_volcano.py
 mbatch/visualindex/__init__.py
 mbatch/visualindex/visual_index_base.py

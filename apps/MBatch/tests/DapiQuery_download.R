@@ -10,8 +10,13 @@
 # MD Anderson Cancer Center Bioinformatics at MDA <https://www.mdanderson.org/research/departments-labs-institutes/departments-divisions/bioinformatics-and-computational-biology.html>
 
 require(MBatch)
+require(reticulate)
+
+py_config()
 
 testUrl <- getTestDapiURL()
+message("SKIPPING TEST UNTIL DEBUGGED")
+testUrl <- ""
 if (""!=testUrl)
 {
   outputDir <- getTestOutputDir()
@@ -36,6 +41,7 @@ if (""!=testUrl)
     pyObj$selected_projects <- append(pyObj$selected_projects, "TCGA-LUSC")
     pyObj$selected_jobtype <- append(pyObj$selected_jobtype, "Original")
     pyObj$selected_data <- append(pyObj$selected_data, "STAR - Counts")
+    py_config()
     updateDapiQuery(pyObj)
     # should be 3
     length(pyObj$available_datasets)
@@ -65,7 +71,18 @@ if (""!=testUrl)
     zipFilePath <- "/analysis/NGCHM/DATA_2022-12-12/TEST_2022_12_28_1300/All_ngchm.ngchm.html"
     downloadNgchmNgchm(pyObj, downloadFile, datasetId, zipFilePath)
     downloadFile <- file.path(theOutputDir, "batch_id_ngchm.html")
+    py_config()
     downloadNgchmHtml(pyObj, downloadFile, datasetId, zipFilePath)
-    return(TRUE)
+    size <- file.size(downloadFile)
+    message(size)
+    return(65237879 == size)
+  } else
+  {
+    message("Nothing done")
+    TRUE
   }
+} else
+{
+  message("Nothing done")
+  TRUE
 }

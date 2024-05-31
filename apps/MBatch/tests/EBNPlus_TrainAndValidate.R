@@ -18,6 +18,8 @@ compareDir <- getTestCompareDir()
 theDataFile1=cleanFilePath(inputDir, "brca_rnaseq2_matrix_data.tsv")
 theDataFile2=cleanFilePath(inputDir, "brca_agi4502_matrix_data.tsv")
 theOutputDir=cleanFilePath(outputDir, "EBNPlus_TrainAndValidateReplicates_Structures3")
+theCompareFile=cleanFilePath(compareDir, "EBNPlus_TrainAndValidate.tsv")
+
 theBatchId1="RNASeqV2"
 theBatchId2="Agilent4502"
 theRandomSeed=314
@@ -120,24 +122,13 @@ if ((!dir.exists(theDataFile1))&&(!dir.exists(theDataFile2)))
     theDataVersion="DATA_2022-09-09-1600",
     theTestVersion="TEST_2022-10-10-1300",
     thePriorPlotFile="priorplots.PNG")
-  print("TestSet1")
-  printMatrix(resultsList$TestSet1)
-  print("TestSet2")
-  printMatrix(resultsList$TestSet2)
-  print("TrainingSet1")
-  printMatrix(resultsList$TrainingSet1)
-  print("TrainingSet2")
-  printMatrix(resultsList$TrainingSet2)
-  print("TrainingResults")
-  printMatrix(resultsList$TrainingResults)
-  print("ValidationSet1")
-  printMatrix(resultsList$ValidationSet1)
-  print("ValidationSet2")
-  printMatrix(resultsList$ValidationSet2)
-  print("ValidationResults")
   printMatrix(resultsList$ValidationResults)
-  print("CorrectedResults")
-  printMatrix(resultsList$CorrectedResults)
+  testMe <- resultsList$ValidationResults
+  compareMe <- readAsGenericMatrix(theCompareFile)
+  compared <- compareTwoMatrices(testMe, compareMe)
+  print("compared")
+  print(compared)
+  compared
 }
 
 TRUE

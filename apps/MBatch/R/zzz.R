@@ -13,6 +13,11 @@
 {
   # call set to trigger loading of Python environment
   packageStartupMessage(paste("Loading Conda Environment.", getMBatchVersion(), sep=" "))
+  condaEnvOverride <- Sys.getenv("MBATCH_PYTHON_ENV")
+  if ("" != condaEnvOverride)
+  {
+     setGlobalMBatchEnv(condaEnvOverride)
+  }
   setGlobalMBatchEnv(getGlobalMBatchEnv())
   setGlobalMBatchErrorTest(FALSE)
   packageStartupMessage(paste("All sorting in this package requires using a Sys.setlocale(\"LC_COLLATE\",\"C\").", getMBatchVersion(), sep=" "))
