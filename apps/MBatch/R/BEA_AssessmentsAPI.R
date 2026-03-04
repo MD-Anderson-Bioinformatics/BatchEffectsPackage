@@ -181,7 +181,7 @@ PCA_DualBatch_Structures <- function(theData, theTitle,
 Boxplot_AllSamplesData_Structures <- function(theData, theTitle, theOutputDir,
                                               theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
                                               theDataVersion, theTestVersion,
-                                              theMaxGeneCount=20000)
+                                              theMaxGeneCount=20000, theYLabel="")
 {
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
@@ -191,14 +191,14 @@ Boxplot_AllSamplesData_Structures <- function(theData, theTitle, theOutputDir,
   newOutDir <- createBatchEffectsOutput_BoxPlot_AllSampleData(theData@mData, theData@mBatches,
                                                               theTitle, theOutputDir,
                                                               theDataVersion, theTestVersion,
-                                                              thePngFlag=TRUE)
+                                                              thePngFlag=TRUE, theYLabel=theYLabel)
   writeBatchDataTsvForBoxplot(newOutDir, theData@mBatches)
 }
 
 Boxplot_AllSamplesRLE_Structures <- function(theData, theTitle, theOutputDir,
                                              theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
                                              theDataVersion, theTestVersion,
-                                             theMaxGeneCount=20000)
+                                             theMaxGeneCount=20000, theYLabel="")
 {
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
@@ -208,7 +208,7 @@ Boxplot_AllSamplesRLE_Structures <- function(theData, theTitle, theOutputDir,
   newOutDir <- createBatchEffectsOutput_BoxPlot_AllSampleRLE(theData@mData, theData@mBatches,
                                                              theTitle, theOutputDir,
                                                              theDataVersion, theTestVersion,
-                                                             thePngFlag=TRUE)
+                                                             thePngFlag=TRUE, theYLabel=theYLabel)
   writeBatchDataTsvForBoxplot(newOutDir, theData@mBatches)
 }
 
@@ -216,7 +216,7 @@ Boxplot_Group_Structures <- function(theData, theTitle, theOutputDir,
                                      theBatchTypeAndValuePairsToRemove, theBatchTypeAndValuePairsToKeep,
                                      theListOfGroupBoxFunction, theListOfGroupBoxLabels,
                                      theDataVersion, theTestVersion,
-                                     theMaxGeneCount=20000)
+                                     theMaxGeneCount=20000, theYLabel="")
 {
   theData <- as.numericWithIssues(theData)
   theData <- mbatchFilterData(theData, theBatchTypeAndValuePairsToRemove=theBatchTypeAndValuePairsToRemove,
@@ -227,7 +227,7 @@ Boxplot_Group_Structures <- function(theData, theTitle, theOutputDir,
                                                       theTitle, theOutputDir,
                                                       theListOfGroupBoxFunction, theListOfGroupBoxLabels,
                                                       theDataVersion, theTestVersion,
-                                                      thePngFlag=TRUE)
+                                                      thePngFlag=TRUE, theYLabel=theYLabel)
   for (newOutDir in newOutDirVector)
   {
     writeBatchDataTsvForBoxplot(newOutDir, theData@mBatches)

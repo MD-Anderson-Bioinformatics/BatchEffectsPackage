@@ -348,6 +348,7 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
     # General MBatch Run
     #
     title <- myConfig["Title",]
+    platform <- ""
     if ((is.na(title)) || ("" == title))
     {
       message("Title entry empty - check for original.json file")
@@ -356,6 +357,7 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
       {
         message("found json file ", jsonFile)
         json <- read_json(jsonFile)
+        platform <- json$platform
         dataVersion <- myConfig["DataVersion",]
         testVersion <- myConfig["TestVersion",]
         title <- paste(json$source, " / ",
@@ -759,7 +761,8 @@ mbatchRunFromConfig <- function(theConfigFile, theMatrixFile, theBatchesFile,
           theShaidyMapGenJava = theShaidyMapGenJava,
           theNGCHMShaidyMem = theNGCHMShaidyMem,
           theNgchmFeatureMapFile = ngchmFeatureMapFile,
-          theLogFrameFlag = theLogFrameFlag)
+          theLogFrameFlag = theLogFrameFlag,
+          theYLabel = platform)
         message("rdataHCvector=", paste(rdataHCvector, sep=", ", collase=", "))
         rdataHCsample <- rdataHCvector[[1]]
         rdataHCfeature <- rdataHCvector[[2]]
@@ -905,7 +908,8 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataVersion, theTestVersion
                                     theShaidyMapGen,
                                     theNgchmWidgetJs,
                                     theShaidyMapGenJava, theNGCHMShaidyMem,
-                                    theNgchmFeatureMapFile, theLogFrameFlag)
+                                    theNgchmFeatureMapFile, theLogFrameFlag,
+                                    theYLabel="")
 {
   if (theBoxplotMaxGenes>5000)
   {
@@ -958,16 +962,17 @@ doAssessmentsFromConfig <- function(theOutputDir, theDataVersion, theTestVersion
   message("call callMBatch_BoxplotAllSamplesData_Structures")
   print("call callMBatch_BoxplotAllSamplesData_Structures")
   callMBatch_BoxplotAllSamplesData_Structures(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle,
-                                              theMaxGeneCount=theBoxplotMaxGenes)
+                                              theMaxGeneCount=theBoxplotMaxGenes, theYLabel=theYLabel)
   message("call callMBatch_BoxplotAllSamplesRLE_Structures")
   print("call callMBatch_BoxplotAllSamplesRLE_Structures")
   callMBatch_BoxplotAllSamplesRLE_Structures(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle,
-                                             theMaxGeneCount=theBoxplotMaxGenes)
+                                             theMaxGeneCount=theBoxplotMaxGenes, theYLabel=theYLabel)
   message("call callMBatch_BoxplotGroup_Structures")
   print("call callMBatch_BoxplotGroup_Structures")
   callMBatch_BoxplotGroup_Structures(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle,
                                      theMaxGeneCount=theBoxplotMaxGenes,
-                                     theFunction=list(pipelineMean), theFunctionName=list("Mean"))
+                                     theFunction=list(pipelineMean), theFunctionName=list("Mean"),
+                                     theYLabel=theYLabel)
   ####
   #### Volcano Plot
   ###

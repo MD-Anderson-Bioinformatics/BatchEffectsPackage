@@ -22,7 +22,8 @@ boxplot_openAndWriteIssuesLogFile<-function(theOutputDir)
 
 createBatchEffectsOutput_BoxPlot_AllSampleRLE<-function(theMatrixGeneData, theDataframeBatchData,
 																												theTitle, theOutputDir,
-																												theDataVersion, theTestVersion, thePngFlag)
+																												theDataVersion, theTestVersion, thePngFlag,
+																												theYLabel="")
 {
   logDebug("createBatchEffectsOutput_BoxPlot_AllSampleRLE - theOutputDir", theOutputDir)
   checkDirForCreation(theOutputDir)
@@ -53,7 +54,7 @@ createBatchEffectsOutput_BoxPlot_AllSampleRLE<-function(theMatrixGeneData, theDa
     thePngFile <- cleanFilePath(theOutputDir, paste("BoxPlot_", "AllSample-RLE", "_Diagram-", batchTypeName, ".png", sep=""))
     title <- paste(theTitle, "/ Boxplot AllSample-RLE", batchTypeName, sep=" ")
     boxplotLabels <- buildBoxplotLabels(theDataframeBatchData, batchTypeName)
-    calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels)
+    calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels, theYLabel)
   }
   # let this return the output dir, used by MBatchUtils
   theOutputDir
@@ -71,7 +72,8 @@ buildBoxplotLabels <- function(theDataframeBatchData, theBatchType)
 }
 
 createBatchEffectsOutput_BoxPlot_AllSampleData<-function(theMatrixGeneData, theDataframeBatchData,
-																							 theTitle, theOutputDir, theDataVersion, theTestVersion, thePngFlag)
+																							 theTitle, theOutputDir, theDataVersion, theTestVersion, thePngFlag,
+																							 theYLabel="")
 {
   checkDirForCreation(theOutputDir)
 	logDebug("dim(theMatrixGeneData)", dim(theMatrixGeneData))
@@ -94,7 +96,7 @@ createBatchEffectsOutput_BoxPlot_AllSampleData<-function(theMatrixGeneData, theD
 	  title <- paste(theTitle, "/ Boxplot AllSample-Data", batchTypeName, sep=" ")
 	  boxplotLabels <- buildBoxplotLabels(theDataframeBatchData, batchTypeName)
 	  #
-	  calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels)
+	  calcAndWriteBoxplot(theMatrixGeneData, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels, theYLabel)
 	}
 	# let this return the output dir, used by MBatchUtils
 	theOutputDir
@@ -104,7 +106,7 @@ createBatchEffectsOutput_BoxPlot_Group<-function(theMatrixGeneData, theDataframe
 																								 theTitle, theOutputDir,
 																								 theListOfGroupBoxFunction, theListOfGroupBoxLabels,
 																								 theDataVersion, theTestVersion,
-																								 thePngFlag)
+																								 thePngFlag, theYLabel="")
 {
 	stopifnotWithLogging("Group box list and group box labels should be the same length", length(theListOfGroupBoxFunction)==length(theListOfGroupBoxLabels))
   checkDirForCreation(theOutputDir)
@@ -144,7 +146,7 @@ createBatchEffectsOutput_BoxPlot_Group<-function(theMatrixGeneData, theDataframe
 	    title <- paste(theTitle, "/ Boxplot", groupAndLabel, batchTypeName, sep=" ")
 	    boxplotLabels <- colnames(newMatrix)
 	    #
-	    calcAndWriteBoxplot(newMatrix, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels)
+	    calcAndWriteBoxplot(newMatrix, title, theBoxDataFile, thePngFile, theHistogramFile, theAnnotationsFile, boxplotLabels, theYLabel)
 	  }
 	}
 	# let this return vector of output dirs, used by MBatchUtils
@@ -159,7 +161,7 @@ createBatchEffectsOutput_BoxPlot_Group<-function(theMatrixGeneData, theDataframe
 ###########################################################################################
 
 calcAndWriteBoxplot <- function(theData, theTitle, theBoxDataFile, thePngFile, theHistogramFile,
-                                theAnnotationsFile, theBoxplotLabels)
+                                theAnnotationsFile, theBoxplotLabels, theYLabel="")
 {
   #logDebug("theBoxplotLabels=", theBoxplotLabels)
   logDebug("calcAndWriteBoxplot - theBoxDataFile=", theBoxDataFile)
@@ -170,7 +172,7 @@ calcAndWriteBoxplot <- function(theData, theTitle, theBoxDataFile, thePngFile, t
     checkIfTestError()
     writeTitleFile(theTitle, thePngFile)
     logDebug("calcAndWriteBoxplot - before calcAndWriteBoxDataFile")
-    calcAndWriteBoxDataFile(theData, theBoxDataFile, thePngFile, theBoxplotLabels, theTitle)
+    calcAndWriteBoxDataFile(theData, theBoxDataFile, thePngFile, theBoxplotLabels, theTitle, theYLabel)
     logDebug("calcAndWriteBoxplot - after calcAndWriteBoxDataFile")
     logDebug("calcAndWriteBoxplot - before calcAndWriteHistogramFile")
     calcAndWriteHistogramFile(theData, theHistogramFile)
@@ -203,7 +205,7 @@ getColorsForBoxplot <- function(theBoxplotLabels)
   colors[batchLevels]
 }
 
-calcAndWriteBoxDataFile <- function(theData, theFile, thePngFile, theBoxplotLabels, theTitle)
+calcAndWriteBoxDataFile <- function(theData, theFile, thePngFile, theBoxplotLabels, theTitle, theYLabel="")
 {
   logDebug("calcAndWriteBoxDataFile theFile=", theFile)
   logDebug("calcAndWriteBoxDataFile thePngFile=", thePngFile)
@@ -247,7 +249,7 @@ calcAndWriteBoxDataFile <- function(theData, theFile, thePngFile, theBoxplotLabe
   logDebug("calcAndWriteBoxDataFile call boxplot")
   boxplot(listOfFivenumResults, main=theTitle,
           col=getColorsForBoxplot(sort(theBoxplotLabels)),
-          xaxt="n", xlab="")
+          xaxt="n", xlab="", ylab=theYLabel)
   logDebug("calcAndWriteBoxDataFile call text")
   text(1:length(listOfFivenumResults), par("usr")[3] - 0.05, labels=sort(theBoxplotLabels), xpd=TRUE, srt=45, adj=1)
   logDebug("calcAndWriteBoxDataFile done")

@@ -298,7 +298,7 @@ callMBatch_BoxplotAllSamplesData <- function(theOutputDir, theGeneFile, theBatch
   callMBatch_BoxplotAllSamplesData_Structures(theOutputDir, myData, theTitle, theMaxGeneCount)
 }
 
-callMBatch_BoxplotAllSamplesData_Structures <- function(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle, theMaxGeneCount = 10000)
+callMBatch_BoxplotAllSamplesData_Structures <- function(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle, theMaxGeneCount = 10000, theYLabel="")
 {
   # output directory
 	outdir <- cleanFilePath(theOutputDir, "BoxPlot")
@@ -314,7 +314,8 @@ callMBatch_BoxplotAllSamplesData_Structures <- function(theOutputDir, theDataVer
                     							  theTestVersion=theTestVersion,
                     							  theBatchTypeAndValuePairsToRemove=NULL,
                     							  theBatchTypeAndValuePairsToKeep=NULL,
-                    							  theMaxGeneCount = theMaxGeneCount)
+                    							  theMaxGeneCount = theMaxGeneCount,
+                    							  theYLabel=theYLabel)
 }
 
 ################################################################################
@@ -329,7 +330,7 @@ callMBatch_BoxplotAllSamplesRLE <- function(theOutputDir, theGeneFile, theBatchF
   callMBatch_BoxplotAllSamplesRLE_Structures(theOutputDir, myData, theTitle)
 }
 
-callMBatch_BoxplotAllSamplesRLE_Structures <- function(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle, theMaxGeneCount = 10000)
+callMBatch_BoxplotAllSamplesRLE_Structures <- function(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle, theMaxGeneCount = 10000, theYLabel="")
 {
 	# output directory
   outdir <- cleanFilePath(theOutputDir, "BoxPlot")
@@ -345,7 +346,8 @@ callMBatch_BoxplotAllSamplesRLE_Structures <- function(theOutputDir, theDataVers
                       						 theTestVersion=theTestVersion,
                       						 theBatchTypeAndValuePairsToRemove=NULL,
                       						 theBatchTypeAndValuePairsToKeep=NULL,
-                                	 theMaxGeneCount=theMaxGeneCount)
+                                	 theMaxGeneCount=theMaxGeneCount,
+                                	 theYLabel=theYLabel)
 }
 
 ################################################################################
@@ -364,7 +366,7 @@ callMBatch_BoxplotGroup <- function(theOutputDir, theGeneFile, theBatchFile, the
 }
 
 callMBatch_BoxplotGroup_Structures <- function(theOutputDir, theDataVersion, theTestVersion, theDataObject, theTitle, theMaxGeneCount = 10000,
-                                               theFunction=list(mean), theFunctionName=list("Mean"))
+                                               theFunction=list(mean), theFunctionName=list("Mean"), theYLabel="")
 {
 	# output directory
   outdir <- cleanFilePath(theOutputDir, "BoxPlot")
@@ -383,7 +385,8 @@ callMBatch_BoxplotGroup_Structures <- function(theOutputDir, theDataVersion, the
                           							theBatchTypeAndValuePairsToKeep=NULL,
                           							theListOfGroupBoxFunction=theFunction,
                           							theListOfGroupBoxLabels=theFunctionName,
-                          							theMaxGeneCount=theMaxGeneCount)
+                          							theMaxGeneCount=theMaxGeneCount,
+                          							theYLabel=theYLabel)
 }
 
 ################################################################################
